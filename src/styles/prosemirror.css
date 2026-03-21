@@ -1,0 +1,194 @@
+/* ProseMirror Editor Styles */
+
+/* Hide scrollbars but keep scrolling functionality */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Preview panel scrollbar: hide vertical, show subtle horizontal at 100% zoom */
+.preview-scroll {
+  scrollbar-width: thin; /* Firefox: thin scrollbar */
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Firefox: thumb and track colors */
+}
+
+/* Hide vertical scrollbar in WebKit browsers */
+.preview-scroll::-webkit-scrollbar {
+  height: 8px; /* Horizontal scrollbar height */
+  width: 0px; /* Hide vertical scrollbar */
+}
+
+.preview-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.preview-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.preview-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Vertical scrollbar always hidden */
+.preview-scroll::-webkit-scrollbar:vertical {
+  display: none;
+}
+
+.ProseMirror {
+  position: relative;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  -webkit-font-variant-ligatures: none;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
+}
+
+.ProseMirror pre {
+  white-space: pre-wrap;
+}
+
+.ProseMirror li {
+  position: relative;
+}
+
+/* Hide the default outline */
+.ProseMirror-focused {
+  outline: none;
+}
+
+/* Selection styles */
+.ProseMirror-selectednode {
+  outline: 2px solid #8cf;
+}
+
+/* Editor drafting styles - emphasize structure, not final typography */
+.ProseMirror p {
+  margin: 0.5em 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+/* Headings in Editor - visually distinct for structure clarity */
+.ProseMirror h1 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1em 0 0.5em 0;
+  color: #000;
+}
+
+.ProseMirror h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0.8em 0 0.4em 0;
+  color: #1a1a1a;
+}
+
+.ProseMirror h3 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0.6em 0 0.3em 0;
+  color: #2a2a2a;
+}
+
+/* Lists in Editor */
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 30px;
+  margin: 0.5em 0;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+/* Multi-level numbered list pattern: decimal → lower-alpha → lower-roman → repeat */
+.ProseMirror ol ol {
+  list-style-type: lower-alpha;
+}
+
+.ProseMirror ol ol ol {
+  list-style-type: lower-roman;
+}
+
+.ProseMirror ol ol ol ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror ol ol ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.ProseMirror ol ol ol ol ol ol {
+  list-style-type: lower-roman;
+}
+
+.ProseMirror li {
+  margin: 0.5em 0;
+  display: list-item;
+}
+
+.ProseMirror li p {
+  margin: 0;
+}
+
+/* Links in Editor - always visible */
+.ProseMirror a {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ProseMirror a:hover {
+  color: #0052a3;
+}
+
+/* Character marks */
+.ProseMirror strong {
+  font-weight: 700;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+.ProseMirror u {
+  text-decoration: underline;
+}
+
+.ProseMirror sup {
+  vertical-align: super;
+  font-size: 0.75em;
+}
+
+.ProseMirror sub {
+  vertical-align: sub;
+  font-size: 0.75em;
+}
+
+/* Placeholder */
+.ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #aaa;
+  pointer-events: none;
+  height: 0;
+}

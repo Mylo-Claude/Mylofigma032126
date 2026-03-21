@@ -1,0 +1,99 @@
+ Running frontend commit c8cf25fd40ec23e6d4f43316412edea9dd392484
+vendor-core-83c17265f2588e9e.min.js.br:54 Statsig is not ready to log exposures, will retry in 1 seconds
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:54
+vendor-core-83c17265f2588e9e.min.js.br:54 [bootstrap_waiting_on_user_state] You appear to be logging a relative timestamp and not an epoch timestamp. Try adding performance.timeOrigin to the timestamp.
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:54
+vendor-core-83c17265f2588e9e.min.js.br:54 [import] git: 166cb33e8bde4f5a2d3b91e3f07579b444411ff4, stamp: 87A19F9B274A8446
+(index):1  Failed to load resource: net::ERR_FAILED
+vendor-core-83c17265f2588e9e.min.js.br:54 Autosave Changes not available or already claimed by another tab undefined
+vendor-core-83c17265f2588e9e.min.js.br:54 [Fullscreen] Booting... (emscripten version 4.0.21)
+vendor-core-83c17265f2588e9e.min.js.br:54 [GPU] graphicsAPI:"WebGPU", vendor:"Google Inc. (Apple)" renderer:"ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)" deviceArchitecture:"metal-3" deviceDescription:"" webGPUDevice:"" webGPUVendor:"apple" bindings:"emdawnwebgpu"
+vendor-core-83c17265f2588e9e.min.js.br:54 [Fullscreen] Ready in 339.1ms
+vendor-core-83c17265f2588e9e.min.js.br:54 [FullscreenApp] calling setEditorTheme and setting preference dark
+vendor-core-83c17265f2588e9e.min.js.br:54 [MultiplayerSession] connecting to wss://www.figma.com/api/multiplayer/wbeLanJw1B7PL3lR9fJAT3?role=editor&tracking_session_id=1BnTi24Ox2ht8H9f&version=151&recentReload=0&file-load-streaming-compression&user-id=1109284789109864614&client_release=c8cf25fd40ec23e6d4f43316412edea9dd392484
+vendor-core-83c17265f2588e9e.min.js.br:54 [FullscreenApp] calling setEditorTheme and setting preference dark
+vendor-core-83c17265f2588e9e.min.js.br:54 Loaded 0 scripts (0b), 0 from cache (0b)
+vendor-core-83c17265f2588e9e.min.js.br:54 [MultiplayerSession] Joining file version 106 (initial load)
+vendor-core-83c17265f2588e9e.min.js.br:54 Migration succeeded: context: fullscreen_migrate_SceneGraphManager, version: 106, duration: 0ms.
+vendor-core-83c17265f2588e9e.min.js.br:54 [Fullscreen] loadtime=2.77s maxmem=51369644
+vendor-core-83c17265f2588e9e.min.js.br:54 [Sprigma] Sprig SDK is ready
+Mylo-with-TBD-pagination?p=f&t=V8SKTymN3p8vHgiC-0&fullscreen=1:1 Access to image at 'https://www.gravatar.com/avatar/d09ef61489bb7b3349912707bb32fec0?size=240&default=https%3A%2F%2Fs3-alpha.figma.com%2Fstatic%2Fuser_d_v2.png?c=1' from origin 'https://www.figma.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+www.gravatar.com/avatar/d09ef61489bb7b3349912707bb32fec0?size=240&default=https%3A%2F%2Fs3-alpha.figma.com%2Fstatic%2Fuser_d_v2.png?c=1:1  Failed to load resource: net::ERR_FAILED
+vendor-core-83c17265f2588e9e.min.js.br:54 [devtools] Initialized LS
+vendor-core-83c17265f2588e9e.min.js.br:54 [devtools] Initialized LS
+figma_app-970c79351b85b521.min.js.br:41 Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+S @ figma_app-970c79351b85b521.min.js.br:41
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 
+=== Step 2: Testing generatePageMarginCSS ===
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 2] generatePageMarginCSS called with: Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 2] Generated CSS: @page test-template-v1 { margin: 1.5in 2in 1in 1.25in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 Input margins: Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 Output CSS: @page test-template-v1 { margin: 1.5in 2in 1in 1.25in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 Expected: @page test-template-v1 { margin: 1.5in 2in 1in 1.25in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 Match: true
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 === Test Complete ===
+
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 1] Template margin data: Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 2] generatePageMarginCSS called with: Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 2] Generated CSS: @page default-template-v1 { margin: 1in 1in 1in 1in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 2] Generated margin CSS for template: default-template-v1
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js Effect] Serialized HTML length: 3022
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js Effect] Serialized HTML preview: <h1 data-type="heading1" style="font-family: system-ui, -apple-system, Arial, sans-serif; font-size: 32px; font-weight: 700; line-height: 1.2; color: rgb(0, 0, 0); margin-top: 24px; margin-bottom: 16px;">Welcome to Mylo</h1><p data-type="body" style="font-family: system-ui, -apple-system, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 1.5; color: rgb(0, 0, 0); margin-top: 0px; margin-bottom: 16px;">Mylo is a document platform where you write in the Editor (left) and see templ
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 2] generatePageMarginCSS called with: Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 2] Generated CSS: @page default-template-v1 { margin: 1in 1in 1in 1in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 3] Passing customPageCSS to pagination service
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js Effect] Using template: default (from template.id: default-template-v1 )
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js] Starting pagination with template: default
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js] Content length: 3022 characters
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 3] Received customPageCSS: @page default-template-v1 { margin: 1in 1in 1in 1in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 4] Injecting customPageCSS into <head>
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 4] Style element injected: @page default-template-v1 { margin: 1in 1in 1in 1in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [DIAGNOSTIC 1] Total <style> tags in <head>: 4
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [DIAGNOSTIC 1] Style #2 contains @page rules: /*! tailwindcss v4.1.12 | MIT License | https://tailwindcss.com */
+@layer properties;
+@page default-template-v1 {
+  size: 8.5in 11in;
+  margin: 1in 1in 1in 1in;
+}
+@page traditional-template-v1 {
+  siz
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [DIAGNOSTIC 1] Style #3 contains @page rules: @page default-template-v1 { margin: 1in 1in 1in 1in; }
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [DIAGNOSTIC 2] Content HTML structure:
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [DIAGNOSTIC 2] Wrapped content preview: 
+        <div class="template-default">
+          <h1 data-type="heading1" style="font-family: system-ui, -apple-system, Arial, sans-serif; font-size: 32px; font-weight: 700; line-height: 1.2; color: rgb(0, 0, 0); margin-top: 24px; margin-bottom: 16px;">Welcome to Mylo</h1><p data-type="body" style=
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [DIAGNOSTIC 2] Found element with template class: template-default
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js] Pagination complete in 21ms
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [DIAGNOSTIC 3] First page computed margins: Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js Effect] Progress: 1 pages
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Step 4] Removing injected style element
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Paged.js Effect] Pagination complete: 1 pages
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Page Measurement] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Page Measurement] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Preview Scale - fit-page] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Page Measurement] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Preview Scale - fit-page] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Preview Scale - fit-page] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Page Measurement] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Preview Scale - fit-page] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Page Measurement] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Preview Scale - fit-page] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Page Measurement] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Preview Scale - fit-page] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Page Measurement] Object
+code_components_preview_iframe-38049e48d7f0a436.min.js.br:90 [Zoom Mode] fit-page

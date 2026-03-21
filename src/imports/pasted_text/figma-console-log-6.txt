@@ -1,0 +1,1178 @@
+Mylo-with-TBD-pagination?p=f&t=U9d1Pe0FQpP4oTda-0&fullscreen=1:533 Running frontend commit 3962ae99b3d44ec0029d3ba76d25f09ef339248f
+vendor-core-83c17265f2588e9e.min.js.br:54 Statsig is not ready to log exposures, will retry in 1 seconds
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:54
+A.logExposureCallback @ 3312-6307ca20d3bd4683.min.js.br:1279
+u @ vendor-core-83c17265f2588e9e.min.js.br:54
+setTimeout
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:63
+logExposureForFeatureGateCheck @ 3312-6307ca20d3bd4683.min.js.br:1279
+getFeatureGateFromInitialOptions @ 3312-6307ca20d3bd4683.min.js.br:1279
+getFeatureGate @ 3312-6307ca20d3bd4683.min.js.br:1279
+getFeatureGate @ 3312-6307ca20d3bd4683.min.js.br:1618
+230842 @ figma_app-06d0392974a6c1b2.min.js.br:229
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+687977 @ figma_app-06d0392974a6c1b2.min.js.br:41
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+980300 @ figma_app-06d0392974a6c1b2.min.js.br:227
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+124903 @ figma_app-06d0392974a6c1b2.min.js.br:4
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+68570 @ 3312-6307ca20d3bd4683.min.js.br:78
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+482414 @ figma_app-06d0392974a6c1b2.min.js.br:302
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+570084 @ 7192-1c9a26ddef713162.min.js.br:3
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+666932 @ 2764-7f60be61767a3d4b.min.js.br:3
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+21390 @ 2764-7f60be61767a3d4b.min.js.br:3
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+485416 @ figma_app-06d0392974a6c1b2.min.js.br:4
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+756587 @ 7887-f3590ff09e0ac742.min.js.br:3
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+409566 @ 64-f47645a48911a4d6.min.js.br:3
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+624716 @ figma_app-06d0392974a6c1b2.min.js.br:4
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:491
+i.O @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:491
+f @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:3
+vendor-core-83c17265f2588e9e.min.js.br:54 [bootstrap_waiting_on_user_state] You appear to be logging a relative timestamp and not an epoch timestamp. Try adding performance.timeOrigin to the timestamp.
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:54
+logVital @ 3312-6307ca20d3bd4683.min.js.br:1618
+v @ 3312-6307ca20d3bd4683.min.js.br:186
+(anonymous) @ 3312-6307ca20d3bd4683.min.js.br:186
+time @ 3312-6307ca20d3bd4683.min.js.br:384
+(anonymous) @ 3312-6307ca20d3bd4683.min.js.br:186
+await in (anonymous)
+tK @ 3312-6307ca20d3bd4683.min.js.br:165
+S8 @ 3312-6307ca20d3bd4683.min.js.br:186
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:6
+n @ 3312-6307ca20d3bd4683.min.js.br:1248
+624716 @ figma_app-06d0392974a6c1b2.min.js.br:6
+i @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:491
+i.O @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:491
+f @ runtime~figma_app-e82417d8faefc55b.min.js.br:3
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:3
+chrome-extension://invalid/:1  GET chrome-extension://invalid/ net::ERR_FAILED
+Image
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:6
+aB @ vendor-core-83c17265f2588e9e.min.js.br:11
+oD @ vendor-core-83c17265f2588e9e.min.js.br:11
+oL @ vendor-core-83c17265f2588e9e.min.js.br:11
+f5 @ vendor-core-83c17265f2588e9e.min.js.br:11
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:11
+oB @ vendor-core-83c17265f2588e9e.min.js.br:11
+oE @ vendor-core-83c17265f2588e9e.min.js.br:11
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:54
+S @ vendor-core-83c17265f2588e9e.min.js.br:54
+O @ vendor-core-83c17265f2588e9e.min.js.br:54
+vendor-core-83c17265f2588e9e.min.js.br:54 [import] git: 795ca6f1ee9882dfe1a8301c1dd929a1216cbc73, stamp: 9F7B891A935AF638
+vendor-core-83c17265f2588e9e.min.js.br:54 Autosave Changes not available or already claimed by another tab undefined
+vendor-core-83c17265f2588e9e.min.js.br:54 [Fullscreen] Booting... (emscripten version 4.0.21)
+vendor-core-83c17265f2588e9e.min.js.br:54 [GPU] graphicsAPI:"WebGPU", vendor:"Google Inc. (Apple)" renderer:"ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)" deviceArchitecture:"metal-3" deviceDescription:"" webGPUDevice:"" webGPUVendor:"apple" bindings:"emdawnwebgpu"
+vendor-core-83c17265f2588e9e.min.js.br:54 [Fullscreen] Ready in 1045.2ms
+vendor-core-83c17265f2588e9e.min.js.br:54 [FullscreenApp] calling setEditorTheme and setting preference dark
+vendor-core-83c17265f2588e9e.min.js.br:54 [MultiplayerSession] connecting to wss://www.figma.com/api/multiplayer/wbeLanJw1B7PL3lR9fJAT3?role=editor&tracking_session_id=4o8VM0oPWvE8TSDd&version=151&recentReload=0&file-load-streaming-compression&user-id=1109284789109864614&client_release=3962ae99b3d44ec0029d3ba76d25f09ef339248f
+vendor-core-83c17265f2588e9e.min.js.br:54 [FullscreenApp] calling setEditorTheme and setting preference dark
+vendor-core-83c17265f2588e9e.min.js.br:54 Loaded 0 scripts (0b), 0 from cache (0b)
+vendor-core-83c17265f2588e9e.min.js.br:54 [MultiplayerSession] Joining file version 106 (initial load)
+vendor-core-83c17265f2588e9e.min.js.br:54 Migration succeeded: context: fullscreen_migrate_SceneGraphManager, version: 106, duration: 0ms.
+vendor-core-83c17265f2588e9e.min.js.br:54 [Sprigma] Sprig SDK is ready
+vendor-core-83c17265f2588e9e.min.js.br:54 [Fullscreen] loadtime=5.20s maxmem=56519184
+/make/wbeLanJw1B7PL3lR9fJAT3/Mylo-with-TBD-pagination?p=f&t=u5o77nN0wkvmYxPc-0&fullscreen=1:1 Access to image at 'https://www.gravatar.com/avatar/d09ef61489bb7b3349912707bb32fec0?size=240&default=https%3A%2F%2Fs3-alpha.figma.com%2Fstatic%2Fuser_d_v2.png?c=1' from origin 'https://www.figma.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+www.gravatar.com/avatar/d09ef61489bb7b3349912707bb32fec0?size=240&default=https%3A%2F%2Fs3-alpha.figma.com%2Fstatic%2Fuser_d_v2.png?c=1:1  GET https://www.gravatar.com/avatar/d09ef61489bb7b3349912707bb32fec0?size=240&default=https%3A%2F%2Fs3-alpha.figma.com%2Fstatic%2Fuser_d_v2.png?c=1 net::ERR_FAILED 302 (Found)
+Image
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:41
+U @ figma_app-06d0392974a6c1b2.min.js.br:41
+g @ figma_app-06d0392974a6c1b2.min.js.br:222
+y @ figma_app-06d0392974a6c1b2.min.js.br:222
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:222
+aB @ vendor-core-83c17265f2588e9e.min.js.br:11
+oD @ vendor-core-83c17265f2588e9e.min.js.br:11
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:11
+oB @ vendor-core-83c17265f2588e9e.min.js.br:11
+oL @ vendor-core-83c17265f2588e9e.min.js.br:11
+f5 @ vendor-core-83c17265f2588e9e.min.js.br:11
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:11
+requestAnimationFrame
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:63
+_s @ 3312-6307ca20d3bd4683.min.js.br:186
+s @ 3312-6307ca20d3bd4683.min.js.br:384
+requestAnimationFrame @ 3312-6307ca20d3bd4683.min.js.br:189
+_Async_requestAnimationFrame @ compiled_wasm.js.br:2
+$wasm-function[1880] @ compiled_wasm.wasm.br:0x3fba2
+$wasm-function[2243] @ compiled_wasm.wasm.br:0x684d7
+$wasm-function[5036] @ compiled_wasm.wasm.br:0x2827df
+$wasm-function[23470] @ compiled_wasm.wasm.br:0x152abc8
+$wasm-function[40682] @ compiled_wasm.wasm.br:0x21235a5
+$wasm-function[16912] @ compiled_wasm.wasm.br:0xe540ba
+$wasm-function[38401] @ compiled_wasm.wasm.br:0x1ed5369
+(anonymous) @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+_wrapCppCall @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+b @ 1085-869fdb2d01126556.min.js.br:3
+g.onmessage @ 1085-869fdb2d01126556.min.js.br:3
+vendor-core-83c17265f2588e9e.min.js.br:54 [devtools] Initialized LS
+vendor-core-83c17265f2588e9e.min.js.br:54 [devtools] Initialized LS
+vendor-core-83c17265f2588e9e.min.js.br:63  GET https://www.figma.com/api/make/wbeLanJw1B7PL3lR9fJAT3/cached_preview_urls?source_code_hash=95963f61867e03a3b190215ee9a81870d7f7eafe 404 (Not Found)
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:63
+h @ vendor-fe7483da6da244f1.min.js.br:3
+(anonymous) @ 3312-6307ca20d3bd4683.min.js.br:1318
+C @ 3312-6307ca20d3bd4683.min.js.br:1318
+await in C
+w @ 3312-6307ca20d3bd4683.min.js.br:1318
+k @ 3312-6307ca20d3bd4683.min.js.br:1318
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:173
+validate @ figma_app-06d0392974a6c1b2.min.js.br:229
+getCachedPreviewUrls @ figma_app-06d0392974a6c1b2.min.js.br:173
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:297
+preloadCachedPreviewUrls @ figma_app-06d0392974a6c1b2.min.js.br:297
+initializeCode @ figma_app-06d0392974a6c1b2.min.js.br:297
+(anonymous) @ 7192-1c9a26ddef713162.min.js.br:3
+aB @ vendor-core-83c17265f2588e9e.min.js.br:11
+oD @ vendor-core-83c17265f2588e9e.min.js.br:11
+oL @ vendor-core-83c17265f2588e9e.min.js.br:11
+f5 @ vendor-core-83c17265f2588e9e.min.js.br:11
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:11
+oB @ vendor-core-83c17265f2588e9e.min.js.br:11
+oE @ vendor-core-83c17265f2588e9e.min.js.br:11
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:54
+S @ vendor-core-83c17265f2588e9e.min.js.br:54
+O @ vendor-core-83c17265f2588e9e.min.js.br:54
+figma_app-06d0392974a6c1b2.min.js.br:41 Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+S @ figma_app-06d0392974a6c1b2.min.js.br:41
+T @ figma_app-06d0392974a6c1b2.min.js.br:41
+await in T
+decodeAsync @ figma_app-06d0392974a6c1b2.min.js.br:41
+await in decodeAsync
+decodeImage @ figma_app-06d0392974a6c1b2.min.js.br:41
+_ImageIo_decodeImage @ compiled_wasm.js.br:2
+$wasm-function[24139] @ compiled_wasm.wasm.br:0x15d9dae
+$wasm-function[5611] @ compiled_wasm.wasm.br:0x2fa9f8
+$wasm-function[12016] @ compiled_wasm.wasm.br:0x8e9598
+$wasm-function[37654] @ compiled_wasm.wasm.br:0x1e42366
+(anonymous) @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+_wrapCppCall @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:41
+Promise.then
+maybeDownloadMoreImages @ figma_app-06d0392974a6c1b2.min.js.br:41
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:41
+Promise.finally
+maybeDownloadMoreImages @ figma_app-06d0392974a6c1b2.min.js.br:41
+lookupImages @ figma_app-06d0392974a6c1b2.min.js.br:41
+await in lookupImages
+(anonymous) @ figma_app-06d0392974a6c1b2.min.js.br:41
+u @ vendor-core-83c17265f2588e9e.min.js.br:54
+setTimeout
+(anonymous) @ vendor-core-83c17265f2588e9e.min.js.br:63
+queueImageForLookup @ figma_app-06d0392974a6c1b2.min.js.br:41
+setImageDownloadPriority @ figma_app-06d0392974a6c1b2.min.js.br:41
+setImageDownloadPriority @ figma_app-06d0392974a6c1b2.min.js.br:41
+_ImageTsBindings_setImageDownloadPriority @ compiled_wasm.js.br:2
+$wasm-function[4255] @ compiled_wasm.wasm.br:0x1e304d
+$wasm-function[41355] @ compiled_wasm.wasm.br:0x21c908a
+$wasm-function[22651] @ compiled_wasm.wasm.br:0x143f588
+$wasm-function[3306] @ compiled_wasm.wasm.br:0x122773
+$wasm-function[4611] @ compiled_wasm.wasm.br:0x22b697
+$wasm-function[10062] @ compiled_wasm.wasm.br:0x711be5
+$wasm-function[25722] @ compiled_wasm.wasm.br:0x177ac75
+$wasm-function[16985] @ compiled_wasm.wasm.br:0xe7c7ad
+$wasm-function[20677] @ compiled_wasm.wasm.br:0x1206a82
+$wasm-function[22541] @ compiled_wasm.wasm.br:0x1420596
+$wasm-function[40682] @ compiled_wasm.wasm.br:0x2123d2f
+$wasm-function[16912] @ compiled_wasm.wasm.br:0xe540ba
+$wasm-function[11867] @ compiled_wasm.wasm.br:0x8bd6d4
+$wasm-function[23470] @ compiled_wasm.wasm.br:0x152abf7
+$wasm-function[40682] @ compiled_wasm.wasm.br:0x21235a5
+$wasm-function[16912] @ compiled_wasm.wasm.br:0xe540ba
+$wasm-function[38401] @ compiled_wasm.wasm.br:0x1ed5369
+(anonymous) @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+_wrapCppCall @ compiled_wasm.js.br:2
+(anonymous) @ compiled_wasm.js.br:2
+b @ 1085-869fdb2d01126556.min.js.br:3
+g.onmessage @ 1085-869fdb2d01126556.min.js.br:3
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Generating CSS for template: default-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [CSS Generated]:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 1in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #000000;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #000000;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #1a1a1a;
+  padding-left: 24px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #1a1a1a;
+  padding-left: 24px;
+}
+
+.mylo-preview li {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000000;
+  margin-bottom: 8px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Page margins extracted: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Using NEW path (stylesheet)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Content length: 1350 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Stylesheet length: 1297
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Page margins: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Wrapped content with .mylo-preview
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Content fragment created
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment childNodes count: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment first child: DIV
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Injected stylesheet into <head> with id: mylo-temp-styles-1773923193604
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Pagination complete in 580ms
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Overriding Paged.js margin variables: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] ✅ Margin variables applied to: pagedjs_pages
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Progress: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Preview Scale - fit-page] {containerWidth: 637, containerHeight: 585, pageWidth: 816, pageHeight: 1056, visualMarginWidth: 48, …}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Preview Scale - fit-page] {containerWidth: 637, containerHeight: 585, pageWidth: 816, pageHeight: 1056, visualMarginWidth: 48, …}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+========================================
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Phase 3A: Serializer Validation Tests
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+=== Test: OLD PATH (with template) ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using OLD path (inline styles) - template provided
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Generated HTML (OLD PATH):
+ <p data-type="body" style="font-family: &quot;Gill Sans&quot;, sans-serif; font-size: 13px; font-weight: 300; line-height: 18px; color: rgb(0, 0, 0); margin-top: 0px; margin-bottom: 9px; letter-spacing: 0.2px;">This is body text.</p><h1 data-type="heading1" style="font-family: &quot;Gill Sans&quot;, sans-serif; font-size: 24px; font-weight: 600; line-height: 38px; color: rgb(37, 64, 142); text-align: left; margin-top: 0px; margin-bottom: 40px; padding: 0px; background-image: linear-gradient(to right, rgb(237, 237, 237) 0%, rgb(237, 237, 237) 94%, rgb(37, 64, 142) 100%), linear-gradient(to right, rgb(237, 237, 237) 0%, rgb(237, 237, 237) 94%, rgb(37, 64, 142) 100%), linear-gradient(to right, rgb(237, 237, 237) 0%, rgb(237, 237, 237) 94%, rgb(37, 64, 142) 100%); background-repeat: no-repeat, no-repeat, no-repeat; background-size: 100% 5px, 95% 5px, 90% 5px; background-position: 0px calc(50% - 16px), 0px 50%, 0px calc(50% + 16px);">This is a heading</h1>
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Checks:
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has inline styles: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has <p> tag: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has <h1> tag: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has data-type attr: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+=== Test: NEW PATH (without template) ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Generated HTML (NEW PATH):
+ <p data-type="body">This is body text.</p><h1 data-type="heading1">This is a heading</h1>
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Checks:
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has NO inline styles: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has <p> tag: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has <h1> tag: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has data-type attr: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+=== Test: Stylesheet Generation ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Generating stylesheet CSS for template: modern-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Generated CSS:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 2in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 300;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 9px;
+  letter-spacing: 0.2px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 38px;
+  color: #25408E;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 40px;
+  padding: 0px;
+  background-image: linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%, #25408E 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: 100% 5px, 95% 5px, 90% 5px;
+  background-position: 0px calc(50% - 16px), 0px 50%, 0px calc(50% + 16px);
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #25408E;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 15px;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 3px;
+  font-style: italic;
+  padding-bottom: 3px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview li {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 18px;
+  color: #000000;
+  letter-spacing: 0.2px;
+  margin-bottom: 0px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Checks:
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has @page rule: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has .mylo-preview p: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has .mylo-preview h1: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   - Has margins: ✓
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+========================================
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Phase 3A Tests Complete
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+========================================
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Phase 4: Modern Template V2 Migration
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 1: Type Checking ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 isTemplateV2(modernTemplate): true
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Result: ✅ PASS - Template is V2 format
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 2: Template Structure ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has contentStyles: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has pageStyles: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has old styles property: ✅ (correctly removed)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has old pageLayout property: ✅ (correctly removed)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Structure: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 3: CSS Generation ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Generated CSS length: 1779 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 CSS Validation:
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   @page rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Letter size: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   2in left margin: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Body rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   H1 rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   H2 rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   H3 rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Gill Sans font: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Blue accent color: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ CSS Generation: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === CSS Preview (first 500 chars) ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 @page {
+  size: letter;
+  margin: 1in 1in 1in 2in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 300;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 9px;
+  letter-spacing: 0.2px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 38px;
+  color: #25408E;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 40px;
+  padding:
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 4: Content Styles Validation ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H2 style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H3 style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body font: Gill Sans, sans-serif
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body size: 13px
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body weight: 300
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 font: Gill Sans, sans-serif
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 size: 24px
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 color: #25408E
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 has gradient background: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Content Styles: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 5: Page Styles Validation ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Size defined: ✅ (letter)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Margins defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Top: 1 in
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Right: 1 in
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Bottom: 1 in
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Left: 2 in ✅ (distinctive)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Page Styles: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Overall Phase 4 Result: ✅ ALL TESTS PASSED
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+========================================
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Phase 5: Default Template V2 Migration
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 1: Type Checking ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 isTemplateV2(defaultTemplate): true
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Result: ✅ PASS - Template is V2 format
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 2: Template Structure ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has contentStyles: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has pageStyles: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has old styles property: ✅ (correctly removed)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Has old pageLayout property: ✅ (correctly removed)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Structure: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 3: CSS Generation ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Generated CSS length: 1297 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 CSS Validation:
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   @page rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Letter size: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   1in uniform margins: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Body rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   H1 rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   H2 rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   H3 rule: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   System font: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ CSS Generation: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === CSS Preview (first 500 chars) ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 @page {
+  size: letter;
+  margin: 1in 1in 1in 1in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.mylo-
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 4: Content Styles Validation ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H2 style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H3 style defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body font: system-ui, -apple-system, Arial, sans-serif
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body size: 16px
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Body weight: 400
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 font: system-ui, -apple-system, Arial, sans-serif
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 size: 32px
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 H1 color: #000000
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Content Styles: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 === Test 5: Page Styles Validation ===
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Size defined: ✅ (letter)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Margins defined: ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Top: 1 in
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Right: 1 in
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Bottom: 1 in
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Left: 1 in
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90   Uniform (all 1in): ✅
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ✓ Page Styles: ✅ PASS
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 Overall Phase 5 Result: ✅ ALL TESTS PASSED
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 ========================================
+
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Generating CSS for template: default-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [CSS Generated]:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 1in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #000000;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #000000;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #1a1a1a;
+  padding-left: 24px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #1a1a1a;
+  padding-left: 24px;
+}
+
+.mylo-preview li {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000000;
+  margin-bottom: 8px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Page margins extracted: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Using NEW path (stylesheet)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Content length: 1350 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Stylesheet length: 1297
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Page margins: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Wrapped content with .mylo-preview
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Content fragment created
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment childNodes count: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment first child: DIV
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Removing old stylesheet: mylo-temp-styles-1773923193604
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Injected stylesheet into <head> with id: mylo-temp-styles-1773923194514
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Pagination complete in 12ms
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Overriding Paged.js margin variables: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] ✅ Margin variables applied to: pagedjs_pages
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Progress: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Generating CSS for template: modern-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [CSS Generated]:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 2in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 300;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 9px;
+  letter-spacing: 0.2px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 38px;
+  color: #25408E;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 40px;
+  padding: 0px;
+  background-image: linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%, #25408E 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: 100% 5px, 95% 5px, 90% 5px;
+  background-position: 0px calc(50% - 16px), 0px 50%, 0px calc(50% + 16px);
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #25408E;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 15px;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 3px;
+  font-style: italic;
+  padding-bottom: 3px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview li {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 18px;
+  color: #000000;
+  letter-spacing: 0.2px;
+  margin-bottom: 0px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Page margins extracted: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Using NEW path (stylesheet)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Content length: 1350 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Stylesheet length: 1779
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Page margins: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Wrapped content with .mylo-preview
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Content fragment created
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment childNodes count: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment first child: DIV
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Removing old stylesheet: mylo-temp-styles-1773923194514
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Injected stylesheet into <head> with id: mylo-temp-styles-1773923276687
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Pagination complete in 21ms
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Overriding Paged.js margin variables: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] ✅ Margin variables applied to: pagedjs_pages
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Progress: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 12:30:54 PM [vite] (client) hmr update /src/styles/index.css, /src/app/App.tsx, /src/app/contributor/preview/PreviewPanel.tsx, /src/app/contributor/preview/PreviewToolbar.tsx
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Preview Scale - fit-page] {containerWidth: 637, containerHeight: 585, pageWidth: 816, pageHeight: 1056, visualMarginWidth: 48, …}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Preview Scale - fit-page] {containerWidth: 637, containerHeight: 585, pageWidth: 816, pageHeight: 1056, visualMarginWidth: 48, …}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Generating CSS for template: modern-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [CSS Generated]:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 2in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 300;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 9px;
+  letter-spacing: 0.2px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 38px;
+  color: #25408E;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 40px;
+  padding: 0px;
+  background-image: linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%, #25408E 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: 100% 5px, 95% 5px, 90% 5px;
+  background-position: 0px calc(50% - 16px), 0px 50%, 0px calc(50% + 16px);
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #25408E;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 15px;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 3px;
+  font-style: italic;
+  padding-bottom: 3px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview li {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 18px;
+  color: #000000;
+  letter-spacing: 0.2px;
+  margin-bottom: 0px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Page margins extracted: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Using NEW path (stylesheet)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Content length: 1350 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Stylesheet length: 1779
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Page margins: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Wrapped content with .mylo-preview
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Content fragment created
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment childNodes count: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment first child: DIV
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Removing old stylesheet: mylo-temp-styles-1773923276687
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Injected stylesheet into <head> with id: mylo-temp-styles-1773923455512
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Pagination complete in 7ms
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Overriding Paged.js margin variables: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] ✅ Margin variables applied to: pagedjs_pages
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Progress: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 12:31:15 PM [vite] (client) hmr update /src/styles/index.css, /src/app/App.tsx, /src/app/contributor/preview/PreviewPanel.tsx, /src/app/contributor/preview/PreviewToolbar.tsx
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Preview Scale - fit-page] {containerWidth: 637, containerHeight: 585, pageWidth: 816, pageHeight: 1056, visualMarginWidth: 48, …}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Preview Scale - fit-page] {containerWidth: 637, containerHeight: 585, pageWidth: 816, pageHeight: 1056, visualMarginWidth: 48, …}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Generating CSS for template: modern-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [CSS Generated]:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 2in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 300;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 9px;
+  letter-spacing: 0.2px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 38px;
+  color: #25408E;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 40px;
+  padding: 0px;
+  background-image: linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%, #25408E 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: 100% 5px, 95% 5px, 90% 5px;
+  background-position: 0px calc(50% - 16px), 0px 50%, 0px calc(50% + 16px);
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #25408E;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 15px;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 3px;
+  font-style: italic;
+  padding-bottom: 3px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview li {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 18px;
+  color: #000000;
+  letter-spacing: 0.2px;
+  margin-bottom: 0px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Page margins extracted: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Using NEW path (stylesheet)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Content length: 1350 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Stylesheet length: 1779
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Page margins: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Wrapped content with .mylo-preview
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Content fragment created
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment childNodes count: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment first child: DIV
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Removing old stylesheet: mylo-temp-styles-1773923455512
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Injected stylesheet into <head> with id: mylo-temp-styles-1773923476301
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Pagination complete in 15ms
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Overriding Paged.js margin variables: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] ✅ Margin variables applied to: pagedjs_pages
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Progress: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Generating CSS for template: default-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [CSS Generated]:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 1in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #000000;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #000000;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #1a1a1a;
+  padding-left: 24px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #1a1a1a;
+  padding-left: 24px;
+}
+
+.mylo-preview li {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000000;
+  margin-bottom: 8px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Page margins extracted: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Using NEW path (stylesheet)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Content length: 1350 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Stylesheet length: 1297
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Page margins: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Wrapped content with .mylo-preview
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Content fragment created
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment childNodes count: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment first child: DIV
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Removing old stylesheet: mylo-temp-styles-1773923476301
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Injected stylesheet into <head> with id: mylo-temp-styles-1773923510298
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Pagination complete in 22ms
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Overriding Paged.js margin variables: {top: 1, right: 1, bottom: 1, left: 1}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] ✅ Margin variables applied to: pagedjs_pages
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Progress: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js Effect] Starting debounced pagination...
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Zoom Mode] fit-page
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Generating CSS for template: modern-template-v1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [CSS Generated]:
+ @page {
+  size: letter;
+  margin: 1in 1in 1in 2in;
+}
+
+.mylo-preview p[data-type="body"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 300;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 9px;
+  letter-spacing: 0.2px;
+}
+
+.mylo-preview h1[data-type="heading1"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 38px;
+  color: #25408E;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 40px;
+  padding: 0px;
+  background-image: linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%,  #25408E 100%), linear-gradient(to right, #ededed 0%, #ededed 94%, #25408E 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: 100% 5px, 95% 5px, 90% 5px;
+  background-position: 0px calc(50% - 16px), 0px 50%, 0px calc(50% + 16px);
+}
+
+.mylo-preview h2[data-type="heading2"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #25408E;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+}
+
+.mylo-preview h3[data-type="heading3"] {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 15px;
+  color: #000000;
+  margin-top: 0;
+  margin-bottom: 3px;
+  font-style: italic;
+  padding-bottom: 3px;
+}
+
+.mylo-preview ul {
+  list-style-type: disc;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview ol {
+  list-style-type: decimal;
+  color: #000000;
+  padding-left: 35px;
+  margin-bottom: 18px;
+}
+
+.mylo-preview li {
+  font-family: Gill Sans, sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 18px;
+  color: #000000;
+  letter-spacing: 0.2px;
+  margin-bottom: 0px;
+}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Serializer] Using NEW path (semantic HTML only) - no template
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Renderer] Page margins extracted: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Using NEW path (stylesheet)
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Content length: 1350 characters
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Stylesheet length: 1779
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Page margins: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Wrapped content with .mylo-preview
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Content fragment created
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment childNodes count: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Fragment first child: DIV
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Removing old stylesheet: mylo-temp-styles-1773923510298
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Injected stylesheet into <head> with id: mylo-temp-styles-1773923512426
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Pagination complete in 11ms
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Total pages: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] Overriding Paged.js margin variables: {top: 1, right: 1, bottom: 1, left: 2}
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Paged.js] ✅ Margin variables applied to: pagedjs_pages
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Pagination] Progress: 1
+code_components_preview_iframe-aee2937bf6889db9.min.js.br:90 [Page Measurement] {measuredPageWidth: 816, measuredPageHeight: 1056, note: 'Actual rendered dimensions from Paged.js output'}

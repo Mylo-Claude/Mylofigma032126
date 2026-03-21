@@ -1,0 +1,51 @@
+/* ============================================
+   TEMPLATE-SPECIFIC PAGE RULES
+   ============================================ */
+
+/* Template: Default - STATIC RULES (will be overridden by dynamic injection) */
+@page default-template-v1 {
+  size: 8.5in 11in;
+  margin: 1in 1in 1in 1in;
+}
+
+/* Template: Traditional - STATIC RULES (will be overridden by dynamic injection) */
+@page traditional-template-v1 {
+  size: 8.5in 11in;
+  margin: 1in 1.25in 1in 1.25in;
+}
+
+/* Template: Legal Brief - STATIC RULES (will be overridden by dynamic injection) */
+@page legal-template-v1 {
+  size: 8.5in 11in;
+  margin: 1.5in 1in 1in 1in;
+}
+
+/* Template: Modern - STATIC RULES (will be overridden by dynamic injection) */
+@page modern-template-v1 {
+  size: 8.5in 11in;
+  margin: 1in 1in 1in 2in;
+}
+
+/* ============================================
+   TEMPLATE CLASS SELECTORS
+   ============================================
+   
+   Apply these classes to content containers to select
+   the appropriate @page rule.
+*/
+
+.template-default {
+  page: default-template-v1;
+}
+
+.template-traditional {
+  page: traditional-template-v1;
+}
+
+.template-legal {
+  page: legal-template-v1;
+}
+
+.template-modern {
+  page: modern-template-v1;
+}

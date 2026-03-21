@@ -1,0 +1,57 @@
+/* Preview rendering styles - template-governed output */
+
+/* ============================================
+   LIST RESET - Remove browser defaults
+   ============================================ */
+
+/* Reset browser defaults for ul/ol to ensure consistent baseline */
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   PAGED.JS PAGE FRAME STYLES
+   ============================================ */
+
+/* Individual page styling - white background with shadow */
+.pagedjs_page {
+  background: white !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+}
+
+/* ============================================
+   LIST STYLING
+   ============================================ */
+
+/* Bulleted lists - disc bullets */
+.pagedjs_page_content ul {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+/* Multi-level numbered list pattern: decimal → lower-alpha → lower-roman → repeat */
+.pagedjs_page_content ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+.pagedjs_page_content ol ol {
+  list-style-type: lower-alpha;
+}
+
+.pagedjs_page_content ol ol ol {
+  list-style-type: lower-roman;
+}
+
+.pagedjs_page_content ol ol ol ol {
+  list-style-type: decimal;
+}
+
+.pagedjs_page_content ol ol ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.pagedjs_page_content ol ol ol ol ol ol {
+  list-style-type: lower-roman;
+}
