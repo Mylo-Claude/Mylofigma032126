@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { EditorState, Transaction } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
+import { Node as PMNode } from "prosemirror-model";
 import { myloSchema } from "../../mylo/schema";
 import { history } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
@@ -34,18 +35,27 @@ interface EditorPanelProps {
   onViewReady?: (view: EditorView) => void;
   isModified?: boolean;
   onModifiedChange?: (isModified: boolean) => void;
+  /**
+   * Optional initial ProseMirror node to populate the editor.
+   * When provided, replaces the default welcome sample.
+   * Captured once at mount — changes after mount have no effect.
+   * Phase 4: hydrated from DocumentContext content (stored as doc.toJSON()).
+   */
+  initialDoc?: PMNode;
 }
 
-export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModifiedChange }: EditorPanelProps) {
+export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModifiedChange, initialDoc }: EditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const [, setUpdateCount] = useState(0);
-  
+
   // Store callbacks in refs to avoid recreating the editor
   const onDocumentChangeRef = useRef(onDocumentChange);
   const onViewReadyRef = useRef(onViewReady);
   const onModifiedChangeRef = useRef(onModifiedChange);
-  
+  // Capture initialDoc at mount — not reactive after mount
+  const initialDocRef = useRef(initialDoc);
+
   useEffect(() => {
     onDocumentChangeRef.current = onDocumentChange;
     onViewReadyRef.current = onViewReady;
@@ -55,8 +65,8 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
   useEffect(() => {
     if (!editorRef.current) return;
 
-    // Create initial document with sample content
-    const initialDoc = sampleToEditorState(welcome, myloSchema).doc;
+    // Use provided initialDoc (restored from storage) or fall back to welcome sample
+    const initialDoc = initialDocRef.current ?? sampleToEditorState(welcome, myloSchema).doc;
 
     // Create editor state
     const state = EditorState.create({

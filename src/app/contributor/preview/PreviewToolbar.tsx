@@ -1,23 +1,22 @@
 import { Template, availableTemplates } from "../../mylo/templates";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../components/ui/select";
+import type { ZoomMode } from "./types";
 
 /**
  * PreviewToolbar - Preview Panel Controls
- * 
+ *
  * Governance: Allows Contributor to select template and zoom level for preview
  * Responsibility: Template selection and zoom controls
  * Role: Contributor (view state control only)
- * 
+ *
  * Controls:
  * - Template selector: Switches between available templates
  * - Zoom selector: Fit Width, Fit Page, 100%
- * 
+ *
  * State: Per-document view state (does not export)
- * 
+ *
  * @see Mylo Governance: Preview enforcement model
  */
-
-type ZoomMode = 'fit-width' | 'fit-page' | '100%';
 
 interface PreviewToolbarProps {
   selectedTemplate: Template;

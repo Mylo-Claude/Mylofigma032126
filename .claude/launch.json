@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Mylo Dev (Vite)",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /tmp && exec node /tmp/mylo-dev/node_modules/.bin/vite --config /tmp/mylo-dev/vite.config.ts"],
+      "port": 5173
+    }
+  ]
+}

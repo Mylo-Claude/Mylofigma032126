@@ -1,25 +1,26 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
+import type { Role } from '../types';
 
 /**
- * RoleContext - User Role State Management
- * 
- * Governance: Tracks current user role for future multi-role UI support
- * Responsibility: Provide role state to components
- * Roles: Contributor, Template Editor, Admin
- * 
+ * @file contexts/RoleContext.tsx
+ * @role Active role state management
+ * @owns In-memory role state; exposes setRole so SessionContext can sync
+ *       the persisted session role into React state on login and page restore.
+ * @does-not-own Role type definition (types/index.ts), session persistence
+ *               (SessionContext), role-based UI gating (individual components).
+ *
  * Role hierarchy (cumulative):
- * - Contributor: Base role (content authoring)
- * - Template Editor: Inherits Contributor + template authoring
- * - Admin: Inherits Template Editor + governance controls
- * 
- * Current state: All users are Contributors (future phases will add role switching)
- * 
- * State: Session state (not persisted)
- * 
- * @see Mylo Governance: Roles and authority
+ * - contributor:     Base role — content authoring only
+ * - template-editor: Inherits contributor + template authoring
+ * - admin:           Inherits template-editor + governance controls
+ *
+ * State: In-memory only. SessionContext bootstraps setRole on mount and login.
+ *
+ * @see types/index.ts — Role type definition
+ * @see SessionContext.tsx — calls setRole to sync persisted session role
  */
 
-export type Role = 'contributor' | 'template-editor' | 'admin';
+export type { Role };
 
 interface RoleContextType {
   role: Role;
