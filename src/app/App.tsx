@@ -14,13 +14,16 @@
  *                       (Modals.tsx, FolderSidebar.tsx) can read session.name
  *                       for createdBy and pass it explicitly to createDocument
  *                       and createFolder. DocumentContext itself is session-free.
- *   DocumentProvider  — innermost: session-free; receives createdBy at call sites.
+ *   DocumentProvider  — session-free; receives createdBy at call sites.
+ *   TemplateProvider  — innermost: seeds mylo_templates on first load; provides
+ *                       template CRUD and publishedTemplates to all pages.
  *
  * All page components rendered via <Outlet /> have access to the full
  * context hierarchy above them.
  *
  * @see router.tsx — App is the root element of the browser router
- * @see RoleContext.tsx, SessionContext.tsx, DocumentContext.tsx — provided here
+ * @see RoleContext.tsx, SessionContext.tsx, DocumentContext.tsx,
+ *      TemplateContext.tsx — provided here
  */
 
 import { useEffect } from 'react';
@@ -28,6 +31,7 @@ import { Outlet } from 'react-router';
 import { RoleProvider } from './contexts/RoleContext';
 import { SessionProvider } from './contexts/SessionContext';
 import { DocumentProvider } from './contexts/DocumentContext';
+import { TemplateProvider } from './contexts/TemplateContext';
 import { runPhase3ATests } from './services/__tests__/serializerPhase3A.test';
 import { runPhase4Tests } from './services/__tests__/phase4Validation.test';
 import { runPhase5Tests } from './services/__tests__/phase5Validation.test';
@@ -57,8 +61,10 @@ export default function App() {
     <RoleProvider>
       <SessionProvider>
         <DocumentProvider>
-          <DevTestSuite />
-          <Outlet />
+          <TemplateProvider>
+            <DevTestSuite />
+            <Outlet />
+          </TemplateProvider>
         </DocumentProvider>
       </SessionProvider>
     </RoleProvider>

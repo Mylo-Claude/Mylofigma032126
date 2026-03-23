@@ -9,6 +9,25 @@ export interface Template {
   name: string;
   version: string;
 
+  /**
+   * Publication status.
+   * - 'draft'     — visible only to template-editor and admin; not available in the
+   *                 contributor preview toolbar.
+   * - 'published' — available to all roles via the preview template selector.
+   *
+   * Optional so that the three hardcoded seed templates (which predated this field)
+   * remain valid Template objects without modification. TemplateContext applies a
+   * default of 'published' during seeding and 'draft' on createTemplate().
+   */
+  status?: 'draft' | 'published';
+
+  /**
+   * ISO 8601 timestamp of the last modification.
+   * Set by TemplateContext on seed and on every createTemplate / updateTemplate call.
+   * Optional for backward compatibility with the hardcoded seed templates.
+   */
+  updatedAt?: string;
+
   // ===== REQUIRED FORMAT =====
   /** Content styling - generates CSS selectors */
   contentStyles: ContentStyles;
