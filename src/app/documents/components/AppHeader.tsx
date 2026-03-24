@@ -1,16 +1,23 @@
 /**
  * @file documents/components/AppHeader.tsx
  * @role Application-wide top bar
- * @owns Mylo wordmark, session user display (name + role badge), sign-out action.
- *       Role badge color communicates governance level at a glance.
+ * @owns Mylo wordmark, primary nav links (Documents; Templates for
+ *       template-editor + admin), session user display (name + role badge),
+ *       sign-out action. Role badge color communicates governance level at a glance.
  * @does-not-own Session persistence (SessionContext), routing beyond logout redirect,
- *               page navigation, document/folder state.
+ *               document/folder state, sidebar navigation (FolderSidebar).
+ *
+ * Nav layout: [Mylo wordmark] [nav links] [spacer] [role badge] [name] [sign out]
+ *
+ * NavLink active state is handled automatically by React Router via isActive.
+ * Active link: slightly darker text + bottom underline using --mylo-text-primary.
+ * Inactive link: --mylo-text-secondary, no underline.
  *
  * @see SessionContext.tsx — session.name, logout()
- * @see RoleContext.tsx — current role for badge display
+ * @see RoleContext.tsx — current role for badge + Templates link visibility
  */
 
-import { useNavigate } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { LogOut } from 'lucide-react';
 import { useSession } from '../../contexts/SessionContext';
 import { useRole } from '../../contexts/RoleContext';
@@ -54,12 +61,32 @@ export function AppHeader() {
     className: 'bg-mylo-surface-subtle text-mylo-text-secondary border-mylo-border-light',
   };
 
+  const canSeeTemplates = role === 'template-editor' || role === 'admin';
+
+  // NavLink className helper — active = darker text + underline, inactive = secondary
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    isActive
+      ? 'text-sm font-medium text-mylo-text-primary border-b-2 border-mylo-text-primary pb-px'
+      : 'text-sm font-medium text-mylo-text-secondary hover:text-mylo-text-primary transition-colors';
+
   return (
     <header className="h-14 shrink-0 flex items-center px-6 bg-mylo-surface border-b border-mylo-border-light z-10">
       {/* Wordmark */}
-      <span className="text-[15px] font-semibold tracking-tight text-mylo-text-primary select-none">
+      <span className="text-[15px] font-semibold tracking-tight text-mylo-text-primary select-none mr-6">
         Mylo
       </span>
+
+      {/* Primary nav */}
+      <nav className="flex items-center gap-5">
+        <NavLink to="/documents" className={navLinkClass}>
+          Documents
+        </NavLink>
+        {canSeeTemplates && (
+          <NavLink to="/templates" className={navLinkClass}>
+            Templates
+          </NavLink>
+        )}
+      </nav>
 
       <div className="flex-1" />
 

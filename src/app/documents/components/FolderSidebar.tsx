@@ -3,9 +3,10 @@
  * @role Folder navigation panel
  * @owns Folder tree rendering, expand/collapse state, inline folder creation,
  *       inline folder renaming, folder context menu (rename, add subfolder, delete),
- *       trash access link, template navigation link (Template Editor + Admin).
+ *       trash access link, New Folder action.
  * @does-not-own Folder persistence (DocumentContext), document filtering
- *               (DocumentGrid handles filtering by folderId), routing decisions.
+ *               (DocumentGrid handles filtering by folderId), routing decisions,
+ *               template navigation (AppHeader handles /templates nav link).
  *
  * Inline creation: clicking "New Folder" inserts an editable input at root (or
  * inside a folder via its context menu). Enter = confirm, Escape/empty blur = cancel.
@@ -14,7 +15,6 @@
  * into an editable input in-place. Same confirm/cancel keyboard behaviour.
  *
  * @see DocumentContext.tsx — folders, createFolder, updateFolder, deleteFolder
- * @see RoleContext.tsx — used to show/hide Templates nav item
  */
 
 import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
@@ -28,13 +28,10 @@ import {
   Pencil,
   FolderPlus,
   Trash2,
-  LayoutTemplate,
   Trash,
 } from 'lucide-react';
-import { useNavigate } from 'react-router';
 import { useDocuments } from '../../contexts/DocumentContext';
 import { useSession } from '../../contexts/SessionContext';
-import { useRole } from '../../contexts/RoleContext';
 import type { Folder } from '../../types';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -344,8 +341,6 @@ function ConnectedFolderRow({ node, depth }: { node: FolderNode; depth: number }
 export function FolderSidebar({ selectedFolderId, onFolderSelect, onTrashOpen }: Props) {
   const { folders, createFolder, updateFolder, deleteFolder, trashedDocuments } = useDocuments();
   const { session } = useSession();
-  const { role } = useRole();
-  const navigate = useNavigate();
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [inlineCreate, setInlineCreate] = useState<InlineCreate>(null);
@@ -476,17 +471,6 @@ export function FolderSidebar({ selectedFolderId, onFolderSelect, onTrashOpen }:
 
       {/* Bottom actions */}
       <div className="p-2 border-t border-mylo-border-light space-y-0.5">
-
-        {/* Templates nav — Template Editor + Admin only */}
-        {(role === 'template-editor' || role === 'admin') && (
-          <button
-            onClick={() => navigate('/templates')}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-left text-mylo-text-secondary hover:bg-mylo-surface-subtle transition-colors"
-          >
-            <LayoutTemplate className="size-3.5 shrink-0 text-mylo-text-tertiary" />
-            Templates
-          </button>
-        )}
 
         {/* Trash */}
         <button
