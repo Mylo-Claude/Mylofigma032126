@@ -3,7 +3,9 @@ import type { Node as PMNode } from 'prosemirror-model';
 import { serializeToHTML } from '../../services/serializer';
 import { paginationService } from '../../services/pagination';
 import type { Template } from '../../mylo/template';
+import { resolveDocumentSettings } from '../../mylo/template';
 import { generateTemplateStylesheet } from '../../services/pageLayoutUtils';
+import { applyGovernanceRules } from '../../services/governanceEnforcement';
 
 /**
  * PaginatedDocumentRenderer - Paged.js Integration Component
@@ -75,10 +77,14 @@ export function PaginatedDocumentRenderer({
         
         // 2. Serialize to semantic HTML (no inline styles)
         const html = serializeToHTML(doc);
-        
+
+        // 2b. Apply governance rules before pagination
+        const settings = resolveDocumentSettings(template.documentSettings);
+        const governedHtml = applyGovernanceRules(html, settings);
+
         // 3. Paginate with stylesheet and template
         const result = await paginationService.paginate({
-          content: html,
+          content: governedHtml,
           stylesheet,
           template, // Pass template object for adapter
           onProgress: (currentPage) => {

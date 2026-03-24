@@ -28,6 +28,7 @@
 
 import { useEffect } from 'react';
 import { Outlet } from 'react-router';
+import { Toaster } from 'sonner';
 import { RoleProvider } from './contexts/RoleContext';
 import { SessionProvider } from './contexts/SessionContext';
 import { DocumentProvider } from './contexts/DocumentContext';
@@ -36,6 +37,7 @@ import { runPhase3ATests } from './services/__tests__/serializerPhase3A.test';
 import { runPhase4Tests } from './services/__tests__/phase4Validation.test';
 import { runPhase5Tests } from './services/__tests__/phase5Validation.test';
 import { runAllValidations } from './mylo/templates/__tests__/validateAdapter';
+import { runGovernanceEnforcementTests } from './services/__tests__/governanceEnforcement.test';
 
 /**
  * DevTestSuite — runs the original codebase validation tests on mount.
@@ -50,6 +52,7 @@ function DevTestSuite() {
       runPhase4Tests();
       runPhase5Tests();
       runAllValidations();
+      runGovernanceEnforcementTests();
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -64,6 +67,7 @@ export default function App() {
           <TemplateProvider>
             <DevTestSuite />
             <Outlet />
+            <Toaster position="bottom-right" />
           </TemplateProvider>
         </DocumentProvider>
       </SessionProvider>

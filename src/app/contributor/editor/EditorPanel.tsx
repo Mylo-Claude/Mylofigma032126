@@ -10,6 +10,10 @@ import { EditorToolbar } from "./EditorToolbar";
 import { myloKeymap } from "../../mylo/keymap";
 import { welcome } from "../../mylo/samples/welcome";
 import { sampleToEditorState } from "../../mylo/samples/converter";
+import { toast } from "sonner";
+import type { Template } from "../../mylo/template";
+import { resolveDocumentSettings } from "../../mylo/template";
+import { shouldNotify, markAsNotified } from "../../services/governanceNotifications";
 
 /**
  * EditorPanel - Contributor Editor Surface
@@ -42,9 +46,52 @@ interface EditorPanelProps {
    * Phase 4: hydrated from DocumentContext content (stored as doc.toJSON()).
    */
   initialDoc?: PMNode;
+  /** Active template — used for governance education notifications. */
+  template?: Template;
 }
 
-export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModifiedChange, initialDoc }: EditorPanelProps) {
+/**
+ * Detects consecutive empty paragraphs and shows a governance notification.
+ *
+ * Detection: cursor is in an empty paragraph AND the previous sibling
+ * is also an empty paragraph.
+ *
+ * @governance Contributor education — empty paragraph stripping
+ */
+function checkEmptyParagraphNotification(
+  state: EditorState,
+  template: Template | null
+): void {
+  if (!template) return
+
+  const settings = resolveDocumentSettings(template.documentSettings)
+  if (!shouldNotify('empty-paragraphs', settings.stripEmptyParagraphs)) return
+
+  const { $from } = state.selection
+  const node = $from.node()
+  const isCurrentEmpty = node.type.name === 'paragraph' && node.textContent.trim() === ''
+
+  if (!isCurrentEmpty) return
+
+  // Check previous sibling
+  const parentNode = $from.node($from.depth - 1)
+  const index = $from.index($from.depth - 1)
+
+  if (index > 0) {
+    const prevNode = parentNode.child(index - 1)
+    const isPrevEmpty = prevNode.type.name === 'paragraph' && prevNode.textContent.trim() === ''
+
+    if (isPrevEmpty) {
+      markAsNotified('empty-paragraphs')
+      toast("Extra blank lines don't affect the preview. Paragraph spacing is controlled by the template.", {
+        duration: 6000,
+        dismissible: true,
+      })
+    }
+  }
+}
+
+export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModifiedChange, initialDoc, template }: EditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const [, setUpdateCount] = useState(0);
@@ -55,11 +102,14 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
   const onModifiedChangeRef = useRef(onModifiedChange);
   // Capture initialDoc at mount — not reactive after mount
   const initialDocRef = useRef(initialDoc);
+  // Keep latest template accessible inside the dispatchTransaction closure
+  const templateRef = useRef<Template | undefined>(template);
 
   useEffect(() => {
     onDocumentChangeRef.current = onDocumentChange;
     onViewReadyRef.current = onViewReady;
     onModifiedChangeRef.current = onModifiedChange;
+    templateRef.current = template;
   });
 
   useEffect(() => {
@@ -92,11 +142,14 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
         // Notify parent of document changes
         if (transaction.docChanged) {
           onDocumentChangeRef.current(newState);
-          
+
           // Mark document as modified
           if (onModifiedChangeRef.current) {
             onModifiedChangeRef.current(true);
           }
+
+          // Governance notification: consecutive empty paragraphs
+          checkEmptyParagraphNotification(view.state, templateRef.current ?? null)
         }
       }
     });

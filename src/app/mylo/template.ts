@@ -86,6 +86,44 @@ export interface Template {
     underline: boolean;
     hoverColor?: string;
   };
+
+  /**
+   * Document-level governance rules.
+   * Controls which contributor formatting behaviors are stripped at render time.
+   * Defaults to stripEmptyParagraphs: true if not specified.
+   *
+   * @see Mylo Governance: Contributor formatting enforcement
+   */
+  documentSettings?: DocumentSettings
+}
+
+/**
+ * DocumentSettings — Template-level governance configuration.
+ *
+ * These settings define which contributor formatting workarounds
+ * are silently stripped during Preview rendering. They do not
+ * affect the Editor surface — contributors can still type freely.
+ *
+ * @governance Template Editor controlled — Contributors cannot override
+ */
+export interface DocumentSettings {
+  /**
+   * Remove consecutive empty paragraphs before rendering.
+   * Prevents contributors from using blank lines to control spacing.
+   * Paragraph spacing is defined by Space Before / Space After in the template.
+   * Default: true
+   */
+  stripEmptyParagraphs?: boolean
+}
+
+/**
+ * Returns resolved DocumentSettings with all defaults applied.
+ * Use this instead of reading documentSettings directly.
+ */
+export function resolveDocumentSettings(settings?: DocumentSettings): Required<DocumentSettings> {
+  return {
+    stripEmptyParagraphs: settings?.stripEmptyParagraphs ?? true,
+  }
 }
 
 /**

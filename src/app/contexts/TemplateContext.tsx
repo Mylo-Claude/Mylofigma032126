@@ -74,6 +74,7 @@ function loadOrSeed(): Template[] {
     ...t,
     status: 'published' as const,
     updatedAt: now,
+    documentSettings: { stripEmptyParagraphs: true },
   }));
   saveToStorage(seeded);
   return seeded;

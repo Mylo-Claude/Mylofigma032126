@@ -32,6 +32,7 @@ import { myloSchema } from '../mylo/schema';
 import { availableTemplates, defaultTemplate } from '../mylo/templates';
 import type { Template } from '../mylo/template';
 import { useDocuments } from '../contexts/DocumentContext';
+import { useTemplates } from '../contexts/TemplateContext';
 import { EditorPanel } from '../contributor/editor/EditorPanel';
 import { PreviewPanel } from '../contributor/preview/PreviewPanel';
 
@@ -86,6 +87,7 @@ export function EditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { documents, updateDocument } = useDocuments();
+  const { publishedTemplates } = useTemplates();
 
   // Look up the active document by route param
   const doc = documents.find((d) => d.id === id) ?? null;
@@ -111,8 +113,13 @@ export function EditorPage() {
 
   // Initial template — resolved once from templateId; PreviewPanel owns local state after that
   const initialTemplateRef = useRef<Template>(
-    availableTemplates.find((t) => t.id === doc?.templateId) ?? defaultTemplate
+    publishedTemplates.find((t) => t.id === doc?.templateId) ??
+    availableTemplates.find((t) => t.id === doc?.templateId) ??
+    defaultTemplate
   );
+
+  // Active template — tracks the currently selected template for EditorPanel governance
+  const [activeTemplate, setActiveTemplate] = useState<Template>(initialTemplateRef.current);
 
   // ---------------------------------------------------------------------------
   // Editor state — tracked to keep PreviewPanel in sync
@@ -154,6 +161,7 @@ export function EditorPage() {
 
   const handleTemplateChange = useCallback(
     (template: Template) => {
+      setActiveTemplate(template);
       if (!id) return;
       updateDocument(id, { templateId: template.id });
     },
@@ -234,6 +242,7 @@ export function EditorPage() {
           <EditorPanel
             onDocumentChange={handleDocumentChange}
             initialDoc={initialDocRef.current}
+            template={activeTemplate}
           />
         </div>
 
