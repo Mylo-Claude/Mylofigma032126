@@ -20,25 +20,24 @@ const INACTIVE_SETTINGS = { stripEmptyParagraphs: false } as const;
 export function runGovernanceEnforcementTests(): void {
   console.log('[GovernanceEnforcement] Running governance enforcement tests...');
 
-  // Test 1: Single empty paragraph between content blocks is preserved
+  // Test 1: Single empty paragraph between content blocks is stripped
   {
     const html = '<p>Hello</p><p></p><p>World</p>';
     const result = applyGovernanceRules(html, ACTIVE_SETTINGS);
     const container = document.createElement('div');
     container.innerHTML = result;
     const paragraphs = container.querySelectorAll('p');
-    assert(paragraphs.length === 3, 'Single empty paragraph between content blocks is preserved');
+    assert(paragraphs.length === 2, 'Single empty paragraph between content blocks is stripped');
   }
 
-  // Test 2: Two consecutive empty paragraphs are reduced to one
+  // Test 2: Two consecutive empty paragraphs are stripped
   {
     const html = '<p>Hello</p><p></p><p></p><p>World</p>';
     const result = applyGovernanceRules(html, ACTIVE_SETTINGS);
     const container = document.createElement('div');
     container.innerHTML = result;
     const paragraphs = container.querySelectorAll('p');
-    // Should have: Hello, one empty, World = 3
-    assert(paragraphs.length === 3, 'Two consecutive empty paragraphs are reduced to one');
+    assert(paragraphs.length === 2, 'Two consecutive empty paragraphs are stripped');
   }
 
   // Test 3: Five consecutive empty paragraphs are stripped
@@ -48,8 +47,7 @@ export function runGovernanceEnforcementTests(): void {
     const container = document.createElement('div');
     container.innerHTML = result;
     const paragraphs = container.querySelectorAll('p');
-    // Should have: Hello, one empty, World = 3
-    assert(paragraphs.length === 3, 'Five consecutive empty paragraphs are reduced to one');
+    assert(paragraphs.length === 2, 'Five consecutive empty paragraphs are stripped');
   }
 
   // Test 4: Content with no empty paragraphs is unchanged
@@ -62,25 +60,24 @@ export function runGovernanceEnforcementTests(): void {
     assert(paragraphs.length === 2, 'Content with no empty paragraphs is unchanged');
   }
 
-  // Test 5: Empty paragraph at very start followed by another empty is handled
+  // Test 5: Empty paragraphs at start are stripped
   {
     const html = '<p></p><p></p><p>World</p>';
     const result = applyGovernanceRules(html, ACTIVE_SETTINGS);
     const container = document.createElement('div');
     container.innerHTML = result;
     const paragraphs = container.querySelectorAll('p');
-    // Should have: one empty, World = 2
-    assert(paragraphs.length === 2, 'Empty paragraphs at start: consecutive run reduced to one');
+    assert(paragraphs.length === 1, 'Empty paragraphs at start are stripped');
   }
 
-  // Test 6: Rule inactive — content unchanged even with consecutive empty paragraphs
+  // Test 6: Rule inactive — content unchanged even with empty paragraphs
   {
     const html = '<p>Hello</p><p></p><p></p><p>World</p>';
     const result = applyGovernanceRules(html, INACTIVE_SETTINGS);
     const container = document.createElement('div');
     container.innerHTML = result;
     const paragraphs = container.querySelectorAll('p');
-    assert(paragraphs.length === 4, 'With rule inactive, consecutive empty paragraphs are preserved');
+    assert(paragraphs.length === 4, 'With rule inactive, empty paragraphs are preserved');
   }
 
   console.log('[GovernanceEnforcement] Tests complete.');

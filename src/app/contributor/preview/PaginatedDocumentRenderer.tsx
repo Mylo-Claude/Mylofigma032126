@@ -36,15 +36,18 @@ export interface PaginatedDocumentRendererProps {
   onPageMeasured: (width: number, height: number) => void;
   scale: number;
   shouldCenter: boolean;
+  /** Incrementing counter that forces re-pagination without a doc change. */
+  forceUpdateKey?: number;
 }
 
-export function PaginatedDocumentRenderer({ 
-  doc, 
-  template, 
-  onPagedJsComplete, 
-  onPageMeasured, 
-  scale, 
-  shouldCenter 
+export function PaginatedDocumentRenderer({
+  doc,
+  template,
+  onPagedJsComplete,
+  onPageMeasured,
+  scale,
+  shouldCenter,
+  forceUpdateKey,
 }: PaginatedDocumentRendererProps) {
   const [pagedResult, setPagedResult] = useState<{ pageCount: number; pagesContainer: HTMLElement } | null>(null);
 
@@ -101,7 +104,7 @@ export function PaginatedDocumentRenderer({
     }, 300);
     
     return () => clearTimeout(timer);
-  }, [doc, template, onPagedJsComplete]);
+  }, [doc, template, onPagedJsComplete, forceUpdateKey]);
 
   /**
    * PAGE MEASUREMENT: Measure actual rendered page dimensions after Paged.js completes

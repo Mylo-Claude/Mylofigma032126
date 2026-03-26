@@ -21,40 +21,30 @@
 import type { DocumentSettings } from '../mylo/template';
 
 /**
- * Strip consecutive empty paragraphs from serialized HTML.
+ * Strip ALL empty paragraphs from serialized HTML.
  *
- * Rule: Two or more consecutive <p> elements containing only whitespace
- * or zero-width space characters are reduced to zero.
- * A single empty paragraph between content blocks is preserved.
+ * Rule: Any <p> element containing only whitespace or zero-width space
+ * characters is removed — regardless of position or count.
  *
- * Rationale: Contributors use repeated empty lines to fake spacing.
- * Paragraph spacing is the template's responsibility via Space Before/After.
+ * Rationale: The template controls ALL document spacing via Space Before and
+ * Space After on paragraph styles. An empty paragraph — even a single one —
+ * is a spacing workaround that bypasses template governance. Zero empty
+ * paragraphs should ever pass through to the rendered output.
  */
-function stripConsecutiveEmptyParagraphs(html: string): string {
+function stripAllEmptyParagraphs(html: string): string {
   const container = document.createElement('div');
   container.innerHTML = html;
 
-  const children = Array.from(container.childNodes);
-  let consecutiveEmptyCount = 0;
   const toRemove: Node[] = [];
 
-  for (const node of children) {
-    if (
+  for (const node of Array.from(container.childNodes)) {
+    const isEmptyP =
       node.nodeType === Node.ELEMENT_NODE &&
-      (node as Element).tagName === 'P'
-    ) {
-      const text = (node as Element).textContent ?? '';
-      const isEmpty = text.trim() === '' || text === '\u200B';
-      if (isEmpty) {
-        consecutiveEmptyCount++;
-        if (consecutiveEmptyCount > 1) {
-          toRemove.push(node);
-        }
-      } else {
-        consecutiveEmptyCount = 0;
-      }
-    } else {
-      consecutiveEmptyCount = 0;
+      (node as Element).tagName === 'P' &&
+      ((node as Element).textContent?.trim() === '' || (node as Element).textContent === '\u200B');
+
+    if (isEmptyP) {
+      toRemove.push(node);
     }
   }
 
@@ -78,7 +68,7 @@ export function applyGovernanceRules(
 ): string {
   let governed = html;
   if (settings.stripEmptyParagraphs) {
-    governed = stripConsecutiveEmptyParagraphs(governed);
+    governed = stripAllEmptyParagraphs(governed);
   }
   // Future rules added here in order
   return governed;

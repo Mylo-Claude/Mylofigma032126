@@ -32,9 +32,12 @@ import { myloSchema } from '../mylo/schema';
 import { availableTemplates, defaultTemplate } from '../mylo/templates';
 import type { Template } from '../mylo/template';
 import { useDocuments } from '../contexts/DocumentContext';
+import { markAsNotified } from '../services/governanceNotifications';
 import { useTemplates } from '../contexts/TemplateContext';
 import { EditorPanel } from '../contributor/editor/EditorPanel';
 import { PreviewPanel } from '../contributor/preview/PreviewPanel';
+
+const GOVERNANCE_BANNER_MESSAGE = 'Extra blank lines are ignored in Preview. Spacing comes from the template.';
 
 // ---------------------------------------------------------------------------
 // Save status indicator
@@ -126,6 +129,39 @@ export function EditorPage() {
   // ---------------------------------------------------------------------------
 
   const [editorState, setEditorState] = useState<EditorState | null>(null);
+
+  // ---------------------------------------------------------------------------
+  // Governance banner — shown in PreviewPanel when a governance rule triggers
+  // ---------------------------------------------------------------------------
+
+  const [showGovernanceBanner, setShowGovernanceBanner] = useState(false);
+
+  // Incremented when any empty paragraph appears or the cursor moves while one
+  // exists — forces PaginatedDocumentRenderer to re-paginate so governance
+  // stripping applies even without a doc reference change.
+  const [forcePreviewUpdate, setForcePreviewUpdate] = useState(0);
+
+  const handleEmptyParagraphDetected = useCallback(() => {
+    setForcePreviewUpdate((n) => n + 1);
+  }, []);
+
+  const handleGovernanceTrigger = useCallback(() => {
+    setShowGovernanceBanner(true);
+  }, []);
+
+  // × alone: session dismiss — write to sessionStorage so banner stays hidden for this session
+  const handleGovernanceBannerDismiss = useCallback(() => {
+    markAsNotified('empty_paragraphs', false);
+    setShowGovernanceBanner(false);
+  }, []);
+
+  // × with checkbox: permanent dismiss — write to localStorage so banner never appears again
+  const handleGovernanceBannerDismissPermanently = useCallback(() => {
+    markAsNotified('empty_paragraphs', true);
+    setShowGovernanceBanner(false);
+  }, []);
+
+  const governanceBannerMessage = GOVERNANCE_BANNER_MESSAGE;
 
   // ---------------------------------------------------------------------------
   // Auto-save — 1s debounce, saves doc JSON to DocumentContext
@@ -243,6 +279,8 @@ export function EditorPage() {
             onDocumentChange={handleDocumentChange}
             initialDoc={initialDocRef.current}
             template={activeTemplate}
+            onGovernanceTrigger={handleGovernanceTrigger}
+            onEmptyParagraphDetected={handleEmptyParagraphDetected}
           />
         </div>
 
@@ -252,6 +290,11 @@ export function EditorPage() {
             editorState={editorState}
             template={initialTemplateRef.current}
             onTemplateChange={handleTemplateChange}
+            showGovernanceBanner={showGovernanceBanner}
+            governanceBannerMessage={governanceBannerMessage}
+            onGovernanceBannerDismiss={handleGovernanceBannerDismiss}
+            onGovernanceBannerDismissPermanently={handleGovernanceBannerDismissPermanently}
+            forceUpdateKey={forcePreviewUpdate}
           />
         </div>
       </div>

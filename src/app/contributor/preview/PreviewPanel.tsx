@@ -4,6 +4,7 @@ import type { Template } from "../../mylo/template";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PreviewToolbar } from "./PreviewToolbar";
 import { PaginatedDocumentRenderer } from "./PaginatedDocumentRenderer";
+import { GovernanceBanner } from "./GovernanceBanner";
 import { usePreviewZoom } from "./hooks/usePreviewZoom";
 import { usePageTracking } from "./hooks/usePageTracking";
 import type { ZoomMode } from "./types";
@@ -38,9 +39,31 @@ interface PreviewPanelProps {
    * Phase 4: EditorPage uses this to persist the new templateId to DocumentContext.
    */
   onTemplateChange?: (template: Template) => void;
+  /** When true, show the inline governance banner below the preview toolbar. */
+  showGovernanceBanner?: boolean;
+  /** Message to display in the governance banner. */
+  governanceBannerMessage?: string;
+  /** Called when × is clicked without the checkbox — session dismiss only. */
+  onGovernanceBannerDismiss?: () => void;
+  /** Called when × is clicked with "Don't show this again" checked — permanent dismiss. */
+  onGovernanceBannerDismissPermanently?: () => void;
+  /**
+   * Incremented by EditorPage whenever consecutive empty paragraphs are detected.
+   * Forces re-pagination even when the doc reference hasn't changed (e.g. cursor move).
+   */
+  forceUpdateKey?: number;
 }
 
-export function PreviewPanel({ editorState, template: externalTemplate, onTemplateChange }: PreviewPanelProps) {
+export function PreviewPanel({
+  editorState,
+  template: externalTemplate,
+  onTemplateChange,
+  showGovernanceBanner,
+  governanceBannerMessage,
+  onGovernanceBannerDismiss,
+  onGovernanceBannerDismissPermanently,
+  forceUpdateKey,
+}: PreviewPanelProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template>(externalTemplate || defaultTemplate);
   const [pagedJsPageCount, setPagedJsPageCount] = useState<number>(0);
@@ -114,6 +137,14 @@ export function PreviewPanel({ editorState, template: externalTemplate, onTempla
         </p>
       </div>
 
+      {showGovernanceBanner && governanceBannerMessage && onGovernanceBannerDismiss && onGovernanceBannerDismissPermanently && (
+        <GovernanceBanner
+          message={governanceBannerMessage}
+          onDismiss={onGovernanceBannerDismiss}
+          onDismissPermanently={onGovernanceBannerDismissPermanently}
+        />
+      )}
+
       <div
         ref={scrollContainerRef}
         className={`flex-1 overflow-auto p-8 ${shouldShowHorizontalScrollbar ? 'preview-scroll pb-3' : 'hide-scrollbar'}`}
@@ -125,6 +156,7 @@ export function PreviewPanel({ editorState, template: externalTemplate, onTempla
           onPageMeasured={handlePageMeasured}
           scale={scale}
           shouldCenter={shouldCenterContent}
+          forceUpdateKey={forceUpdateKey}
         />
       </div>
     </div>

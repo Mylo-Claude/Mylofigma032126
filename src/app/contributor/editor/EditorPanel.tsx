@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { EditorState, Transaction } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { Node as PMNode } from "prosemirror-model";
@@ -10,10 +10,9 @@ import { EditorToolbar } from "./EditorToolbar";
 import { myloKeymap } from "../../mylo/keymap";
 import { welcome } from "../../mylo/samples/welcome";
 import { sampleToEditorState } from "../../mylo/samples/converter";
-import { toast } from "sonner";
 import type { Template } from "../../mylo/template";
 import { resolveDocumentSettings } from "../../mylo/template";
-import { shouldNotify, markAsNotified } from "../../services/governanceNotifications";
+import { shouldNotify } from "../../services/governanceNotifications";
 
 /**
  * EditorPanel - Contributor Editor Surface
@@ -48,50 +47,74 @@ interface EditorPanelProps {
   initialDoc?: PMNode;
   /** Active template — used for governance education notifications. */
   template?: Template;
+  /**
+   * Called once per page load when a governance rule triggers a notification.
+   * EditorPage uses this to show the inline GovernanceBanner in PreviewPanel.
+   */
+  onGovernanceTrigger?: () => void;
+  /**
+   * Called when empty paragraph presence changes from absent to present.
+   * EditorPage uses this to force the preview to re-paginate even without
+   * a doc change (e.g. cursor move while empty paragraphs exist).
+   */
+  onEmptyParagraphDetected?: () => void;
 }
 
 /**
- * Detects consecutive empty paragraphs and shows a governance notification.
+ * Returns true if the document contains ANY empty paragraph at the top level.
+ * Runs on every transaction (including selection-only) so the preview
+ * re-renders even when the cursor moves without changing content.
  *
- * Detection: cursor is in an empty paragraph AND the previous sibling
- * is also an empty paragraph.
+ * A single empty paragraph is enough to trigger a preview re-render because
+ * the governance rule strips ALL empty paragraphs — the template controls
+ * all spacing via Space Before/After on paragraph styles.
+ */
+function checkForEmptyParagraph(state: EditorState): boolean {
+  let found = false
+  state.doc.forEach((node) => {
+    if (found) return
+    if (node.type.name === 'paragraph' && node.textContent.trim() === '') {
+      found = true
+    }
+  })
+  return found
+}
+
+/**
+ * Detects any empty paragraph and triggers a governance notification.
+ *
+ * Detection: cursor is in an empty paragraph. A single empty paragraph is
+ * enough to warrant the notification because ALL empty paragraphs are stripped
+ * from the preview — the template controls all spacing.
+ *
+ * Uses persistent: true so that permanently-dismissed notifications are
+ * never re-triggered (checked against localStorage).
  *
  * @governance Contributor education — empty paragraph stripping
  */
 function checkEmptyParagraphNotification(
   state: EditorState,
-  template: Template | null
+  template: Template | null,
+  triggeredRef: React.MutableRefObject<boolean>,
+  onGovernanceTrigger?: () => void,
 ): void {
-  if (!template) return
+  if (!template || triggeredRef.current) return
 
   const settings = resolveDocumentSettings(template.documentSettings)
-  if (!shouldNotify('empty-paragraphs', settings.stripEmptyParagraphs)) return
+  if (!settings.stripEmptyParagraphs) return
+  if (!shouldNotify('empty_paragraphs')) return
 
   const { $from } = state.selection
   const node = $from.node()
   const isCurrentEmpty = node.type.name === 'paragraph' && node.textContent.trim() === ''
 
-  if (!isCurrentEmpty) return
-
-  // Check previous sibling
-  const parentNode = $from.node($from.depth - 1)
-  const index = $from.index($from.depth - 1)
-
-  if (index > 0) {
-    const prevNode = parentNode.child(index - 1)
-    const isPrevEmpty = prevNode.type.name === 'paragraph' && prevNode.textContent.trim() === ''
-
-    if (isPrevEmpty) {
-      markAsNotified('empty-paragraphs')
-      toast("Extra blank lines don't affect the preview. Paragraph spacing is controlled by the template.", {
-        duration: 6000,
-        dismissible: true,
-      })
-    }
+  if (isCurrentEmpty) {
+    triggeredRef.current = true
+    onGovernanceTrigger?.()
   }
 }
 
-export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModifiedChange, initialDoc, template }: EditorPanelProps) {
+export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModifiedChange, initialDoc, template, onGovernanceTrigger, onEmptyParagraphDetected }: EditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const [, setUpdateCount] = useState(0);
@@ -104,12 +127,22 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
   const initialDocRef = useRef(initialDoc);
   // Keep latest template accessible inside the dispatchTransaction closure
   const templateRef = useRef<Template | undefined>(template);
+  // Keep latest governance trigger callback accessible inside closure
+  const onGovernanceTriggerRef = useRef(onGovernanceTrigger);
+  // Keep latest empty-paragraph callback accessible inside closure
+  const onEmptyParagraphDetectedRef = useRef(onEmptyParagraphDetected);
+  // Prevent re-triggering the governance banner within the same page load
+  const governanceTriggeredRef = useRef(false);
+  // Track previous empty-paragraph presence to avoid firing on every keystroke
+  const hadEmptyParagraphRef = useRef(false);
 
   useEffect(() => {
     onDocumentChangeRef.current = onDocumentChange;
     onViewReadyRef.current = onViewReady;
     onModifiedChangeRef.current = onModifiedChange;
     templateRef.current = template;
+    onGovernanceTriggerRef.current = onGovernanceTrigger;
+    onEmptyParagraphDetectedRef.current = onEmptyParagraphDetected;
   });
 
   useEffect(() => {
@@ -135,10 +168,21 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
       dispatchTransaction(transaction: Transaction) {
         const newState = view.state.apply(transaction);
         view.updateState(newState);
-        
+
         // Force toolbar re-render on selection or document changes
         setUpdateCount(c => c + 1);
-        
+
+        // Fire onEmptyParagraphDetected when:
+        //   (a) empty paragraph newly appears (false → true), or
+        //   (b) cursor moves while empty paragraphs already exist (selection-only)
+        // Does NOT fire on every doc change while an unrelated empty para exists
+        // elsewhere — that would re-paginate on every keystroke needlessly.
+        const hasEmptyParagraph = checkForEmptyParagraph(newState);
+        if (hasEmptyParagraph && (!hadEmptyParagraphRef.current || !transaction.docChanged)) {
+          onEmptyParagraphDetectedRef.current?.();
+        }
+        hadEmptyParagraphRef.current = hasEmptyParagraph;
+
         // Notify parent of document changes
         if (transaction.docChanged) {
           onDocumentChangeRef.current(newState);
@@ -149,13 +193,13 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
           }
 
           // Governance notification: consecutive empty paragraphs
-          checkEmptyParagraphNotification(view.state, templateRef.current ?? null)
+          checkEmptyParagraphNotification(newState, templateRef.current ?? null, governanceTriggeredRef, onGovernanceTriggerRef.current)
         }
       }
     });
 
     viewRef.current = view;
-    
+
     // Notify parent that view is ready
     if (onViewReadyRef.current) {
       onViewReadyRef.current(view);
