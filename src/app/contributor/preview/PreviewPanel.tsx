@@ -48,10 +48,10 @@ interface PreviewPanelProps {
   /** Called when × is clicked with "Don't show this again" checked — permanent dismiss. */
   onGovernanceBannerDismissPermanently?: () => void;
   /**
-   * Incremented by EditorPage whenever consecutive empty paragraphs are detected.
+   * Incremented by EditorPage whenever empty paragraphs are detected.
    * Forces re-pagination even when the doc reference hasn't changed (e.g. cursor move).
    */
-  forceUpdateKey?: number;
+  governanceTick?: number;
 }
 
 export function PreviewPanel({
@@ -62,7 +62,7 @@ export function PreviewPanel({
   governanceBannerMessage,
   onGovernanceBannerDismiss,
   onGovernanceBannerDismissPermanently,
-  forceUpdateKey,
+  governanceTick,
 }: PreviewPanelProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template>(externalTemplate || defaultTemplate);
@@ -137,11 +137,11 @@ export function PreviewPanel({
         </p>
       </div>
 
-      {showGovernanceBanner && governanceBannerMessage && onGovernanceBannerDismiss && onGovernanceBannerDismissPermanently && (
+      {showGovernanceBanner && (
         <GovernanceBanner
-          message={governanceBannerMessage}
-          onDismiss={onGovernanceBannerDismiss}
-          onDismissPermanently={onGovernanceBannerDismissPermanently}
+          message={governanceBannerMessage!}
+          onDismiss={onGovernanceBannerDismiss!}
+          onDismissPermanently={onGovernanceBannerDismissPermanently!}
         />
       )}
 
@@ -156,7 +156,7 @@ export function PreviewPanel({
           onPageMeasured={handlePageMeasured}
           scale={scale}
           shouldCenter={shouldCenterContent}
-          forceUpdateKey={forceUpdateKey}
+          governanceTick={governanceTick}
         />
       </div>
     </div>

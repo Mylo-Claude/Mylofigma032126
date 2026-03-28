@@ -38,11 +38,9 @@ import { EditorView } from "prosemirror-view";
 
 interface LoadSampleMenuProps {
   view?: EditorView | null;
-  isModified?: boolean;
-  onModifiedChange?: (isModified: boolean) => void;
 }
 
-export function LoadSampleMenu({ view, isModified = false, onModifiedChange }: LoadSampleMenuProps) {
+export function LoadSampleMenu({ view }: LoadSampleMenuProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingSampleId, setPendingSampleId] = useState<string | null>(null);
 
@@ -68,22 +66,11 @@ export function LoadSampleMenu({ view, isModified = false, onModifiedChange }: L
 
     // Dispatch the transaction (this triggers dispatchTransaction callback)
     view.dispatch(tr);
-
-    // Reset modification tracking
-    if (onModifiedChange) {
-      onModifiedChange(false);
-    }
   };
 
   const handleSampleClick = (sampleId: string) => {
-    // If document is modified, show confirmation dialog
-    if (isModified) {
-      setPendingSampleId(sampleId);
-      setShowConfirmDialog(true);
-    } else {
-      // Load immediately if not modified
-      loadSample(sampleId);
-    }
+    setPendingSampleId(sampleId);
+    setShowConfirmDialog(true);
   };
 
   const handleConfirm = () => {

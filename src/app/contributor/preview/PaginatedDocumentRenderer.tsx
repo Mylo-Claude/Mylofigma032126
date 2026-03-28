@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Node as PMNode } from 'prosemirror-model';
 import { serializeToHTML } from '../../services/serializer';
 import { paginationService } from '../../services/pagination';
@@ -9,20 +9,20 @@ import { applyGovernanceRules } from '../../services/governanceEnforcement';
 
 /**
  * PaginatedDocumentRenderer - Paged.js Integration Component
- * 
+ *
  * Governance: Authoritative pagination using template-governed styles
- * 
+ *
  * Architecture:
  * - Converts ProseMirror doc → Semantic HTML
  * - Generates complete CSS stylesheet from template
  * - Delegates to PaginationService for Paged.js rendering
  * - Measures actual page dimensions for scale calculation
- * 
+ *
  * Rendering Path (NEW CSS Generation):
  * - Template → CSS generation (contentStyles + pageStyles)
  * - Document → Semantic HTML serialization (no inline styles)
  * - Paged.js applies CSS to HTML for pagination
- * 
+ *
  * Backward Compatibility:
  * - V1 templates (styles + pageLayout) are automatically adapted
  * - V2 templates (contentStyles + pageStyles) are used directly
@@ -36,8 +36,12 @@ export interface PaginatedDocumentRendererProps {
   onPageMeasured: (width: number, height: number) => void;
   scale: number;
   shouldCenter: boolean;
-  /** Incrementing counter that forces re-pagination without a doc change. */
-  forceUpdateKey?: number;
+  /**
+   * Incremented by EditorPage whenever empty paragraphs are detected.
+   * Forces re-pagination when the doc reference hasn't changed
+   * (e.g. cursor move while empty paragraphs exist in the document).
+   */
+  governanceTick?: number;
 }
 
 export function PaginatedDocumentRenderer({
@@ -47,37 +51,32 @@ export function PaginatedDocumentRenderer({
   onPageMeasured,
   scale,
   shouldCenter,
-  forceUpdateKey,
+  governanceTick,
 }: PaginatedDocumentRendererProps) {
   const [pagedResult, setPagedResult] = useState<{ pageCount: number; pagesContainer: HTMLElement } | null>(null);
+  const pagesContainerRef = useRef<HTMLDivElement>(null);
 
   /**
    * PAGINATION EFFECT
-   * 
-   * Triggers on doc or template changes
+   *
+   * Triggers on doc, template, or governanceTick changes.
    * - Generates CSS from template (handles both V1 and V2 formats)
    * - Serializes document to semantic HTML
-   * - Passes both to Paged.js for pagination
+   * - Applies governance rules (strips empty paragraphs, etc.)
+   * - Passes governed HTML + CSS to Paged.js for pagination
    * - Updates result state when complete
    */
   useEffect(() => {
-    console.log('[Paged.js Effect] Starting debounced pagination...');
-    
     const timer = setTimeout(async () => {
       try {
-        console.log('[Renderer] Generating CSS for template:', template.id);
-        
         // 1. Generate complete stylesheet (adapts V1 automatically)
         const stylesheet = generateTemplateStylesheet(template);
-        
-        // Log generated CSS for debugging
-        console.log('[CSS Generated]:\n', stylesheet);
-        
+
         // Validate CSS doesn't contain invalid objects
         if (stylesheet.includes('[object Object]')) {
           console.error('[CSS Generation] ❌ INVALID: Contains [object Object]');
         }
-        
+
         // 2. Serialize to semantic HTML (no inline styles)
         const html = serializeToHTML(doc);
 
@@ -89,76 +88,74 @@ export function PaginatedDocumentRenderer({
         const result = await paginationService.paginate({
           content: governedHtml,
           stylesheet,
-          template, // Pass template object for adapter
-          onProgress: (currentPage) => {
-            console.log('[Pagination] Progress:', currentPage);
-          },
+          template,
         });
-        
+
         setPagedResult({ pageCount: result.pageCount, pagesContainer: result.pagesContainer });
         onPagedJsComplete(result.pageCount);
-        
+
       } catch (error) {
         console.error('[Pagination] Error:', error);
       }
     }, 300);
-    
+
     return () => clearTimeout(timer);
-  }, [doc, template, onPagedJsComplete, forceUpdateKey]);
+  }, [doc, template, onPagedJsComplete, governanceTick]);
 
   /**
-   * PAGE MEASUREMENT: Measure actual rendered page dimensions after Paged.js completes
-   * 
-   * Strategy:
-   * - Runs when pagedResult changes (after pagination completes)
-   * - Queries first .pagedjs_page element from rendered output
-   * - Measures offsetWidth and offsetHeight (actual rendered dimensions)
-   * - Does NOT re-measure on window resize (only on pagination change)
-   * 
-   * Purpose:
-   * - Replace assumed 816px width with actual measurement
-   * - Account for browser rendering variations, borders, box-sizing
-   * - Provide real dimensions for scale calculation
+   * PAGE MEASUREMENT: Measure actual rendered page dimensions after Paged.js completes.
+   *
+   * Queries the first .pagedjs_page element for real offsetWidth/offsetHeight.
+   * These measured dimensions drive the zoom scale calculation in usePreviewZoom.
    */
   useEffect(() => {
     if (!pagedResult?.pagesContainer) return;
 
-    // Query the first rendered page
     const firstPage = pagedResult.pagesContainer.querySelector('.pagedjs_page') as HTMLElement;
-    
-    if (firstPage) {
-      const measuredPageWidth = firstPage.offsetWidth;
-      const measuredPageHeight = firstPage.offsetHeight;
-      
-      console.log('[Page Measurement]', {
-        measuredPageWidth,
-        measuredPageHeight,
-        note: 'Actual rendered dimensions from Paged.js output'
-      });
 
-      // Pass measured dimensions to parent for scale calculation
-      onPageMeasured(measuredPageWidth, measuredPageHeight);
-    } else {
-      console.warn('[Page Measurement] No .pagedjs_page elements found');
+    if (firstPage) {
+      onPageMeasured(firstPage.offsetWidth, firstPage.offsetHeight);
     }
   }, [pagedResult, onPageMeasured]);
+
+  /**
+   * DOM INJECTION: Insert Paged.js output into the container when pagedResult changes.
+   *
+   * Strategy:
+   * - Clone pagesContainer from Paged.js result to avoid mutations
+   * - Apply 64px marginBottom to each .pagedjs_page for visual separation
+   * - Clear container before appending to prevent duplicate content on re-pagination
+   */
+  useEffect(() => {
+    const container = pagesContainerRef.current;
+    if (!container || !pagedResult?.pagesContainer) return;
+
+    container.innerHTML = '';
+    const pagedClone = pagedResult.pagesContainer.cloneNode(true) as HTMLElement;
+
+    pagedClone.querySelectorAll('.pagedjs_page').forEach((page) => {
+      (page as HTMLElement).style.marginBottom = '64px';
+    });
+
+    container.appendChild(pagedClone);
+  }, [pagedResult]);
 
   return (
     <>
       {pagedResult && (
         <div className={`flex flex-col ${shouldCenter ? 'items-center' : 'items-start'} gap-8`}>
-          {/* 
+          {/*
             ZOOM IMPLEMENTATION: Two-layer approach
-            
+
             Outer container: Inverse scale width to compensate for CSS transform
             - Without this, scaled content would overflow/underflow container
             - width: 100/scale% ensures proper layout flow
-            
+
             Inner container: CSS transform scale for actual zoom
             - transform: scale(scale) applies the zoom effect
             - transformOrigin: top center keeps pages aligned at top
           */}
-          <div 
+          <div
             style={{
               width: `${100 / scale}%`,
               display: 'flex',
@@ -166,40 +163,14 @@ export function PaginatedDocumentRenderer({
               alignItems: shouldCenter ? 'center' : 'flex-start',
             }}
           >
-            <div 
+            <div
               style={{
                 transform: `scale(${scale})`,
                 transformOrigin: shouldCenter ? 'top center' : 'top left',
               }}
             >
-              {/* 
-                PAGED.JS CONTAINER INJECTION
-                
-                Strategy:
-                - Clone pagesContainer from Paged.js result to avoid mutations
-                - Apply 64px marginBottom to each .pagedjs_page for visual separation
-                - Use ref callback to re-inject on result changes (handles re-pagination)
-                - innerHTML clearing prevents duplicate content on updates
-                
-                Note: Paged.js generates complete page structure with @page rules applied.
-                We inject it into DOM rather than rendering React components for pages.
-              */}
-              <div 
-                ref={(node) => {
-                  if (node && pagedResult.pagesContainer) {
-                    node.innerHTML = '';
-                    const pagedClone = pagedResult.pagesContainer.cloneNode(true) as HTMLElement;
-                    
-                    // Apply gap between pages
-                    const pagedPages = pagedClone.querySelectorAll('.pagedjs_page');
-                    pagedPages.forEach((page) => {
-                      const pageEl = page as HTMLElement;
-                      pageEl.style.marginBottom = '64px';
-                    });
-                    
-                    node.appendChild(pagedClone);
-                  }
-                }}
+              <div
+                ref={pagesContainerRef}
                 className="flex flex-col items-center"
               />
             </div>

@@ -139,10 +139,10 @@ export function EditorPage() {
   // Incremented when any empty paragraph appears or the cursor moves while one
   // exists — forces PaginatedDocumentRenderer to re-paginate so governance
   // stripping applies even without a doc reference change.
-  const [forcePreviewUpdate, setForcePreviewUpdate] = useState(0);
+  const [governanceTick, setGovernanceTick] = useState(0);
 
   const handleEmptyParagraphDetected = useCallback(() => {
-    setForcePreviewUpdate((n) => n + 1);
+    setGovernanceTick((n) => n + 1);
   }, []);
 
   const handleGovernanceTrigger = useCallback(() => {
@@ -288,13 +288,13 @@ export function EditorPage() {
         <div className="flex-1 overflow-hidden">
           <PreviewPanel
             editorState={editorState}
-            template={initialTemplateRef.current}
+            template={activeTemplate}
             onTemplateChange={handleTemplateChange}
             showGovernanceBanner={showGovernanceBanner}
             governanceBannerMessage={governanceBannerMessage}
             onGovernanceBannerDismiss={handleGovernanceBannerDismiss}
             onGovernanceBannerDismissPermanently={handleGovernanceBannerDismissPermanently}
-            forceUpdateKey={forcePreviewUpdate}
+            governanceTick={governanceTick}
           />
         </div>
       </div>

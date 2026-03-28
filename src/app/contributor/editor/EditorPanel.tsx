@@ -36,8 +36,6 @@ import { shouldNotify } from "../../services/governanceNotifications";
 interface EditorPanelProps {
   onDocumentChange: (state: EditorState) => void;
   onViewReady?: (view: EditorView) => void;
-  isModified?: boolean;
-  onModifiedChange?: (isModified: boolean) => void;
   /**
    * Optional initial ProseMirror node to populate the editor.
    * When provided, replaces the default welcome sample.
@@ -68,16 +66,21 @@ interface EditorPanelProps {
  * A single empty paragraph is enough to trigger a preview re-render because
  * the governance rule strips ALL empty paragraphs — the template controls
  * all spacing via Space Before/After on paragraph styles.
+ *
+ * Empty detection matches governanceEnforcement.ts: both trim() === '' and
+ * the serializer's zero-width-space form (\u200B) are treated as empty.
  */
 function checkForEmptyParagraph(state: EditorState): boolean {
-  let found = false
+  const paragraphType = state.schema.nodes.paragraph;
+  let found = false;
   state.doc.forEach((node) => {
-    if (found) return
-    if (node.type.name === 'paragraph' && node.textContent.trim() === '') {
-      found = true
+    if (found) return;
+    const isEmpty = node.textContent.trim() === '' || node.textContent === '\u200B';
+    if (node.type === paragraphType && isEmpty) {
+      found = true;
     }
-  })
-  return found
+  });
+  return found;
 }
 
 /**
@@ -106,7 +109,8 @@ function checkEmptyParagraphNotification(
 
   const { $from } = state.selection
   const node = $from.node()
-  const isCurrentEmpty = node.type.name === 'paragraph' && node.textContent.trim() === ''
+  const paragraphType = state.schema.nodes.paragraph;
+  const isCurrentEmpty = node.type === paragraphType && node.textContent.trim() === ''
 
   if (isCurrentEmpty) {
     triggeredRef.current = true
@@ -114,7 +118,7 @@ function checkEmptyParagraphNotification(
   }
 }
 
-export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModifiedChange, initialDoc, template, onGovernanceTrigger, onEmptyParagraphDetected }: EditorPanelProps) {
+export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, template, onGovernanceTrigger, onEmptyParagraphDetected }: EditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const [, setUpdateCount] = useState(0);
@@ -122,7 +126,6 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
   // Store callbacks in refs to avoid recreating the editor
   const onDocumentChangeRef = useRef(onDocumentChange);
   const onViewReadyRef = useRef(onViewReady);
-  const onModifiedChangeRef = useRef(onModifiedChange);
   // Capture initialDoc at mount — not reactive after mount
   const initialDocRef = useRef(initialDoc);
   // Keep latest template accessible inside the dispatchTransaction closure
@@ -136,10 +139,17 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
   // Track previous empty-paragraph presence to avoid firing on every keystroke
   const hadEmptyParagraphRef = useRef(false);
 
+  // Reset governance trigger state when the initial document changes.
+  // Guards against the case where a new document is loaded into the same
+  // component instance without unmounting (e.g. same-session document switch).
+  useEffect(() => {
+    governanceTriggeredRef.current = false;
+    hadEmptyParagraphRef.current = false;
+  }, [initialDoc]);
+
   useEffect(() => {
     onDocumentChangeRef.current = onDocumentChange;
     onViewReadyRef.current = onViewReady;
-    onModifiedChangeRef.current = onModifiedChange;
     templateRef.current = template;
     onGovernanceTriggerRef.current = onGovernanceTrigger;
     onEmptyParagraphDetectedRef.current = onEmptyParagraphDetected;
@@ -187,11 +197,6 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
         if (transaction.docChanged) {
           onDocumentChangeRef.current(newState);
 
-          // Mark document as modified
-          if (onModifiedChangeRef.current) {
-            onModifiedChangeRef.current(true);
-          }
-
           // Governance notification: consecutive empty paragraphs
           checkEmptyParagraphNotification(newState, templateRef.current ?? null, governanceTriggeredRef, onGovernanceTriggerRef.current)
         }
@@ -215,7 +220,7 @@ export function EditorPanel({ onDocumentChange, onViewReady, isModified, onModif
 
   return (
     <div className="h-full flex flex-col bg-mylo-editor-bg">
-      <EditorToolbar view={viewRef.current} isModified={isModified} onModifiedChange={onModifiedChange} />
+      <EditorToolbar view={viewRef.current} />
       
       <div className="flex-1 overflow-auto p-6 hide-scrollbar">
         <div 

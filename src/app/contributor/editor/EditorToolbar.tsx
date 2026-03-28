@@ -22,11 +22,9 @@ import { LoadSampleMenu } from "./LoadSampleMenu";
 
 interface EditorToolbarProps {
   view: EditorView | null;
-  isModified?: boolean;
-  onModifiedChange?: (isModified: boolean) => void;
 }
 
-export function EditorToolbar({ view, isModified, onModifiedChange }: EditorToolbarProps) {
+export function EditorToolbar({ view }: EditorToolbarProps) {
   if (!view) return null;
 
   return (
@@ -35,7 +33,7 @@ export function EditorToolbar({ view, isModified, onModifiedChange }: EditorTool
       <FormattingControls view={view} />
       <ContentControls view={view} />
       <div className="w-px h-6 bg-mylo-border-light mx-1" />
-      <LoadSampleMenu view={view} isModified={isModified} onModifiedChange={onModifiedChange} />
+      <LoadSampleMenu view={view} />
     </div>
   );
 }
