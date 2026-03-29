@@ -4,7 +4,8 @@
  * @owns Bidirectional conversion between `Template.contentStyles.body` (the
  *       persisted TemplateStyle object) and `BodyStyleDraft` (the local state
  *       driving the property panel UI form fields). Also owns the px↔display
- *       string conversion and the advanced CSS textarea serialisation.
+ *       string conversion, the advanced CSS textarea serialisation, and the
+ *       `updateDraftBodyStyle` merge helper for live-preview field changes.
  * @does-not-own Template persistence (TemplateContext), UI rendering
  *               (TemplateEditorPage), field mapping constants (stylePropertyMap).
  *
@@ -260,4 +261,23 @@ export function styleDraftToTemplateBody(draft: BodyStyleDraft): TemplateStyle {
   }
 
   return style;
+}
+
+/**
+ * Merge a partial BodyStyleDraft patch into the current draft, returning a
+ * new BodyStyleDraft. Used by each property panel field's onChange handler to
+ * produce the next draft state without mutating the current one.
+ *
+ * Placing this here (rather than inline in the component) keeps business logic
+ * out of UI components and makes the merge logic independently testable.
+ *
+ * Example:
+ *   updateDraftBodyStyle(draft, { fontSize: '14' })
+ *   → { ...draft, fontSize: '14' }
+ */
+export function updateDraftBodyStyle(
+  current: BodyStyleDraft,
+  patch: Partial<BodyStyleDraft>,
+): BodyStyleDraft {
+  return { ...current, ...patch };
 }

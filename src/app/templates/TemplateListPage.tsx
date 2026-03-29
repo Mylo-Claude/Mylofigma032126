@@ -2,7 +2,8 @@
  * @file templates/TemplateListPage.tsx
  * @role Template library dashboard
  * @owns Grid of template cards, + New Template action, kebab-menu actions
- *       (Edit, Duplicate, Delete) per card.
+ *       (Duplicate, Delete) per card. Clicking a card navigates directly to
+ *       the Template Editor — no kebab action needed for editing.
  * @does-not-own Template data persistence (TemplateContext), template authoring
  *               UI (TemplateEditorPage), session/role state.
  *
@@ -17,7 +18,7 @@
 
 import { useNavigate } from 'react-router';
 import { format } from 'date-fns';
-import { Plus, MoreHorizontal, Pencil, Copy, Trash2, LayoutTemplate } from 'lucide-react';
+import { Plus, MoreHorizontal, Copy, Trash2, LayoutTemplate } from 'lucide-react';
 import { useTemplates } from '../contexts/TemplateContext';
 import type { Template } from '../mylo/template';
 import { AppHeader } from '../documents/components/AppHeader';
@@ -64,14 +65,24 @@ function TemplateCard({ template, onEdit, onDuplicate, onDelete }: TemplateCardP
     : '—';
 
   return (
-    <div className="group relative bg-mylo-surface border border-mylo-border-light rounded-xl p-5 flex flex-col gap-4 hover:border-mylo-border hover:shadow-sm transition-all">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onEdit}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onEdit(); }}
+      className="group relative bg-mylo-surface border border-mylo-border-light rounded-xl p-5 flex flex-col gap-4 hover:border-mylo-border hover:shadow-md transition-all cursor-pointer"
+    >
       {/* Icon */}
       <div className="size-10 rounded-lg bg-mylo-surface-subtle border border-mylo-border-light flex items-center justify-center">
         <LayoutTemplate className="size-5 text-mylo-text-tertiary" />
       </div>
 
-      {/* Kebab menu */}
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Kebab menu — stop propagation so it doesn't trigger card click */}
+      <div
+        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -84,10 +95,6 @@ function TemplateCard({ template, onEdit, onDuplicate, onDelete }: TemplateCardP
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={onEdit} className="gap-2">
-              <Pencil className="size-3.5" />
-              Edit
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={onDuplicate} className="gap-2">
               <Copy className="size-3.5" />
               Duplicate

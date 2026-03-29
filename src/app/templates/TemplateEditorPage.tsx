@@ -9,15 +9,21 @@
  *               service, pageLayoutUtils. None of these may be modified here.
  *
  * State model:
- *   savedTemplate  — last version persisted to TemplateContext (read on mount, synced after Save)
- *   draftTemplate  — local working copy; all edits apply here
- *   bodyDraft      — property panel state for the Body style; derived from draftTemplate on entry
+ *   savedTemplate  — snapshot of the last explicitly-saved version (frozen until Save)
+ *   draftTemplate  — local working copy; updated live on every panel field change
+ *   bodyDraft      — property panel form state for the Body style; kept in sync with
+ *                    draftTemplate via handleBodyDraftChange
  *   isDirty        — true when draftTemplate differs from savedTemplate
+ *   showPreview    — when true: renderer uses draftTemplate (live A/B toggle)
+ *                    when false: renderer uses savedTemplate (see saved state)
  *
  * Mutations:
- *   Apply   — writes bodyDraft → draftTemplate.contentStyles.body; triggers specimen re-render
- *   Save    — persists draftTemplate to TemplateContext; clears isDirty
- *   Revert  — restores draftTemplate from the latest savedTemplate; clears isDirty
+ *   Field change  — calls updateDraftBodyStyle (styleConversions.ts), immediately
+ *                   writes bodyDraft → draftTemplate.contentStyles.body (live preview)
+ *   Save (panel)  — same as top-bar Save; persists draftTemplate to TemplateContext
+ *   Save (topbar) — persists draftTemplate to TemplateContext; updates savedTemplate
+ *   Revert        — restores draftTemplate from savedTemplate; clears isDirty
+ *   Cancel        — closes property panel; draftTemplate retains live changes
  *   Publish/Unpublish — calls TemplateContext directly; also updates local draft status
  *
  * @governance Template Editor + Admin
@@ -60,6 +66,8 @@ import { usePreviewZoom } from '../contributor/preview/hooks/usePreviewZoom';
 
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Checkbox } from '../components/ui/checkbox';
+import { Label } from '../components/ui/label';
 import {
   Select,
   SelectContent,
@@ -86,7 +94,11 @@ import {
 } from '../components/ui/tooltip';
 
 import type { BodyStyleDraft } from './types/styleEditor';
-import { templateBodyToStyleDraft, styleDraftToTemplateBody } from './utils/styleConversions';
+import {
+  templateBodyToStyleDraft,
+  styleDraftToTemplateBody,
+  updateDraftBodyStyle,
+} from './utils/styleConversions';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -103,6 +115,13 @@ const FONT_WEIGHT_OPTIONS = [
   { value: '800', label: 'Extra Bold (800)' },
   { value: '900', label: 'Black (900)' },
 ] as const;
+
+/**
+ * Temporary affordance shown below the Font Family input until the Google
+ * Fonts picker is added in Step 5. Remove this constant and its usage when
+ * the picker replaces the text input.
+ */
+const FONT_FAMILY_HELPER_TEXT = 'Type any system font or font name. Google Fonts picker coming soon.' as const;
 
 // ---------------------------------------------------------------------------
 // StyleListView — left panel view 1 (style tree)
@@ -304,8 +323,13 @@ interface BodyPropertyPanelProps {
   onChange: (draft: BodyStyleDraft) => void;
   activeTab: 'typography' | 'spacing' | 'rules';
   onTabChange: (tab: 'typography' | 'spacing' | 'rules') => void;
-  onApply: () => void;
+  /** Persists current draftTemplate to TemplateContext. Same action as top-bar Save. */
+  onSave: () => void;
+  /** Close the panel; draft changes are retained in draftTemplate. */
   onCancel: () => void;
+  /** When true, specimen renders from draftTemplate (live changes). When false, from savedTemplate. */
+  showPreview: boolean;
+  onShowPreviewChange: (showPreview: boolean) => void;
 }
 
 function BodyPropertyPanel({
@@ -313,16 +337,21 @@ function BodyPropertyPanel({
   onChange,
   activeTab,
   onTabChange,
-  onApply,
+  onSave,
   onCancel,
+  showPreview,
+  onShowPreviewChange,
 }: BodyPropertyPanelProps) {
   const colorInputRef = useRef<HTMLInputElement>(null);
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
 
-  /** Produce a new draft with a single field updated. */
+  /**
+   * Produce a new draft with a single field updated, using the pure
+   * updateDraftBodyStyle helper from styleConversions.ts.
+   */
   const set = useCallback(
     <K extends keyof BodyStyleDraft>(key: K, value: BodyStyleDraft[K]) => {
-      onChange({ ...bodyDraft, [key]: value });
+      onChange(updateDraftBodyStyle(bodyDraft, { [key]: value }));
     },
     [bodyDraft, onChange]
   );
@@ -339,9 +368,25 @@ function BodyPropertyPanel({
           <ChevronLeft className="size-3" />
           All Styles
         </button>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-mylo-text-primary">Body</span>
-          <span className="text-xs text-mylo-text-tertiary">paragraph</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-mylo-text-primary">Body</span>
+            <span className="text-xs text-mylo-text-tertiary">paragraph</span>
+          </div>
+          {/* Preview checkbox — toggle A/B comparison */}
+          <div className="flex items-center gap-1.5">
+            <Checkbox
+              id="preview-toggle"
+              checked={showPreview}
+              onCheckedChange={(checked) => onShowPreviewChange(checked === true)}
+            />
+            <Label
+              htmlFor="preview-toggle"
+              className="text-xs text-muted-foreground font-normal cursor-pointer"
+            >
+              Preview
+            </Label>
+          </div>
         </div>
       </div>
 
@@ -371,6 +416,9 @@ function BodyPropertyPanel({
                 placeholder="e.g. Gill Sans, sans-serif"
                 className="h-7 text-xs"
               />
+              <p className="text-xs text-muted-foreground mt-1 leading-snug">
+                {FONT_FAMILY_HELPER_TEXT}
+              </p>
             </div>
 
             {/* Weight */}
@@ -481,9 +529,8 @@ function BodyPropertyPanel({
                 {/* Hex text input */}
                 <Input
                   value={bodyDraft.color}
-                  onChange={(e) => {
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     const val = e.target.value;
-                    // Accept any valid partial or complete hex string
                     if (/^#[0-9a-fA-F]{0,6}$/.test(val)) {
                       set('color', val);
                     }
@@ -574,8 +621,8 @@ function BodyPropertyPanel({
         <Button variant="ghost" size="sm" onClick={onCancel} className="flex-1 h-7 text-xs">
           Cancel
         </Button>
-        <Button size="sm" onClick={onApply} className="flex-1 h-7 text-xs">
-          Apply
+        <Button size="sm" onClick={onSave} className="flex-1 h-7 text-xs">
+          Save
         </Button>
       </div>
     </div>
@@ -624,26 +671,38 @@ export function TemplateEditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Resolve the saved template. If id is undefined (redirect hasn't fired yet)
-  // or the id isn't found, return null — the component renders a loading state.
-  const savedTemplate = id ? templates.find((t) => t.id === id) ?? null : null;
+  // Resolve the current template from context (re-derives on every context update).
+  // Used only for: initialising state on mount, not-found redirect.
+  const contextTemplate = id ? templates.find((t) => t.id === id) ?? null : null;
 
-  // Initialise local draft from the saved template. Only re-initialises when
-  // the template ID changes (navigating to a different template), not on every
-  // context update.
-  const [draftTemplate, setDraftTemplate] = useState<Template | null>(savedTemplate);
+  // savedTemplate — frozen snapshot of the last explicitly-saved version.
+  // Only updated by handleSave. Drives the "Preview off" state in the renderer
+  // and is the restore point for Revert.
+  const [savedTemplate, setSavedTemplate] = useState<Template | null>(contextTemplate);
+
+  // draftTemplate — local working copy. Updated live on every panel field change.
+  const [draftTemplate, setDraftTemplate] = useState<Template | null>(contextTemplate);
+
   const [isDirty, setIsDirty] = useState(false);
 
-  // Sync local draft when navigating to a different template (id change)
+  // showPreview — when true: renderer shows draftTemplate (live changes).
+  // When false: renderer shows savedTemplate (A/B comparison).
+  const [showPreview, setShowPreview] = useState(true);
+
+  // Sync local state when navigating to a different template (id change only).
   const prevIdRef = useRef(id);
   useEffect(() => {
     if (id !== prevIdRef.current) {
       prevIdRef.current = id;
-      setDraftTemplate(savedTemplate);
+      const template = id ? templates.find((t) => t.id === id) ?? null : null;
+      setDraftTemplate(template);
+      setSavedTemplate(template);
       setIsDirty(false);
+      setShowPreview(true);
       setActiveView('styleList');
+      setBodyDraft(null);
     }
-  }, [id, savedTemplate]);
+  }, [id, templates]);
 
   // Template name inline editing
   const [isEditingName, setIsEditingName] = useState(false);
@@ -697,18 +756,34 @@ export function TemplateEditorPage() {
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
-    if (id && templates.length > 0 && !savedTemplate) {
+    if (id && templates.length > 0 && !contextTemplate) {
       navigate('/templates', { replace: true });
     }
-  }, [id, templates, savedTemplate, navigate]);
+  }, [id, templates, contextTemplate, navigate]);
 
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
 
-  /** Stable wrapper so BodyPropertyPanel.onChange gets a (draft: BodyStyleDraft) => void. */
+  /**
+   * Called by BodyPropertyPanel whenever any field changes.
+   * Immediately writes the new bodyDraft to draftTemplate for live preview.
+   * Deps: empty — only uses stable setters and imported pure functions.
+   */
   const handleBodyDraftChange = useCallback((draft: BodyStyleDraft) => {
     setBodyDraft(draft);
+    setDraftTemplate((prev) =>
+      prev
+        ? {
+            ...prev,
+            contentStyles: {
+              ...prev.contentStyles,
+              body: styleDraftToTemplateBody(draft),
+            },
+          }
+        : prev
+    );
+    setIsDirty(true);
   }, []);
 
   const handleBodyClick = useCallback(() => {
@@ -718,31 +793,30 @@ export function TemplateEditorPage() {
     setActiveView('bodyPanel');
   }, [draftTemplate]);
 
-  const handleApply = useCallback(() => {
-    if (!bodyDraft || !draftTemplate) return;
-    const newBody = styleDraftToTemplateBody(bodyDraft);
-    setDraftTemplate((prev) =>
-      prev
-        ? {
-            ...prev,
-            contentStyles: { ...prev.contentStyles, body: newBody },
-          }
-        : prev
-    );
-    setIsDirty(true);
-  }, [bodyDraft, draftTemplate]);
+  /**
+   * Persists draftTemplate to TemplateContext and updates savedTemplate.
+   * Called by both the top-bar Save button and the panel Save button.
+   */
+  const handleSave = useCallback(() => {
+    if (!draftTemplate) return;
+    updateTemplate(draftTemplate.id, draftTemplate);
+    setSavedTemplate(draftTemplate);
+    setIsDirty(false);
+  }, [draftTemplate, updateTemplate]);
 
+  /**
+   * Close the property panel and return to the style list.
+   * Does NOT revert draft changes — draftTemplate retains live edits.
+   */
   const handleCancel = useCallback(() => {
     setActiveView('styleList');
     setBodyDraft(null);
   }, []);
 
-  const handleSave = useCallback(() => {
-    if (!draftTemplate) return;
-    updateTemplate(draftTemplate.id, draftTemplate);
-    setIsDirty(false);
-  }, [draftTemplate, updateTemplate]);
-
+  /**
+   * Restore draftTemplate to the last saved state (savedTemplate).
+   * Also resets bodyDraft if the panel is open.
+   */
   const handleRevert = useCallback(() => {
     if (!savedTemplate) return;
     setDraftTemplate(savedTemplate);
@@ -817,6 +891,9 @@ export function TemplateEditorPage() {
 
   const templateName = draftTemplate.name || 'Untitled Template';
   const isPublished = draftTemplate.status === 'published';
+
+  // Renderer template: draft for live preview, saved for A/B comparison
+  const rendererTemplate = showPreview ? draftTemplate : (savedTemplate ?? draftTemplate);
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-mylo-surface-subtle">
@@ -917,8 +994,8 @@ export function TemplateEditorPage() {
       {/* ────────────────────── Body (two columns) ────────────────────── */}
       <div className="flex-1 flex overflow-hidden">
 
-        {/* Left column (260px): style list or property panel */}
-        <div className="w-[260px] shrink-0 bg-mylo-surface border-r border-mylo-border-light flex flex-col overflow-hidden">
+        {/* Left column (300px): style list or property panel */}
+        <div className="w-[300px] shrink-0 bg-mylo-surface border-r border-mylo-border-light flex flex-col overflow-hidden">
           {activeView === 'styleList' ? (
             <StyleListView
               template={draftTemplate}
@@ -930,8 +1007,10 @@ export function TemplateEditorPage() {
               onChange={handleBodyDraftChange}
               activeTab={activeTab}
               onTabChange={setActiveTab}
-              onApply={handleApply}
+              onSave={handleSave}
               onCancel={handleCancel}
+              showPreview={showPreview}
+              onShowPreviewChange={setShowPreview}
             />
           ) : null}
         </div>
@@ -943,7 +1022,7 @@ export function TemplateEditorPage() {
         >
           <PaginatedDocumentRenderer
             doc={specimenDoc}
-            template={draftTemplate}
+            template={rendererTemplate}
             onPagedJsComplete={handlePagedJsComplete}
             onPageMeasured={handlePageMeasured}
             scale={scale}
