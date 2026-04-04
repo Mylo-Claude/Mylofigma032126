@@ -94,6 +94,47 @@ export interface BodyStyleDraft {
   textIndent: string;
 
   // ---------------------------------------------------------------------------
+  // Case
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Text transform (case). Maps to CSS `text-transform`.
+   * '' or 'none' means not set (CSS default).
+   * Values: '' | 'none' | 'uppercase' | 'lowercase' | 'capitalize' | 'small-caps'
+   */
+  textTransform: string;
+
+  // ---------------------------------------------------------------------------
+  // Paragraph Rules
+  // ---------------------------------------------------------------------------
+
+  /** Whether Rule Above is enabled. When false, rule fields are dimmed and ignored. */
+  ruleAboveEnabled: boolean;
+  /** Stroke weight of Rule Above, in pt display units. */
+  ruleAboveWeight: string;
+  /** Vertical offset of Rule Above from the top of the line, in pt display units. */
+  ruleAboveOffset: string;
+  /** Left extension of Rule Above beyond the text frame, in pt display units. */
+  ruleAboveLeft: string;
+  /** Right extension of Rule Above beyond the text frame, in pt display units. */
+  ruleAboveRight: string;
+  /** Stroke color of Rule Above as a hex string, e.g. '#000000'. */
+  ruleAboveColor: string;
+
+  /** Whether Rule Below is enabled. When false, rule fields are dimmed and ignored. */
+  ruleBelowEnabled: boolean;
+  /** Stroke weight of Rule Below, in pt display units. */
+  ruleBelowWeight: string;
+  /** Vertical offset of Rule Below from the bottom of the line, in pt display units. */
+  ruleBelowOffset: string;
+  /** Left extension of Rule Below beyond the text frame, in pt display units. */
+  ruleBelowLeft: string;
+  /** Right extension of Rule Below beyond the text frame, in pt display units. */
+  ruleBelowRight: string;
+  /** Stroke color of Rule Below as a hex string, e.g. '#000000'. */
+  ruleBelowColor: string;
+
+  // ---------------------------------------------------------------------------
   // Advanced CSS tab (escape hatch)
   // ---------------------------------------------------------------------------
 

@@ -1,12 +1,13 @@
 /**
  * @file templates/TemplateEditorPage.tsx
- * @role Template Editor authoring surface
+ * @role Template Editor orchestrator
  * @owns Three-zone template editor: style list (left), property panel (left — on
  *       style selection), and live specimen preview (right). Used for both
  *       /templates/new and /templates/:id routes.
  * @does-not-own Template persistence (TemplateContext), Paged.js rendering pipeline
  *               (PaginatedDocumentRenderer — reused as-is), serializer, pagination
  *               service, pageLayoutUtils. None of these may be modified here.
+ *               Panel rendering: delegated to StyleListPanel and BodyStylePanel.
  *
  * State model:
  *   savedTemplate  — snapshot of the last explicitly-saved version (frozen until Save)
@@ -32,6 +33,8 @@
  * @see PaginatedDocumentRenderer.tsx — reused for the live specimen preview
  * @see mylo/samples/specimen-documents.ts — specimen content
  * @see templates/utils/styleConversions.ts — Template ↔ BodyStyleDraft conversion
+ * @see templates/StyleListPanel.tsx — left panel style tree view
+ * @see templates/BodyStylePanel.tsx — left panel Body style property editor
  * @see router.tsx — /templates/new and /templates/:id routes (role-gated)
  */
 
@@ -42,17 +45,9 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import type { ReactNode, KeyboardEvent, ChangeEvent } from 'react';
+import type { KeyboardEvent, ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import {
-  ChevronLeft,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 import { useTemplates } from '../contexts/TemplateContext';
 import type { Template } from '../mylo/template';
@@ -66,8 +61,6 @@ import { usePreviewZoom } from '../contributor/preview/hooks/usePreviewZoom';
 
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Checkbox } from '../components/ui/checkbox';
-import { Label } from '../components/ui/label';
 import {
   Select,
   SelectContent,
@@ -75,7 +68,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,548 +78,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../components/ui/alert-dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../components/ui/tooltip';
 
 import type { BodyStyleDraft } from './types/styleEditor';
 import {
   templateBodyToStyleDraft,
   styleDraftToTemplateBody,
-  updateDraftBodyStyle,
 } from './utils/styleConversions';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const FONT_WEIGHT_OPTIONS = [
-  { value: '100', label: 'Thin (100)' },
-  { value: '200', label: 'Extra Light (200)' },
-  { value: '300', label: 'Light (300)' },
-  { value: '400', label: 'Regular (400)' },
-  { value: '500', label: 'Medium (500)' },
-  { value: '600', label: 'Semi Bold (600)' },
-  { value: '700', label: 'Bold (700)' },
-  { value: '800', label: 'Extra Bold (800)' },
-  { value: '900', label: 'Black (900)' },
-] as const;
-
-/**
- * Temporary affordance shown below the Font Family input until the Google
- * Fonts picker is added in Step 5. Remove this constant and its usage when
- * the picker replaces the text input.
- */
-const FONT_FAMILY_HELPER_TEXT = 'Type any system font or font name. Google Fonts picker coming soon.' as const;
-
-// ---------------------------------------------------------------------------
-// StyleListView — left panel view 1 (style tree)
-// ---------------------------------------------------------------------------
-
-interface StyleListViewProps {
-  template: Template;
-  onBodyClick: () => void;
-}
-
-function StyleListView({ template, onBodyClick }: StyleListViewProps) {
-  const margins = template.pageStyles;
-  const stripEmpty = template.documentSettings?.stripEmptyParagraphs ?? true;
-
-  return (
-    <TooltipProvider>
-      <div className="flex flex-col h-full overflow-y-auto">
-        {/* Paragraph Styles */}
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary mb-1">
-            Paragraph Styles
-          </p>
-
-          {/* Non-interactive heading styles */}
-          {(['Heading 1', 'Heading 2', 'Heading 3'] as const).map((label) => (
-            <Tooltip key={label}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-between px-2 py-1.5 rounded text-sm text-mylo-text-tertiary cursor-default opacity-60 select-none">
-                  <span>{label}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p className="text-xs">Coming soon</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-
-          {/* Body — clickable */}
-          <button
-            type="button"
-            onClick={onBodyClick}
-            className="w-full flex items-center justify-between px-2 py-1.5 rounded text-sm text-mylo-text-primary hover:bg-mylo-surface-subtle font-medium transition-colors"
-          >
-            <span>Body</span>
-            <span className="text-xs text-mylo-text-tertiary">paragraph</span>
-          </button>
-        </div>
-
-        {/* Character Styles */}
-        <div className="px-4 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary mb-1">
-            Character Styles
-          </p>
-          {(['Bold', 'Italic', 'Underline'] as const).map((label) => (
-            <Tooltip key={label}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center px-2 py-1.5 rounded text-sm text-mylo-text-tertiary cursor-default opacity-60 select-none">
-                  {label}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p className="text-xs">Coming soon</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
-
-        {/* List Styles */}
-        <div className="px-4 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary mb-1">
-            List Styles
-          </p>
-          {(['Bulleted List', 'Numbered List'] as const).map((label) => (
-            <Tooltip key={label}>
-              <TooltipTrigger asChild>
-                <div className="flex items-center px-2 py-1.5 rounded text-sm text-mylo-text-tertiary cursor-default opacity-60 select-none">
-                  {label}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p className="text-xs">Coming soon</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
-
-        {/* Other */}
-        <div className="px-4 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary mb-1">
-            Other
-          </p>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center px-2 py-1.5 rounded text-sm text-mylo-text-tertiary cursor-default opacity-60 select-none">
-                Link
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p className="text-xs">Coming soon</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* Divider */}
-        <div className="mx-4 my-2 border-t border-mylo-border-light" />
-
-        {/* Page Setup */}
-        <div className="px-4 py-2">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary">
-              Page Setup
-            </p>
-            <Button variant="ghost" size="sm" disabled className="h-5 px-1 text-xs text-mylo-text-tertiary">
-              Edit
-            </Button>
-          </div>
-          <div className="px-2 space-y-0.5 text-xs text-mylo-text-secondary">
-            <p>Size: {margins.size ?? 'Letter'}</p>
-            {margins.marginTop !== undefined && (
-              <p>
-                Margins: {margins.marginTop}"&nbsp;{margins.marginRight}"&nbsp;
-                {margins.marginBottom}"&nbsp;{margins.marginLeft}"
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Document Settings */}
-        <div className="px-4 py-2">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary">
-              Document Settings
-            </p>
-            <Button variant="ghost" size="sm" disabled className="h-5 px-1 text-xs text-mylo-text-tertiary">
-              Edit
-            </Button>
-          </div>
-          <div className="px-2 text-xs text-mylo-text-secondary">
-            <p>Strip empty paragraphs: {stripEmpty ? 'On' : 'Off'}</p>
-          </div>
-        </div>
-      </div>
-    </TooltipProvider>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// LabeledField — reusable layout for property panel rows
-// ---------------------------------------------------------------------------
-
-function LabeledField({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-mylo-text-secondary w-24 shrink-0">{label}</span>
-      <div className="flex-1 min-w-0">{children}</div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// DimensionInput — number input with "pt" unit label
-// ---------------------------------------------------------------------------
-
-function DimensionInput({
-  value,
-  onChange,
-  placeholder,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder ?? '—'}
-        className="h-7 text-xs w-16"
-        inputMode="decimal"
-      />
-      <span className="text-xs text-mylo-text-tertiary">pt</span>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// BodyPropertyPanel — left panel view 2 (Body style property panel)
-// ---------------------------------------------------------------------------
-
-interface BodyPropertyPanelProps {
-  bodyDraft: BodyStyleDraft;
-  onChange: (draft: BodyStyleDraft) => void;
-  activeTab: 'typography' | 'spacing' | 'rules';
-  onTabChange: (tab: 'typography' | 'spacing' | 'rules') => void;
-  /** Persists current draftTemplate to TemplateContext. Same action as top-bar Save. */
-  onSave: () => void;
-  /** Close the panel; draft changes are retained in draftTemplate. */
-  onCancel: () => void;
-  /** When true, specimen renders from draftTemplate (live changes). When false, from savedTemplate. */
-  showPreview: boolean;
-  onShowPreviewChange: (showPreview: boolean) => void;
-}
-
-function BodyPropertyPanel({
-  bodyDraft,
-  onChange,
-  activeTab,
-  onTabChange,
-  onSave,
-  onCancel,
-  showPreview,
-  onShowPreviewChange,
-}: BodyPropertyPanelProps) {
-  const colorInputRef = useRef<HTMLInputElement>(null);
-  const [advancedExpanded, setAdvancedExpanded] = useState(false);
-
-  /**
-   * Produce a new draft with a single field updated, using the pure
-   * updateDraftBodyStyle helper from styleConversions.ts.
-   */
-  const set = useCallback(
-    <K extends keyof BodyStyleDraft>(key: K, value: BodyStyleDraft[K]) => {
-      onChange(updateDraftBodyStyle(bodyDraft, { [key]: value }));
-    },
-    [bodyDraft, onChange]
-  );
-
-  return (
-    <div className="flex flex-col h-full">
-      {/* Panel header */}
-      <div className="px-4 pt-3 pb-2 border-b border-mylo-border-light">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex items-center gap-1 text-xs text-mylo-text-secondary hover:text-mylo-text-primary mb-2 transition-colors"
-        >
-          <ChevronLeft className="size-3" />
-          All Styles
-        </button>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-mylo-text-primary">Body</span>
-            <span className="text-xs text-mylo-text-tertiary">paragraph</span>
-          </div>
-          {/* Preview checkbox — toggle A/B comparison */}
-          <div className="flex items-center gap-1.5">
-            <Checkbox
-              id="preview-toggle"
-              checked={showPreview}
-              onCheckedChange={(checked) => onShowPreviewChange(checked === true)}
-            />
-            <Label
-              htmlFor="preview-toggle"
-              className="text-xs text-muted-foreground font-normal cursor-pointer"
-            >
-              Preview
-            </Label>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex-1 overflow-y-auto">
-        <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as typeof activeTab)}>
-          <TabsList className="w-full rounded-none border-b border-mylo-border-light h-8 px-3 bg-transparent justify-start gap-0">
-            {(['typography', 'spacing', 'rules'] as const).map((tab) => (
-              <TabsTrigger
-                key={tab}
-                value={tab}
-                className="h-7 px-2 text-xs capitalize rounded-none border-b-2 border-transparent data-[state=active]:border-mylo-text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {/* Typography tab */}
-          <TabsContent value="typography" className="mt-0 px-4 py-3 space-y-3">
-            {/* Font Family */}
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-mylo-text-secondary">Font Family</span>
-              <Input
-                value={bodyDraft.fontFamily}
-                onChange={(e) => set('fontFamily', e.target.value)}
-                placeholder="e.g. Gill Sans, sans-serif"
-                className="h-7 text-xs"
-              />
-              <p className="text-xs text-muted-foreground mt-1 leading-snug">
-                {FONT_FAMILY_HELPER_TEXT}
-              </p>
-            </div>
-
-            {/* Weight */}
-            <LabeledField label="Weight">
-              <Select
-                value={bodyDraft.fontWeight}
-                onValueChange={(v) => set('fontWeight', v)}
-              >
-                <SelectTrigger className="h-7 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {FONT_WEIGHT_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </LabeledField>
-
-            {/* Style */}
-            <LabeledField label="Style">
-              <Select
-                value={bodyDraft.fontStyle}
-                onValueChange={(v) => set('fontStyle', v as BodyStyleDraft['fontStyle'])}
-              >
-                <SelectTrigger className="h-7 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal" className="text-xs">Normal</SelectItem>
-                  <SelectItem value="italic" className="text-xs">Italic</SelectItem>
-                </SelectContent>
-              </Select>
-            </LabeledField>
-
-            {/* Size */}
-            <LabeledField label="Size">
-              <DimensionInput
-                value={bodyDraft.fontSize}
-                onChange={(v) => set('fontSize', v)}
-              />
-            </LabeledField>
-
-            {/* Line Height */}
-            <LabeledField label="Line Height">
-              <DimensionInput
-                value={bodyDraft.lineHeight}
-                onChange={(v) => set('lineHeight', v)}
-              />
-            </LabeledField>
-
-            {/* Tracking */}
-            <LabeledField label="Tracking">
-              <DimensionInput
-                value={bodyDraft.letterSpacing}
-                onChange={(v) => set('letterSpacing', v)}
-              />
-            </LabeledField>
-
-            {/* Alignment */}
-            <LabeledField label="Alignment">
-              <div className="flex gap-0.5">
-                {(
-                  [
-                    { value: 'left', Icon: AlignLeft },
-                    { value: 'center', Icon: AlignCenter },
-                    { value: 'right', Icon: AlignRight },
-                    { value: 'justify', Icon: AlignJustify },
-                  ] as const
-                ).map(({ value, Icon }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => set('textAlign', value)}
-                    className={`p-1 rounded transition-colors ${
-                      bodyDraft.textAlign === value
-                        ? 'bg-mylo-text-primary text-white'
-                        : 'text-mylo-text-secondary hover:bg-mylo-surface-subtle'
-                    }`}
-                  >
-                    <Icon className="size-3.5" />
-                  </button>
-                ))}
-              </div>
-            </LabeledField>
-
-            {/* Color */}
-            <LabeledField label="Color">
-              <div className="flex items-center gap-2">
-                {/* Color swatch — opens native color picker */}
-                <button
-                  type="button"
-                  className="size-6 rounded border border-mylo-border-light shrink-0"
-                  style={{ backgroundColor: bodyDraft.color }}
-                  onClick={() => colorInputRef.current?.click()}
-                  aria-label="Open color picker"
-                />
-                {/* Hidden native color input */}
-                <input
-                  ref={colorInputRef}
-                  type="color"
-                  className="sr-only"
-                  value={bodyDraft.color}
-                  onChange={(e) => set('color', e.target.value)}
-                />
-                {/* Hex text input */}
-                <Input
-                  value={bodyDraft.color}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    const val = e.target.value;
-                    if (/^#[0-9a-fA-F]{0,6}$/.test(val)) {
-                      set('color', val);
-                    }
-                  }}
-                  className="h-7 text-xs font-mono w-24"
-                  maxLength={7}
-                />
-              </div>
-            </LabeledField>
-
-            {/* Advanced CSS — collapsible */}
-            <div className="pt-1">
-              <button
-                type="button"
-                className="flex items-center gap-1 text-xs text-mylo-text-secondary hover:text-mylo-text-primary w-full mb-1 transition-colors"
-                onClick={() => setAdvancedExpanded((x) => !x)}
-              >
-                {advancedExpanded ? (
-                  <ChevronUp className="size-3" />
-                ) : (
-                  <ChevronDown className="size-3" />
-                )}
-                Advanced CSS
-              </button>
-              {advancedExpanded && (
-                <div className="space-y-1">
-                  <textarea
-                    value={bodyDraft.advancedCss}
-                    onChange={(e) => set('advancedCss', e.target.value)}
-                    placeholder={'textTransform: uppercase\nborderBottom: 1px solid #000'}
-                    rows={4}
-                    className="w-full text-xs font-mono rounded border border-mylo-border-light bg-mylo-surface p-2 resize-y focus:outline-none focus:ring-1 focus:ring-mylo-border"
-                    spellCheck={false}
-                  />
-                  <p className="text-[10px] text-mylo-text-tertiary leading-snug">
-                    Advanced CSS is applied directly. Verify in the specimen before saving.
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Spacing tab */}
-          <TabsContent value="spacing" className="mt-0 px-4 py-3 space-y-3">
-            <LabeledField label="Space Before">
-              <DimensionInput
-                value={bodyDraft.marginTop}
-                onChange={(v) => set('marginTop', v)}
-              />
-            </LabeledField>
-            <LabeledField label="Space After">
-              <DimensionInput
-                value={bodyDraft.marginBottom}
-                onChange={(v) => set('marginBottom', v)}
-              />
-            </LabeledField>
-            <LabeledField label="Left Indent">
-              <DimensionInput
-                value={bodyDraft.paddingLeft}
-                onChange={(v) => set('paddingLeft', v)}
-              />
-            </LabeledField>
-            <LabeledField label="Right Indent">
-              <DimensionInput
-                value={bodyDraft.paddingRight}
-                onChange={(v) => set('paddingRight', v)}
-              />
-            </LabeledField>
-            <LabeledField label="First Line">
-              <DimensionInput
-                value={bodyDraft.textIndent}
-                onChange={(v) => set('textIndent', v)}
-              />
-            </LabeledField>
-          </TabsContent>
-
-          {/* Rules tab — placeholder */}
-          <TabsContent value="rules" className="mt-0 px-4 py-4">
-            <p className="text-xs text-mylo-text-secondary leading-relaxed">
-              Paragraph rules coming in a future update.
-            </p>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Pinned action bar */}
-      <div className="px-4 py-3 border-t border-mylo-border-light flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={onCancel} className="flex-1 h-7 text-xs">
-          Cancel
-        </Button>
-        <Button size="sm" onClick={onSave} className="flex-1 h-7 text-xs">
-          Save
-        </Button>
-      </div>
-    </div>
-  );
-}
+import { StyleListPanel } from './StyleListPanel';
+import { BodyStylePanel } from './BodyStylePanel';
 
 // ---------------------------------------------------------------------------
 // StatusBadge
@@ -717,7 +175,6 @@ export function TemplateEditorPage() {
 
   // Body style property panel state (null = not yet initialised)
   const [bodyDraft, setBodyDraft] = useState<BodyStyleDraft | null>(null);
-  const [activeTab, setActiveTab] = useState<'typography' | 'spacing' | 'rules'>('typography');
 
   // Specimen selection
   const [selectedSpecimen, setSelectedSpecimen] = useState<SampleDocument>(defaultSpecimen);
@@ -766,9 +223,8 @@ export function TemplateEditorPage() {
   // ---------------------------------------------------------------------------
 
   /**
-   * Called by BodyPropertyPanel whenever any field changes.
+   * Called by BodyStylePanel whenever any field changes.
    * Immediately writes the new bodyDraft to draftTemplate for live preview.
-   * Deps: empty — only uses stable setters and imported pure functions.
    */
   const handleBodyDraftChange = useCallback((draft: BodyStyleDraft) => {
     setBodyDraft(draft);
@@ -789,7 +245,6 @@ export function TemplateEditorPage() {
   const handleBodyClick = useCallback(() => {
     if (!draftTemplate) return;
     setBodyDraft(templateBodyToStyleDraft(draftTemplate));
-    setActiveTab('typography');
     setActiveView('bodyPanel');
   }, [draftTemplate]);
 
@@ -997,16 +452,14 @@ export function TemplateEditorPage() {
         {/* Left column (300px): style list or property panel */}
         <div className="w-[300px] shrink-0 bg-mylo-surface border-r border-mylo-border-light flex flex-col overflow-hidden">
           {activeView === 'styleList' ? (
-            <StyleListView
+            <StyleListPanel
               template={draftTemplate}
               onBodyClick={handleBodyClick}
             />
           ) : bodyDraft !== null ? (
-            <BodyPropertyPanel
+            <BodyStylePanel
               bodyDraft={bodyDraft}
               onChange={handleBodyDraftChange}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
               onSave={handleSave}
               onCancel={handleCancel}
               showPreview={showPreview}

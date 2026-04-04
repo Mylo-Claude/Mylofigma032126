@@ -50,6 +50,20 @@ export const BODY_ADVANCED_STRUCTURED_FIELDS = [
   'textIndent',
   'paddingLeft',
   'paddingRight',
+  'textTransform',
+  // Paragraph rule fields (stored in advanced; not yet rendered as CSS)
+  'ruleAboveEnabled',
+  'ruleAboveWeight',
+  'ruleAboveOffset',
+  'ruleAboveLeft',
+  'ruleAboveRight',
+  'ruleAboveColor',
+  'ruleBelowEnabled',
+  'ruleBelowWeight',
+  'ruleBelowOffset',
+  'ruleBelowLeft',
+  'ruleBelowRight',
+  'ruleBelowColor',
 ] as const;
 
 /**

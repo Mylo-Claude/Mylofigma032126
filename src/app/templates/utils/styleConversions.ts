@@ -168,6 +168,7 @@ export function templateBodyToStyleDraft(template: Template): BodyStyleDraft {
     letterSpacing: pxToPtDisplay(cssValStr(advanced, 'letterSpacing')),
     color: styleValStr(body.color) || '#000000',
     textAlign: toTextAlign(cssValStr(advanced, 'textAlign')),
+    textTransform: cssValStr(advanced, 'textTransform'),
 
     // Spacing (from advanced)
     marginTop: pxToPtDisplay(cssValStr(advanced, 'marginTop')),
@@ -175,6 +176,20 @@ export function templateBodyToStyleDraft(template: Template): BodyStyleDraft {
     paddingLeft: pxToPtDisplay(cssValStr(advanced, 'paddingLeft')),
     paddingRight: pxToPtDisplay(cssValStr(advanced, 'paddingRight')),
     textIndent: pxToPtDisplay(cssValStr(advanced, 'textIndent')),
+
+    // Paragraph Rules (from advanced)
+    ruleAboveEnabled: cssValStr(advanced, 'ruleAboveEnabled') === 'true',
+    ruleAboveWeight: pxToPtDisplay(cssValStr(advanced, 'ruleAboveWeight')),
+    ruleAboveOffset: pxToPtDisplay(cssValStr(advanced, 'ruleAboveOffset')),
+    ruleAboveLeft: pxToPtDisplay(cssValStr(advanced, 'ruleAboveLeft')),
+    ruleAboveRight: pxToPtDisplay(cssValStr(advanced, 'ruleAboveRight')),
+    ruleAboveColor: cssValStr(advanced, 'ruleAboveColor') || '#000000',
+    ruleBelowEnabled: cssValStr(advanced, 'ruleBelowEnabled') === 'true',
+    ruleBelowWeight: pxToPtDisplay(cssValStr(advanced, 'ruleBelowWeight')),
+    ruleBelowOffset: pxToPtDisplay(cssValStr(advanced, 'ruleBelowOffset')),
+    ruleBelowLeft: pxToPtDisplay(cssValStr(advanced, 'ruleBelowLeft')),
+    ruleBelowRight: pxToPtDisplay(cssValStr(advanced, 'ruleBelowRight')),
+    ruleBelowColor: cssValStr(advanced, 'ruleBelowColor') || '#000000',
 
     // Advanced CSS textarea
     advancedCss: serializeAdvancedCss(unstructured),
@@ -235,6 +250,40 @@ export function styleDraftToTemplateBody(draft: BodyStyleDraft): TemplateStyle {
   } else {
     delete advanced.fontStyle;
   }
+
+  // textTransform — omit '' and 'none' since they are the CSS default
+  if (draft.textTransform && draft.textTransform !== 'none') {
+    advanced.textTransform = draft.textTransform;
+  } else {
+    delete advanced.textTransform;
+  }
+
+  // Paragraph Rules — store enabled flag and dimension fields only when enabled
+  const writeRuleFields = (
+    prefix: 'ruleAbove' | 'ruleBelow',
+    enabled: boolean,
+    weight: string,
+    offset: string,
+    left: string,
+    right: string,
+    color: string,
+  ) => {
+    if (enabled) {
+      advanced[`${prefix}Enabled`] = 'true';
+      const wPx = ptDisplayToPx(weight); if (wPx) advanced[`${prefix}Weight`] = wPx; else delete advanced[`${prefix}Weight`];
+      const oPx = ptDisplayToPx(offset); if (oPx) advanced[`${prefix}Offset`] = oPx; else delete advanced[`${prefix}Offset`];
+      const lPx = ptDisplayToPx(left);   if (lPx) advanced[`${prefix}Left`]   = lPx; else delete advanced[`${prefix}Left`];
+      const rPx = ptDisplayToPx(right);  if (rPx) advanced[`${prefix}Right`]  = rPx; else delete advanced[`${prefix}Right`];
+      if (color) advanced[`${prefix}Color`] = color; else delete advanced[`${prefix}Color`];
+    } else {
+      for (const key of [`${prefix}Enabled`, `${prefix}Weight`, `${prefix}Offset`, `${prefix}Left`, `${prefix}Right`, `${prefix}Color`]) {
+        delete advanced[key];
+      }
+    }
+  };
+
+  writeRuleFields('ruleAbove', draft.ruleAboveEnabled, draft.ruleAboveWeight, draft.ruleAboveOffset, draft.ruleAboveLeft, draft.ruleAboveRight, draft.ruleAboveColor);
+  writeRuleFields('ruleBelow', draft.ruleBelowEnabled, draft.ruleBelowWeight, draft.ruleBelowOffset, draft.ruleBelowLeft, draft.ruleBelowRight, draft.ruleBelowColor);
 
   // Build the top-level TemplateStyle
   const style: TemplateStyle = {};
