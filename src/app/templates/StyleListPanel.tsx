@@ -6,6 +6,13 @@
  *       Calls onBodyClick when the Body row is activated.
  * @does-not-own Template persistence, property panel state, style conversion logic.
  *
+ * Structure:
+ *   Paragraph Styles — Heading 1/2/3 (disabled), Body (clickable),
+ *                      [divider], Bulleted List / Numbered List (disabled)
+ *   Character Styles — Bold / Italic / Underline (disabled), [divider], Link (disabled)
+ *   Page Setup       — read-only size + margin values; Edit disabled
+ *   Document Settings — read-only stripEmptyParagraphs; Edit disabled
+ *
  * @governance Template Editor only
  * @see TemplateEditorPage.tsx — orchestrator that renders this panel
  */
@@ -34,6 +41,26 @@ interface StyleListPanelProps {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Dimmed, non-interactive style row with a Coming Soon tooltip. */
+function DisabledStyleRow({ label }: { label: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-center px-6 py-1.5 text-sm text-mylo-text-tertiary cursor-default opacity-50 select-none">
+          {label}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="right">
+        <p className="text-xs">Coming soon</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // StyleListPanel
 // ---------------------------------------------------------------------------
 
@@ -57,29 +84,26 @@ export function StyleListPanel({ template, onBodyClick }: StyleListPanelProps) {
               Paragraph Styles
             </AccordionTrigger>
             <AccordionContent className="px-0 pb-2">
-              {(['Heading 1', 'Heading 2', 'Heading 3'] as const).map((label) => (
-                <Tooltip key={label}>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center justify-between px-6 py-1.5 text-sm text-mylo-text-tertiary cursor-default opacity-60 select-none">
-                      <span>{label}</span>
-                      <span className="text-xs text-mylo-text-tertiary">paragraph</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p className="text-xs">Coming soon</p>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
+              {/* Heading styles — disabled */}
+              <DisabledStyleRow label="Heading 1" />
+              <DisabledStyleRow label="Heading 2" />
+              <DisabledStyleRow label="Heading 3" />
 
               {/* Body — clickable */}
               <button
                 type="button"
                 onClick={onBodyClick}
-                className="w-full flex items-center justify-between px-6 py-1.5 text-sm text-mylo-text-primary hover:bg-mylo-surface-subtle font-medium transition-colors"
+                className="w-full flex items-center px-6 py-1.5 text-sm text-mylo-text-primary hover:bg-mylo-surface-subtle font-semibold transition-colors"
               >
-                <span>Body</span>
-                <span className="text-xs text-mylo-text-tertiary">paragraph</span>
+                Body
               </button>
+
+              {/* Divider before list styles */}
+              <div className="mx-4 my-1.5 border-t border-mylo-border-light" />
+
+              {/* List styles — disabled */}
+              <DisabledStyleRow label="Bulleted List" />
+              <DisabledStyleRow label="Numbered List" />
             </AccordionContent>
           </AccordionItem>
 
@@ -89,18 +113,14 @@ export function StyleListPanel({ template, onBodyClick }: StyleListPanelProps) {
               Character Styles
             </AccordionTrigger>
             <AccordionContent className="px-0 pb-2">
-              {(['Bold', 'Italic', 'Underline'] as const).map((label) => (
-                <Tooltip key={label}>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center px-6 py-1.5 text-sm text-mylo-text-tertiary cursor-default opacity-60 select-none">
-                      {label}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p className="text-xs">Coming soon</p>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
+              <DisabledStyleRow label="Bold" />
+              <DisabledStyleRow label="Italic" />
+              <DisabledStyleRow label="Underline" />
+
+              {/* Divider before Link */}
+              <div className="mx-4 my-1.5 border-t border-mylo-border-light" />
+
+              <DisabledStyleRow label="Link" />
             </AccordionContent>
           </AccordionItem>
 
@@ -111,7 +131,7 @@ export function StyleListPanel({ template, onBodyClick }: StyleListPanelProps) {
               {/* Edit is disabled until page-setup editing is implemented */}
               <span
                 aria-disabled="true"
-                className="text-xs font-normal normal-case tracking-normal text-mylo-text-tertiary opacity-40 mr-2 cursor-not-allowed"
+                className="text-[10px] font-normal normal-case tracking-normal text-mylo-text-tertiary opacity-40 mr-2 cursor-not-allowed"
               >
                 Edit
               </span>
@@ -136,7 +156,7 @@ export function StyleListPanel({ template, onBodyClick }: StyleListPanelProps) {
               {/* Edit is disabled until document-settings editing is implemented */}
               <span
                 aria-disabled="true"
-                className="text-xs font-normal normal-case tracking-normal text-mylo-text-tertiary opacity-40 mr-2 cursor-not-allowed"
+                className="text-[10px] font-normal normal-case tracking-normal text-mylo-text-tertiary opacity-40 mr-2 cursor-not-allowed"
               >
                 Edit
               </span>
