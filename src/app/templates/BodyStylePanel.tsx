@@ -310,7 +310,7 @@ export function BodyStylePanel({
                 </StackedField>
 
                 {/* Weight + Style — side by side, labels above */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <StackedField label="Weight">
                     <Select
                       value={bodyDraft.fontWeight}
@@ -356,7 +356,7 @@ export function BodyStylePanel({
                 </div>
 
                 {/* Size + Line Height + Tracking — 3-column grid, each cell label above input */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                   <StackedField label="Size">
                     <DimensionInput
                       value={bodyDraft.fontSize}
@@ -381,7 +381,7 @@ export function BodyStylePanel({
                 </div>
 
                 {/* Case + Alignment — side by side in a two-column grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   {/* Case — left column */}
                   <StackedField label="Case">
                     <Select
@@ -458,7 +458,7 @@ export function BodyStylePanel({
             <AccordionContent className="px-4 pb-3">
               <div className="space-y-3 pt-1">
                 {/* Row 1: Space Before + Space After */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <StackedField label="Space Before">
                     <DimensionInput
                       value={bodyDraft.marginTop}
@@ -473,7 +473,7 @@ export function BodyStylePanel({
                   </StackedField>
                 </div>
                 {/* Row 2: Left Indent + Right Indent */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <StackedField label="Left Indent">
                     <DimensionInput
                       value={bodyDraft.paddingLeft}
@@ -531,7 +531,7 @@ export function BodyStylePanel({
                     }
                   >
                     <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <StackedField label="Weight">
                           <DimensionInput
                             value={bodyDraft.ruleAboveWeight}
@@ -547,7 +547,7 @@ export function BodyStylePanel({
                           />
                         </StackedField>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <StackedField label="Left Indent">
                           <DimensionInput
                             value={bodyDraft.ruleAboveLeft}
@@ -603,7 +603,7 @@ export function BodyStylePanel({
                     }
                   >
                     <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <StackedField label="Weight">
                           <DimensionInput
                             value={bodyDraft.ruleBelowWeight}
@@ -619,7 +619,7 @@ export function BodyStylePanel({
                           />
                         </StackedField>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <StackedField label="Left Indent">
                           <DimensionInput
                             value={bodyDraft.ruleBelowLeft}
