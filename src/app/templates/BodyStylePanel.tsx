@@ -87,6 +87,13 @@ const ALIGN_OPTIONS = [
 ] as const;
 
 /**
+ * Width of compact dimension inputs (Size, Line Height, Tracking).
+ * 52px fits 3-4 digit values comfortably at text-xs.
+ * Update here if the panel width or input density changes.
+ */
+const DIM_INPUT_WIDTH = 'w-[52px]' as const;
+
+/**
  * Temporary affordance shown below the Font Family input until the Google
  * Fonts picker is added in Step 5. Remove when the picker replaces the input.
  */
@@ -156,7 +163,7 @@ function DimensionInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder ?? '—'}
-        className={`h-7 text-xs ${small ? 'w-10' : 'w-16'}`}
+        className={`h-7 text-xs ${small ? DIM_INPUT_WIDTH : 'w-16'}`}
         inputMode="decimal"
         disabled={disabled}
       />
@@ -391,50 +398,53 @@ export function BodyStylePanel({
                   </StackedField>
                 </div>
 
-                {/* Alignment — label above, 4-button group */}
-                <StackedField label="Alignment">
-                  <div className="flex gap-0.5">
-                    {ALIGN_OPTIONS.map(({ value, Icon }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => set('textAlign', value)}
-                        className={`p-1.5 rounded transition-colors ${
-                          bodyDraft.textAlign === value
-                            ? 'bg-mylo-text-primary text-white'
-                            : 'text-mylo-text-secondary hover:bg-mylo-surface-subtle'
-                        }`}
-                      >
-                        <Icon className="size-3.5" />
-                      </button>
-                    ))}
-                  </div>
-                </StackedField>
+                {/* Case + Alignment — side by side in a two-column grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Case — left column */}
+                  <StackedField label="Case">
+                    <Select
+                      value={bodyDraft.textTransform || 'none'}
+                      onValueChange={(v) =>
+                        set('textTransform', v === 'none' ? '' : v)
+                      }
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEXT_TRANSFORM_OPTIONS.map((opt) => (
+                          <SelectItem
+                            key={opt.value}
+                            value={opt.value}
+                            className="text-xs"
+                          >
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </StackedField>
 
-                {/* Case — label above, select */}
-                <StackedField label="Case">
-                  <Select
-                    value={bodyDraft.textTransform || 'none'}
-                    onValueChange={(v) =>
-                      set('textTransform', v === 'none' ? '' : v)
-                    }
-                  >
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TEXT_TRANSFORM_OPTIONS.map((opt) => (
-                        <SelectItem
-                          key={opt.value}
-                          value={opt.value}
-                          className="text-xs"
+                  {/* Alignment — right column */}
+                  <StackedField label="Alignment">
+                    <div className="flex gap-0.5">
+                      {ALIGN_OPTIONS.map(({ value, Icon }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => set('textAlign', value)}
+                          className={`p-1.5 rounded transition-colors ${
+                            bodyDraft.textAlign === value
+                              ? 'bg-mylo-text-primary text-white'
+                              : 'text-mylo-text-secondary hover:bg-mylo-surface-subtle'
+                          }`}
                         >
-                          {opt.label}
-                        </SelectItem>
+                          <Icon className="size-3.5" />
+                        </button>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </StackedField>
+                    </div>
+                  </StackedField>
+                </div>
 
               </div>
             </AccordionContent>

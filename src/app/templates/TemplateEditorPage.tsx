@@ -450,7 +450,7 @@ export function TemplateEditorPage() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* Left column (300px): style list or property panel */}
-        <div className="w-[300px] shrink-0 bg-mylo-surface border-r border-mylo-border-light flex flex-col overflow-hidden">
+        <div className="w-[360px] shrink-0 bg-mylo-surface border-r border-mylo-border-light flex flex-col overflow-hidden">
           {activeView === 'styleList' ? (
             <StyleListPanel
               template={draftTemplate}
