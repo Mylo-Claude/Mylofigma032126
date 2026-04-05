@@ -8,7 +8,7 @@
  *                            Alignment, Case
  *           2. Character Color — Color swatch + hex input
  *           3. Spacing     — Space Before/After, Left/Right Indent, First Line
- *           4. Rule Above  — enable toggle, Weight/V.Offset, Left/Right Offset, Color
+ *           4. Rule Above  — enable toggle, Weight/V.Offset, Left/Right Indent, Color
  *           5. Rule Below  — same structure as Rule Above
  *           6. Style Summary — read-only two-column property grid
  *       • Pinned preview toggle bar
@@ -355,8 +355,8 @@ export function BodyStylePanel({
                   </StackedField>
                 </div>
 
-                {/* Size + Line Height + Tracking — three narrow inputs in a row */}
-                <div className="flex gap-4">
+                {/* Size + Line Height + Tracking — 3-column grid, each cell label above input */}
+                <div className="grid grid-cols-3 gap-3">
                   <StackedField label="Size">
                     <DimensionInput
                       value={bodyDraft.fontSize}
@@ -539,7 +539,7 @@ export function BodyStylePanel({
                             disabled={!bodyDraft.ruleAboveEnabled}
                           />
                         </StackedField>
-                        <StackedField label="V. Offset">
+                        <StackedField label="Offset">
                           <DimensionInput
                             value={bodyDraft.ruleAboveOffset}
                             onChange={(v) => set('ruleAboveOffset', v)}
@@ -548,14 +548,14 @@ export function BodyStylePanel({
                         </StackedField>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <StackedField label="Left Offset">
+                        <StackedField label="Left Indent">
                           <DimensionInput
                             value={bodyDraft.ruleAboveLeft}
                             onChange={(v) => set('ruleAboveLeft', v)}
                             disabled={!bodyDraft.ruleAboveEnabled}
                           />
                         </StackedField>
-                        <StackedField label="Right Offset">
+                        <StackedField label="Right Indent">
                           <DimensionInput
                             value={bodyDraft.ruleAboveRight}
                             onChange={(v) => set('ruleAboveRight', v)}
@@ -611,7 +611,7 @@ export function BodyStylePanel({
                             disabled={!bodyDraft.ruleBelowEnabled}
                           />
                         </StackedField>
-                        <StackedField label="V. Offset">
+                        <StackedField label="Offset">
                           <DimensionInput
                             value={bodyDraft.ruleBelowOffset}
                             onChange={(v) => set('ruleBelowOffset', v)}
@@ -620,14 +620,14 @@ export function BodyStylePanel({
                         </StackedField>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <StackedField label="Left Offset">
+                        <StackedField label="Left Indent">
                           <DimensionInput
                             value={bodyDraft.ruleBelowLeft}
                             onChange={(v) => set('ruleBelowLeft', v)}
                             disabled={!bodyDraft.ruleBelowEnabled}
                           />
                         </StackedField>
-                        <StackedField label="Right Offset">
+                        <StackedField label="Right Indent">
                           <DimensionInput
                             value={bodyDraft.ruleBelowRight}
                             onChange={(v) => set('ruleBelowRight', v)}
