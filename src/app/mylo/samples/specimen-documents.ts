@@ -20,12 +20,12 @@
 import type { SampleDocument } from './types';
 
 // ---------------------------------------------------------------------------
-// 1. Typography Specimen — one of each style, default specimen
+// 1. Type Specimen — one of each style, default specimen
 // ---------------------------------------------------------------------------
 
 const typographySpecimen: SampleDocument = {
   id: 'specimen-typography',
-  name: 'Typography Specimen',
+  name: 'Type Specimen',
   description: 'One of each style level — shows all paragraph and character styles simultaneously.',
   content: [
     {
@@ -372,5 +372,5 @@ export const specimenDocuments: SampleDocument[] = [
   pressReleaseSpecimen,
 ];
 
-/** Default specimen — Typography Specimen, shows every style simultaneously. */
+/** Default specimen — Type Specimen, shows every style simultaneously. */
 export const defaultSpecimen: SampleDocument = typographySpecimen;
