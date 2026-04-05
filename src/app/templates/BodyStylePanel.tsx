@@ -669,7 +669,7 @@ export function BodyStylePanel({
               Style Summary
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-3">
-              <div className="grid grid-cols-[88px_1fr] gap-y-1.5 pt-1">
+              <div className="grid grid-cols-[96px_1fr] gap-y-1.5 pt-1">
                 {(
                   [
                     ['Font Family', bodyDraft.fontFamily || '—'],
