@@ -52,7 +52,7 @@ export function StyleListPanel({ template, onStyleClick }: StyleListPanelProps) 
   const linkColor = template.linkRules?.color;
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex flex-col h-full overflow-y-auto scrollbar-none">
       <Accordion
         type="single"
         collapsible
