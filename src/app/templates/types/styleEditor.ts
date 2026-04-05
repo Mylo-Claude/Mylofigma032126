@@ -1,23 +1,25 @@
 /**
  * @file templates/types/styleEditor.ts
- * @role Local state types for the Template Editor property panel
- * @owns Editable draft representations of template style properties.
+ * @role Local state types for the Template Editor property panels
+ * @owns Editable draft representations of template style properties for all
+ *       three style families: paragraph (BodyStyleDraft), character
+ *       (CharacterStyleDraft), and list (ListStyleDraft).
  *       These types are the intermediate state between the Template interface
  *       (serialised to localStorage) and the UI form fields (user input).
  * @does-not-own Conversion logic between Template ↔ draft (styleConversions.ts),
  *               template persistence (TemplateContext), UI rendering.
  *
- * Design intent:
- * - BodyStyleDraft is the Step 2 implementation for Body paragraph styling.
- * - In Step 3, this will generalise to a common StyleDraft type shared by all
- *   paragraph, character, and list style editors. Design BodyStyleDraft with
- *   that generalisation in mind — no Body-specific coupling in field names.
- * - All fields are strings to align with HTML input values. Numeric CSS values
- *   (e.g. font-size in px) are held as display strings ('13', not '13px').
- *   Conversion to/from the Template format is handled in styleConversions.ts.
+ * Design decisions:
+ * - All dimensional values are display strings (numeric without unit suffix).
+ *   E.g. '13' not '13px'. Conversion handled in styleConversions.ts.
+ * - BodyStyleDraft is reused for all four paragraph styles (body/h1/h2/h3);
+ *   ParagraphStylePanel selects the correct template key via styleKey prop.
+ * - ListStyleDraft extends BodyStyleDraft — list items have all paragraph
+ *   fields plus marker/indent overrides.
+ * - CharacterStyleDraft covers the subset of fields relevant to inline marks.
  *
  * @governance Template Editor only
- * @see templates/utils/styleConversions.ts — converts Template ↔ BodyStyleDraft
+ * @see templates/utils/styleConversions.ts — converts Template ↔ draft types
  * @see templates/constants/stylePropertyMap.ts — field-to-template-key mapping
  */
 
@@ -144,4 +146,78 @@ export interface BodyStyleDraft {
    * Example: 'textTransform: uppercase\nborderBottom: 1px solid #000'
    */
   advancedCss: string;
+}
+
+// ---------------------------------------------------------------------------
+// CharacterStyleDraft
+// ---------------------------------------------------------------------------
+
+/**
+ * Editable draft state for character style property panels
+ * (Bold, Italic, Underline, Link).
+ *
+ * Character styles override a subset of paragraph style fields — no spacing,
+ * paragraph rules, or keep options. All dimensional values are display strings.
+ */
+export interface CharacterStyleDraft {
+  /** Font family override stack, e.g. 'Georgia, serif'. Empty = inherit. */
+  fontFamily: string;
+
+  /**
+   * Font weight as a numeric string matching the select options, e.g. '700'.
+   * For bold: stored as characterRules.bold.fontWeight (number).
+   * For italic/underline/link: stored in advanced.fontWeight.
+   */
+  fontWeight: string;
+
+  /** Normal or italic. */
+  fontStyle: 'normal' | 'italic';
+
+  /**
+   * Font size as a display number string, e.g. '13' (stored as '13px').
+   * Empty = inherit from paragraph style.
+   */
+  fontSize: string;
+
+  /** Text color as a 6-digit hex string including #, e.g. '#000000'. */
+  color: string;
+}
+
+// ---------------------------------------------------------------------------
+// ListStyleDraft
+// ---------------------------------------------------------------------------
+
+/**
+ * Editable draft state for list style property panels
+ * (Bulleted List, Numbered List).
+ *
+ * Extends BodyStyleDraft so the ListStylePanel can reuse all paragraph
+ * style fields (Typography, Spacing, Paragraph Rules) for list item text
+ * overrides, plus adds list-specific marker and indent fields.
+ *
+ * Paragraph fields are stored in ListStyle.itemStyle in the template.
+ * Marker/indent fields map to ListStyle top-level properties.
+ */
+export interface ListStyleDraft extends BodyStyleDraft {
+  /**
+   * Marker type for this list.
+   * Bulleted: 'disc' | 'circle' | 'square'
+   * Numbered: 'decimal' | 'lower-alpha' | 'lower-roman' | 'upper-alpha' | 'upper-roman'
+   */
+  markerStyle: string;
+
+  /** Marker color as a hex string, e.g. '#000000'. */
+  markerColor: string;
+
+  /**
+   * Marker glyph size as a display pt string, e.g. '12'.
+   * Stored as markerSize (px string) in ListStyle. Empty = inherit.
+   */
+  markerSize: string;
+
+  /**
+   * Left indent / hanging indent as a display pt string, e.g. '24'.
+   * Maps to indentSize in ListStyle (stored as px string).
+   */
+  indent: string;
 }

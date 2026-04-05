@@ -1,11 +1,12 @@
 /**
  * @file templates/utils/styleConversions.ts
- * @role Pure conversion utilities between Template format and BodyStyleDraft
- * @owns Bidirectional conversion between `Template.contentStyles.body` (the
- *       persisted TemplateStyle object) and `BodyStyleDraft` (the local state
- *       driving the property panel UI form fields). Also owns the px↔display
- *       string conversion, the advanced CSS textarea serialisation, and the
- *       `updateDraftBodyStyle` merge helper for live-preview field changes.
+ * @role Pure conversion utilities between Template format and style drafts
+ * @owns Bidirectional conversion between Template (persisted) and all draft
+ *       types (local panel state): BodyStyleDraft (paragraph styles),
+ *       CharacterStyleDraft (bold/italic/underline/link), ListStyleDraft
+ *       (bulletedList/numberedList). Also owns px↔display string conversion,
+ *       the advanced CSS textarea serialisation, and the `updateDraft*`
+ *       merge helpers for live-preview field changes.
  * @does-not-own Template persistence (TemplateContext), UI rendering
  *               (TemplateEditorPage), field mapping constants (stylePropertyMap).
  *
@@ -13,14 +14,19 @@
  * new values — no mutation, no I/O, no context access.
  *
  * @governance Template Editor only
- * @see templates/types/styleEditor.ts — BodyStyleDraft interface
+ * @see templates/types/styleEditor.ts — draft interfaces
  * @see templates/constants/stylePropertyMap.ts — BODY_ADVANCED_STRUCTURED_FIELDS
- * @see mylo/template.ts — Template, TemplateStyle types
+ * @see mylo/template.ts — Template, TemplateStyle, ListStyle types
  */
 
-import type { Template, TemplateStyle, CSSProperties } from '../../mylo/template';
-import type { BodyStyleDraft } from '../types/styleEditor';
-import { BODY_ADVANCED_STRUCTURED_FIELDS } from '../constants/stylePropertyMap';
+import type { Template, TemplateStyle, CSSProperties, ContentStyles } from '../../mylo/template';
+import type { BodyStyleDraft, CharacterStyleDraft, ListStyleDraft } from '../types/styleEditor';
+import {
+  BODY_ADVANCED_STRUCTURED_FIELDS,
+  PARA_CONTENT_KEY_MAP,
+  LIST_TEMPLATE_KEY_MAP,
+} from '../constants/stylePropertyMap';
+import type { ParagraphStyleKey, CharacterStyleKey, ListStyleKey } from '../constants/stylePropertyMap';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -48,13 +54,13 @@ function toTextAlign(value: string): BodyStyleDraft['textAlign'] {
   return 'left';
 }
 
-/** Safe cast to one of the BodyStyleDraft fontStyle values. */
-function toFontStyle(value: string): BodyStyleDraft['fontStyle'] {
+/** Safe cast to one of the draft fontStyle values. */
+function toFontStyle(value: string): 'normal' | 'italic' {
   return value === 'italic' ? 'italic' : 'normal';
 }
 
 // ---------------------------------------------------------------------------
-// Public API
+// Public API — unit conversion
 // ---------------------------------------------------------------------------
 
 /**
@@ -92,6 +98,10 @@ export function ptDisplayToPx(value: string): string {
   if (trimmed === '0') return '0';
   return `${trimmed}px`;
 }
+
+// ---------------------------------------------------------------------------
+// Public API — advanced CSS textarea serialisation
+// ---------------------------------------------------------------------------
 
 /**
  * Parse the advanced CSS textarea string into a property key/value map.
@@ -132,22 +142,18 @@ export function serializeAdvancedCss(props: Record<string, string>): string {
     .join('\n');
 }
 
-/**
- * Read a Template object and produce a BodyStyleDraft for the property panel.
- *
- * Reads top-level `contentStyles.body` properties and extracts known advanced
- * properties into structured fields. Any remaining advanced properties that
- * are not in BODY_ADVANCED_STRUCTURED_FIELDS are serialised into the
- * `advancedCss` textarea field.
- *
- * Handles missing or undefined values gracefully — templates created before
- * certain fields existed will not crash; empty strings are used as defaults.
- */
-export function templateBodyToStyleDraft(template: Template): BodyStyleDraft {
-  const body = template.contentStyles?.body ?? {};
-  const advanced: CSSProperties = body.advanced ?? {};
+// ---------------------------------------------------------------------------
+// Internal — core TemplateStyle → BodyStyleDraft converter
+// ---------------------------------------------------------------------------
 
-  // Identify which advanced keys are structured (surfaced as form fields)
+/**
+ * Convert a TemplateStyle object directly to a BodyStyleDraft.
+ * Extracted from templateBodyToStyleDraft so it can be reused by all
+ * paragraph and list style conversions without requiring a full Template.
+ */
+function styleObjectToBodyDraft(style: TemplateStyle): BodyStyleDraft {
+  const advanced: CSSProperties = style.advanced ?? {};
+
   const structuredKeys = new Set<string>(BODY_ADVANCED_STRUCTURED_FIELDS);
 
   // Collect unstructured advanced properties → advancedCss textarea
@@ -160,13 +166,13 @@ export function templateBodyToStyleDraft(template: Template): BodyStyleDraft {
 
   return {
     // Typography
-    fontFamily: styleValStr(body.fontFamily),
-    fontSize: pxToPtDisplay(styleValStr(body.fontSize)),
-    fontWeight: styleValStr(body.fontWeight) || '400',
+    fontFamily: styleValStr(style.fontFamily),
+    fontSize: pxToPtDisplay(styleValStr(style.fontSize)),
+    fontWeight: styleValStr(style.fontWeight) || '400',
     fontStyle: toFontStyle(cssValStr(advanced, 'fontStyle')),
-    lineHeight: pxToPtDisplay(styleValStr(body.lineHeight)),
+    lineHeight: pxToPtDisplay(styleValStr(style.lineHeight)),
     letterSpacing: pxToPtDisplay(cssValStr(advanced, 'letterSpacing')),
-    color: styleValStr(body.color) || '#000000',
+    color: styleValStr(style.color) || '#000000',
     textAlign: toTextAlign(cssValStr(advanced, 'textAlign')),
     textTransform: cssValStr(advanced, 'textTransform'),
 
@@ -196,19 +202,49 @@ export function templateBodyToStyleDraft(template: Template): BodyStyleDraft {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Public API — paragraph style conversions
+// ---------------------------------------------------------------------------
+
 /**
- * Convert a BodyStyleDraft back into the contentStyles.body TemplateStyle shape,
- * ready to merge into the template object.
+ * Read a Template object and produce a BodyStyleDraft for the Body style panel.
+ * Kept for backward compatibility — prefer templateStyleToParaDraft(template, 'body').
+ */
+export function templateBodyToStyleDraft(template: Template): BodyStyleDraft {
+  return templateStyleToParaDraft(template, 'body');
+}
+
+/**
+ * Read a Template object and produce a BodyStyleDraft for any paragraph style
+ * (body, h1, h2, h3). The styleKey determines which contentStyles key to read.
+ */
+export function templateStyleToParaDraft(
+  template: Template,
+  styleKey: ParagraphStyleKey,
+): BodyStyleDraft {
+  const contentKey = PARA_CONTENT_KEY_MAP[styleKey] as keyof ContentStyles;
+  const style: TemplateStyle = template.contentStyles?.[contentKey] ?? {};
+  return styleObjectToBodyDraft(style);
+}
+
+/**
+ * Convert a BodyStyleDraft back into a TemplateStyle shape,
+ * ready to merge into template.contentStyles[key].
  *
  * Only fields with non-empty values are included — omitting a field is the same
  * as "not set" in the CSS output.
  *
- * The `advancedCss` textarea is parsed and merged with the structured advanced
- * fields. Structured fields take precedence over any duplicates in advancedCss.
- *
- * Line height special case: CSS line-height values < 10 are unitless multipliers
- * (e.g. '1.5' means 1.5× font size). Values ≥ 10 are treated as pixel values
- * and stored with the 'px' suffix (e.g. '18' → '18px').
+ * Line height special case: values < 10 are unitless multipliers ('1.5' means
+ * 1.5× font size). Values ≥ 10 are treated as pixel values ('18' → '18px').
+ */
+export function paraDraftToTemplateStyle(draft: BodyStyleDraft): TemplateStyle {
+  return styleDraftToTemplateBody(draft);
+}
+
+/**
+ * Convert a BodyStyleDraft back into the contentStyles.body TemplateStyle shape,
+ * ready to merge into the template object.
+ * @deprecated Use paraDraftToTemplateStyle. Kept for backward compatibility.
  */
 export function styleDraftToTemplateBody(draft: BodyStyleDraft): TemplateStyle {
   // Start with parsed free-form advanced CSS (structured fields override it below)
@@ -314,19 +350,246 @@ export function styleDraftToTemplateBody(draft: BodyStyleDraft): TemplateStyle {
 
 /**
  * Merge a partial BodyStyleDraft patch into the current draft, returning a
- * new BodyStyleDraft. Used by each property panel field's onChange handler to
- * produce the next draft state without mutating the current one.
- *
- * Placing this here (rather than inline in the component) keeps business logic
- * out of UI components and makes the merge logic independently testable.
- *
- * Example:
- *   updateDraftBodyStyle(draft, { fontSize: '14' })
- *   → { ...draft, fontSize: '14' }
+ * new BodyStyleDraft. Used by each property panel field's onChange handler.
  */
 export function updateDraftBodyStyle(
   current: BodyStyleDraft,
   patch: Partial<BodyStyleDraft>,
 ): BodyStyleDraft {
+  return { ...current, ...patch };
+}
+
+// ---------------------------------------------------------------------------
+// Public API — character style conversions
+// ---------------------------------------------------------------------------
+
+/**
+ * Read a Template object and produce a CharacterStyleDraft for the given
+ * character style key (bold, italic, underline, link).
+ *
+ * - bold:      reads characterRules.bold.fontWeight/color and advanced
+ * - italic:    reads characterRules.italic.advanced (fontStyle defaults to 'italic')
+ * - underline: reads characterRules.underline.color and advanced
+ * - link:      reads linkRules.color and linkRules.advanced
+ */
+export function templateStyleToCharacterDraft(
+  template: Template,
+  styleKey: CharacterStyleKey,
+): CharacterStyleDraft {
+  if (styleKey === 'link') {
+    const linkAdv: CSSProperties = template.linkRules?.advanced ?? {};
+    return {
+      fontFamily: cssValStr(linkAdv, 'fontFamily'),
+      fontWeight: cssValStr(linkAdv, 'fontWeight') || '400',
+      fontStyle: toFontStyle(cssValStr(linkAdv, 'fontStyle')),
+      fontSize: pxToPtDisplay(cssValStr(linkAdv, 'fontSize')),
+      color: template.linkRules?.color || '#0000ee',
+    };
+  }
+
+  if (styleKey === 'bold') {
+    const boldRule = template.characterRules.bold;
+    const advanced: CSSProperties = boldRule.advanced ?? {};
+    return {
+      fontFamily: cssValStr(advanced, 'fontFamily'),
+      fontWeight: styleValStr(boldRule.fontWeight) || '700',
+      fontStyle: toFontStyle(cssValStr(advanced, 'fontStyle')),
+      fontSize: pxToPtDisplay(cssValStr(advanced, 'fontSize')),
+      color: boldRule.color || cssValStr(advanced, 'color') || '#000000',
+    };
+  }
+
+  if (styleKey === 'italic') {
+    const italicRule = template.characterRules.italic;
+    const advanced: CSSProperties = italicRule.advanced ?? {};
+    const rawFontStyle = cssValStr(advanced, 'fontStyle');
+    return {
+      fontFamily: cssValStr(advanced, 'fontFamily'),
+      fontWeight: cssValStr(advanced, 'fontWeight') || '400',
+      // italic panel defaults fontStyle to 'italic' when not explicitly overridden
+      fontStyle: rawFontStyle ? toFontStyle(rawFontStyle) : 'italic',
+      fontSize: pxToPtDisplay(cssValStr(advanced, 'fontSize')),
+      color: cssValStr(advanced, 'color') || '#000000',
+    };
+  }
+
+  // underline
+  const underlineRule = template.characterRules.underline;
+  const advanced: CSSProperties = underlineRule.advanced ?? {};
+  return {
+    fontFamily: cssValStr(advanced, 'fontFamily'),
+    fontWeight: cssValStr(advanced, 'fontWeight') || '400',
+    fontStyle: toFontStyle(cssValStr(advanced, 'fontStyle')),
+    fontSize: pxToPtDisplay(cssValStr(advanced, 'fontSize')),
+    color: underlineRule.color || cssValStr(advanced, 'color') || '#000000',
+  };
+}
+
+/**
+ * Apply a CharacterStyleDraft back to the template, returning a new Template.
+ * Each style key writes to a different section of the template:
+ * - bold → characterRules.bold (fontWeight/color top-level; others in advanced)
+ * - italic → characterRules.italic.advanced
+ * - underline → characterRules.underline.color + advanced
+ * - link → linkRules.color + linkRules.advanced
+ */
+export function characterDraftToTemplateUpdate(
+  template: Template,
+  draft: CharacterStyleDraft,
+  styleKey: CharacterStyleKey,
+): Template {
+  /** Build an advanced CSSProperties object from the non-top-level draft fields. */
+  const buildAdvanced = (
+    includeFontWeight: boolean,
+    includeColor: boolean,
+  ): CSSProperties | undefined => {
+    const adv: CSSProperties = {};
+    if (draft.fontFamily) adv.fontFamily = draft.fontFamily;
+    const fsPx = ptDisplayToPx(draft.fontSize);
+    if (fsPx) adv.fontSize = fsPx;
+    if (draft.fontStyle === 'italic') adv.fontStyle = 'italic';
+    if (includeFontWeight && draft.fontWeight) adv.fontWeight = draft.fontWeight;
+    if (includeColor && draft.color) adv.color = draft.color;
+    return Object.keys(adv).length > 0 ? adv : undefined;
+  };
+
+  if (styleKey === 'link') {
+    return {
+      ...template,
+      linkRules: {
+        ...template.linkRules,
+        color: draft.color,
+        advanced: buildAdvanced(true, false),
+      },
+    };
+  }
+
+  if (styleKey === 'bold') {
+    return {
+      ...template,
+      characterRules: {
+        ...template.characterRules,
+        bold: {
+          ...template.characterRules.bold,
+          fontWeight: draft.fontWeight ? Number(draft.fontWeight) : undefined,
+          color: draft.color || undefined,
+          advanced: buildAdvanced(false, false),
+        },
+      },
+    };
+  }
+
+  if (styleKey === 'italic') {
+    return {
+      ...template,
+      characterRules: {
+        ...template.characterRules,
+        italic: {
+          ...template.characterRules.italic,
+          advanced: buildAdvanced(true, true),
+        },
+      },
+    };
+  }
+
+  // underline
+  return {
+    ...template,
+    characterRules: {
+      ...template.characterRules,
+      underline: {
+        ...template.characterRules.underline,
+        color: draft.color || undefined,
+        advanced: buildAdvanced(true, false),
+      },
+    },
+  };
+}
+
+/**
+ * Merge a partial CharacterStyleDraft patch into the current draft.
+ * Used by CharacterStylePanel field onChange handlers.
+ */
+export function updateDraftCharStyle(
+  current: CharacterStyleDraft,
+  patch: Partial<CharacterStyleDraft>,
+): CharacterStyleDraft {
+  return { ...current, ...patch };
+}
+
+// ---------------------------------------------------------------------------
+// Public API — list style conversions
+// ---------------------------------------------------------------------------
+
+/**
+ * Read a Template object and produce a ListStyleDraft for the given list
+ * style key (bulletedList, numberedList).
+ *
+ * Paragraph fields are read from listStyle.itemStyle (TemplateStyle).
+ * Marker/indent fields are read from the ListStyle top-level properties.
+ */
+export function templateStyleToListDraft(
+  template: Template,
+  styleKey: ListStyleKey,
+): ListStyleDraft {
+  const templateKey = LIST_TEMPLATE_KEY_MAP[styleKey] as 'bulletedList' | 'orderedList';
+  const listStyle = template.listStyles[templateKey];
+  const defaultMarker = styleKey === 'bulletedList' ? 'disc' : 'decimal';
+
+  // Paragraph overrides for list item text (empty style if not set)
+  const itemStyle: TemplateStyle = listStyle.itemStyle ?? {};
+  const paraDraft = styleObjectToBodyDraft(itemStyle);
+
+  return {
+    ...paraDraft,
+    markerStyle: listStyle.markerType || defaultMarker,
+    markerColor: listStyle.markerColor || '#000000',
+    markerSize: pxToPtDisplay(listStyle.markerSize || ''),
+    indent: pxToPtDisplay(listStyle.indentSize || ''),
+  };
+}
+
+/**
+ * Apply a ListStyleDraft back to the template, returning a new Template.
+ * Paragraph fields are written to listStyle.itemStyle.
+ * Marker/indent fields are written to ListStyle top-level properties.
+ */
+export function listDraftToTemplateUpdate(
+  template: Template,
+  draft: ListStyleDraft,
+  styleKey: ListStyleKey,
+): Template {
+  const templateKey = LIST_TEMPLATE_KEY_MAP[styleKey] as 'bulletedList' | 'orderedList';
+  const existingListStyle = template.listStyles[templateKey];
+
+  // Convert paragraph draft fields to a TemplateStyle for itemStyle
+  const itemStyle = styleDraftToTemplateBody(draft);
+
+  const updatedListStyle = {
+    ...existingListStyle,
+    markerType: draft.markerStyle,
+    markerColor: draft.markerColor,
+    markerSize: draft.markerSize ? ptDisplayToPx(draft.markerSize) : existingListStyle.markerSize,
+    indentSize: draft.indent ? ptDisplayToPx(draft.indent) : existingListStyle.indentSize,
+    itemStyle: Object.keys(itemStyle).length > 0 ? itemStyle : undefined,
+  };
+
+  return {
+    ...template,
+    listStyles: {
+      ...template.listStyles,
+      [templateKey]: updatedListStyle,
+    },
+  };
+}
+
+/**
+ * Merge a partial ListStyleDraft patch into the current draft.
+ * Used by ListStylePanel field onChange handlers.
+ */
+export function updateDraftListStyle(
+  current: ListStyleDraft,
+  patch: Partial<ListStyleDraft>,
+): ListStyleDraft {
   return { ...current, ...patch };
 }

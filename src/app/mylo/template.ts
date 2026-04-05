@@ -43,12 +43,18 @@ export interface PageStyles {
 
 /**
  * List marker and spacing configuration for bullet/ordered lists.
+ * `itemStyle` holds optional paragraph-level style overrides for list item text.
+ * `markerSize` holds the pt size of the marker glyph (stored as a px string, e.g. '12px').
  */
 export interface ListStyle {
   markerType: string;
   indentSize: string;
   itemSpacing?: string;
   markerColor?: string;
+  /** Size of the list marker glyph, e.g. '12px'. Optional — inherits from body when absent. */
+  markerSize?: string;
+  /** Paragraph-level style overrides for list item text (font, size, spacing, etc.). */
+  itemStyle?: TemplateStyle;
   advanced?: CSSProperties;
 }
 
@@ -128,10 +134,12 @@ export interface Template {
     superscript: {
       enabled: boolean;
       fontSize?: string;
+      advanced?: CSSProperties;
     };
     subscript: {
       enabled: boolean;
       fontSize?: string;
+      advanced?: CSSProperties;
     };
   };
 
@@ -139,6 +147,8 @@ export interface Template {
     color?: string;
     underline: boolean;
     hoverColor?: string;
+    /** Advanced CSS overrides applied to <a> elements (e.g. fontFamily, fontSize). */
+    advanced?: CSSProperties;
   };
 
   /**
@@ -197,5 +207,7 @@ export function isTemplateV2(template: Template): boolean {
  * @returns true if template has styles and pageLayout (old format)
  */
 export function isTemplateV1(template: Template): boolean {
-  return !!(template.styles && template.pageLayout);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const t = template as any;
+  return !!(t.styles && t.pageLayout);
 }

@@ -4,7 +4,7 @@
     {
       "name": "Mylo Dev (Vite)",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /tmp && exec node /tmp/mylo-dev/node_modules/.bin/vite --config /tmp/mylo-dev/vite.config.ts"],
+      "runtimeArgs": ["-c", "cd /Users/Doug/Documents/Work/my-idea/GIT/Mylofigma032126 && exec /usr/local/bin/node node_modules/.bin/vite"],
       "port": 5173
     }
   ]
