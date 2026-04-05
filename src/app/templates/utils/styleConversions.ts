@@ -59,6 +59,42 @@ function toFontStyle(value: string): 'normal' | 'italic' {
   return value === 'italic' ? 'italic' : 'normal';
 }
 
+/**
+ * Parse a CSS border shorthand like '1px solid #91161a' into weight and color.
+ * Weight is returned as a display string (no px suffix).
+ */
+function parseBorderShorthand(value: string): { weight: string; color: string } {
+  if (!value) return { weight: '', color: '' };
+  const parts = value.trim().split(/\s+/);
+  const weight = parts[0] ? pxToPtDisplay(parts[0]) : '';
+  const color = parts[2] ?? '';
+  return { weight, color };
+}
+
+/**
+ * Parse a CSS padding shorthand like '10px 0px 8px 0px' into individual sides.
+ * All values are returned as display strings (no px suffix).
+ */
+function parsePaddingShorthand(value: string): { top: string; bottom: string } {
+  if (!value) return { top: '', bottom: '' };
+  const parts = value.trim().split(/\s+/);
+  if (parts.length === 1) {
+    const v = pxToPtDisplay(parts[0]);
+    return { top: v, bottom: v };
+  }
+  // 2-value: vertical | horizontal → top = bottom = first value
+  if (parts.length === 2) {
+    const v = pxToPtDisplay(parts[0]);
+    return { top: v, bottom: v };
+  }
+  // 3-value: top | horizontal | bottom  (length=3)
+  // 4-value: top | right | bottom | left (length=4)
+  return {
+    top: pxToPtDisplay(parts[0]),
+    bottom: pxToPtDisplay(parts[parts.length === 3 ? 2 : 2]),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Public API — unit conversion
 // ---------------------------------------------------------------------------
@@ -183,19 +219,73 @@ function styleObjectToBodyDraft(style: TemplateStyle): BodyStyleDraft {
     paddingRight: pxToPtDisplay(cssValStr(advanced, 'paddingRight')),
     textIndent: pxToPtDisplay(cssValStr(advanced, 'textIndent')),
 
-    // Paragraph Rules (from advanced)
-    ruleAboveEnabled: cssValStr(advanced, 'ruleAboveEnabled') === 'true',
-    ruleAboveWeight: pxToPtDisplay(cssValStr(advanced, 'ruleAboveWeight')),
-    ruleAboveOffset: pxToPtDisplay(cssValStr(advanced, 'ruleAboveOffset')),
-    ruleAboveLeft: pxToPtDisplay(cssValStr(advanced, 'ruleAboveLeft')),
-    ruleAboveRight: pxToPtDisplay(cssValStr(advanced, 'ruleAboveRight')),
-    ruleAboveColor: cssValStr(advanced, 'ruleAboveColor') || '#000000',
-    ruleBelowEnabled: cssValStr(advanced, 'ruleBelowEnabled') === 'true',
-    ruleBelowWeight: pxToPtDisplay(cssValStr(advanced, 'ruleBelowWeight')),
-    ruleBelowOffset: pxToPtDisplay(cssValStr(advanced, 'ruleBelowOffset')),
-    ruleBelowLeft: pxToPtDisplay(cssValStr(advanced, 'ruleBelowLeft')),
-    ruleBelowRight: pxToPtDisplay(cssValStr(advanced, 'ruleBelowRight')),
-    ruleBelowColor: cssValStr(advanced, 'ruleBelowColor') || '#000000',
+    // Paragraph Rules — read from native CSS border properties first (used by
+    // built-in templates like Traditional), falling back to the custom ruleAbove*/
+    // ruleBelow* keys written by the editor when the user has previously saved rules.
+    ...(() => {
+      const borderTopVal = cssValStr(advanced, 'borderTop');
+      const borderBottomVal = cssValStr(advanced, 'borderBottom');
+
+      // Vertical offsets come from individual paddingTop/paddingBottom, or from
+      // the CSS padding shorthand (Traditional uses 'padding: top right bottom left').
+      let paddingTopDisplay = pxToPtDisplay(cssValStr(advanced, 'paddingTop'));
+      let paddingBottomDisplay = pxToPtDisplay(cssValStr(advanced, 'paddingBottom'));
+      const paddingShorthand = cssValStr(advanced, 'padding');
+      if (paddingShorthand && !paddingTopDisplay && !paddingBottomDisplay) {
+        const parsed = parsePaddingShorthand(paddingShorthand);
+        paddingTopDisplay = parsed.top;
+        paddingBottomDisplay = parsed.bottom;
+      }
+
+      let ruleAboveEnabled: boolean;
+      let ruleAboveWeight: string;
+      let ruleAboveColor: string;
+      let ruleAboveOffset: string;
+      if (borderTopVal) {
+        const parsed = parseBorderShorthand(borderTopVal);
+        ruleAboveEnabled = true;
+        ruleAboveWeight = parsed.weight;
+        ruleAboveColor = parsed.color || '#000000';
+        ruleAboveOffset = paddingTopDisplay;
+      } else {
+        ruleAboveEnabled = cssValStr(advanced, 'ruleAboveEnabled') === 'true';
+        ruleAboveWeight = pxToPtDisplay(cssValStr(advanced, 'ruleAboveWeight'));
+        ruleAboveColor = cssValStr(advanced, 'ruleAboveColor') || '#000000';
+        ruleAboveOffset = pxToPtDisplay(cssValStr(advanced, 'ruleAboveOffset'));
+      }
+
+      let ruleBelowEnabled: boolean;
+      let ruleBelowWeight: string;
+      let ruleBelowColor: string;
+      let ruleBelowOffset: string;
+      if (borderBottomVal) {
+        const parsed = parseBorderShorthand(borderBottomVal);
+        ruleBelowEnabled = true;
+        ruleBelowWeight = parsed.weight;
+        ruleBelowColor = parsed.color || '#000000';
+        ruleBelowOffset = paddingBottomDisplay;
+      } else {
+        ruleBelowEnabled = cssValStr(advanced, 'ruleBelowEnabled') === 'true';
+        ruleBelowWeight = pxToPtDisplay(cssValStr(advanced, 'ruleBelowWeight'));
+        ruleBelowColor = cssValStr(advanced, 'ruleBelowColor') || '#000000';
+        ruleBelowOffset = pxToPtDisplay(cssValStr(advanced, 'ruleBelowOffset'));
+      }
+
+      return {
+        ruleAboveEnabled,
+        ruleAboveWeight,
+        ruleAboveOffset,
+        ruleAboveLeft: pxToPtDisplay(cssValStr(advanced, 'ruleAboveLeft')),
+        ruleAboveRight: pxToPtDisplay(cssValStr(advanced, 'ruleAboveRight')),
+        ruleAboveColor,
+        ruleBelowEnabled,
+        ruleBelowWeight,
+        ruleBelowOffset,
+        ruleBelowLeft: pxToPtDisplay(cssValStr(advanced, 'ruleBelowLeft')),
+        ruleBelowRight: pxToPtDisplay(cssValStr(advanced, 'ruleBelowRight')),
+        ruleBelowColor,
+      };
+    })(),
 
     // Advanced CSS textarea
     advancedCss: serializeAdvancedCss(unstructured),
@@ -294,32 +384,46 @@ export function styleDraftToTemplateBody(draft: BodyStyleDraft): TemplateStyle {
     delete advanced.textTransform;
   }
 
-  // Paragraph Rules — store enabled flag and dimension fields only when enabled
-  const writeRuleFields = (
-    prefix: 'ruleAbove' | 'ruleBelow',
-    enabled: boolean,
-    weight: string,
-    offset: string,
-    left: string,
-    right: string,
-    color: string,
-  ) => {
-    if (enabled) {
-      advanced[`${prefix}Enabled`] = 'true';
-      const wPx = ptDisplayToPx(weight); if (wPx) advanced[`${prefix}Weight`] = wPx; else delete advanced[`${prefix}Weight`];
-      const oPx = ptDisplayToPx(offset); if (oPx) advanced[`${prefix}Offset`] = oPx; else delete advanced[`${prefix}Offset`];
-      const lPx = ptDisplayToPx(left);   if (lPx) advanced[`${prefix}Left`]   = lPx; else delete advanced[`${prefix}Left`];
-      const rPx = ptDisplayToPx(right);  if (rPx) advanced[`${prefix}Right`]  = rPx; else delete advanced[`${prefix}Right`];
-      if (color) advanced[`${prefix}Color`] = color; else delete advanced[`${prefix}Color`];
-    } else {
-      for (const key of [`${prefix}Enabled`, `${prefix}Weight`, `${prefix}Offset`, `${prefix}Left`, `${prefix}Right`, `${prefix}Color`]) {
-        delete advanced[key];
-      }
-    }
-  };
+  // Paragraph Rules — written as native CSS border properties so the CSS generator
+  // can render them. Custom ruleAbove*/ruleBelow* keys and the CSS padding shorthand
+  // are cleaned up so they don't conflict on re-read.
+  const oldRuleKeys = [
+    'ruleAboveEnabled', 'ruleAboveWeight', 'ruleAboveOffset', 'ruleAboveLeft', 'ruleAboveRight', 'ruleAboveColor',
+    'ruleBelowEnabled', 'ruleBelowWeight', 'ruleBelowOffset', 'ruleBelowLeft', 'ruleBelowRight', 'ruleBelowColor',
+  ];
+  for (const key of oldRuleKeys) delete advanced[key];
+  // Replace padding shorthand with individual paddingTop/paddingBottom for rule offsets
+  delete advanced['padding'];
 
-  writeRuleFields('ruleAbove', draft.ruleAboveEnabled, draft.ruleAboveWeight, draft.ruleAboveOffset, draft.ruleAboveLeft, draft.ruleAboveRight, draft.ruleAboveColor);
-  writeRuleFields('ruleBelow', draft.ruleBelowEnabled, draft.ruleBelowWeight, draft.ruleBelowOffset, draft.ruleBelowLeft, draft.ruleBelowRight, draft.ruleBelowColor);
+  if (draft.ruleAboveEnabled) {
+    const wPx = ptDisplayToPx(draft.ruleAboveWeight) || '1px';
+    const color = draft.ruleAboveColor || '#000000';
+    advanced.borderTop = `${wPx} solid ${color}`;
+    const offsetPx = ptDisplayToPx(draft.ruleAboveOffset);
+    if (offsetPx) advanced.paddingTop = offsetPx; else delete advanced.paddingTop;
+    const lPx = ptDisplayToPx(draft.ruleAboveLeft); if (lPx) advanced.ruleAboveLeft = lPx; else delete advanced.ruleAboveLeft;
+    const rPx = ptDisplayToPx(draft.ruleAboveRight); if (rPx) advanced.ruleAboveRight = rPx; else delete advanced.ruleAboveRight;
+  } else {
+    delete advanced.borderTop;
+    delete advanced.paddingTop;
+    delete advanced.ruleAboveLeft;
+    delete advanced.ruleAboveRight;
+  }
+
+  if (draft.ruleBelowEnabled) {
+    const wPx = ptDisplayToPx(draft.ruleBelowWeight) || '1px';
+    const color = draft.ruleBelowColor || '#000000';
+    advanced.borderBottom = `${wPx} solid ${color}`;
+    const offsetPx = ptDisplayToPx(draft.ruleBelowOffset);
+    if (offsetPx) advanced.paddingBottom = offsetPx; else delete advanced.paddingBottom;
+    const lPx = ptDisplayToPx(draft.ruleBelowLeft); if (lPx) advanced.ruleBelowLeft = lPx; else delete advanced.ruleBelowLeft;
+    const rPx = ptDisplayToPx(draft.ruleBelowRight); if (rPx) advanced.ruleBelowRight = rPx; else delete advanced.ruleBelowRight;
+  } else {
+    delete advanced.borderBottom;
+    delete advanced.paddingBottom;
+    delete advanced.ruleBelowLeft;
+    delete advanced.ruleBelowRight;
+  }
 
   // Build the top-level TemplateStyle
   const style: TemplateStyle = {};

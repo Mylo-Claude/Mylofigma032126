@@ -51,6 +51,12 @@ export const BODY_ADVANCED_STRUCTURED_FIELDS = [
   'paddingLeft',
   'paddingRight',
   'textTransform',
+  // Native CSS border/padding properties used by paragraph rules
+  'borderTop',
+  'borderBottom',
+  'paddingTop',
+  'paddingBottom',
+  'padding',
   // Paragraph rule fields (stored in advanced; not yet rendered as CSS)
   'ruleAboveEnabled',
   'ruleAboveWeight',
