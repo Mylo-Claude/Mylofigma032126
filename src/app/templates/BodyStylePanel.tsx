@@ -123,24 +123,6 @@ function StackedField({
 }
 
 /**
- * Label-left layout for spacing rows.
- */
-function LabeledField({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-mylo-text-secondary w-24 shrink-0">{label}</span>
-      <div className="flex-1 min-w-0">{children}</div>
-    </div>
-  );
-}
-
-/**
  * Number + "pt" unit pair.
  * `small` renders a max-40px input for compact three-in-a-row layouts.
  */
@@ -475,119 +457,193 @@ export function BodyStylePanel({
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-3">
               <div className="space-y-3 pt-1">
-                <LabeledField label="Space Before">
-                  <DimensionInput
-                    value={bodyDraft.marginTop}
-                    onChange={(v) => set('marginTop', v)}
-                  />
-                </LabeledField>
-                <LabeledField label="Space After">
-                  <DimensionInput
-                    value={bodyDraft.marginBottom}
-                    onChange={(v) => set('marginBottom', v)}
-                  />
-                </LabeledField>
-                <LabeledField label="Left Indent">
-                  <DimensionInput
-                    value={bodyDraft.paddingLeft}
-                    onChange={(v) => set('paddingLeft', v)}
-                  />
-                </LabeledField>
-                <LabeledField label="Right Indent">
-                  <DimensionInput
-                    value={bodyDraft.paddingRight}
-                    onChange={(v) => set('paddingRight', v)}
-                  />
-                </LabeledField>
-                <LabeledField label="First Line">
+                {/* Row 1: Space Before + Space After */}
+                <div className="grid grid-cols-2 gap-3">
+                  <StackedField label="Space Before">
+                    <DimensionInput
+                      value={bodyDraft.marginTop}
+                      onChange={(v) => set('marginTop', v)}
+                    />
+                  </StackedField>
+                  <StackedField label="Space After">
+                    <DimensionInput
+                      value={bodyDraft.marginBottom}
+                      onChange={(v) => set('marginBottom', v)}
+                    />
+                  </StackedField>
+                </div>
+                {/* Row 2: Left Indent + Right Indent */}
+                <div className="grid grid-cols-2 gap-3">
+                  <StackedField label="Left Indent">
+                    <DimensionInput
+                      value={bodyDraft.paddingLeft}
+                      onChange={(v) => set('paddingLeft', v)}
+                    />
+                  </StackedField>
+                  <StackedField label="Right Indent">
+                    <DimensionInput
+                      value={bodyDraft.paddingRight}
+                      onChange={(v) => set('paddingRight', v)}
+                    />
+                  </StackedField>
+                </div>
+                {/* Row 3: First Line — full width */}
+                <StackedField label="First Line">
                   <DimensionInput
                     value={bodyDraft.textIndent}
                     onChange={(v) => set('textIndent', v)}
                   />
-                </LabeledField>
+                </StackedField>
               </div>
             </AccordionContent>
           </AccordionItem>
 
-          {/* ══ 4. Rule Above ══ */}
-          <AccordionItem value="rule-above" className="border-b border-mylo-border-light">
+          {/* ══ 4. Paragraph Rules — Rule Above + Rule Below in one accordion ══ */}
+          <AccordionItem value="paragraph-rules" className="border-b border-mylo-border-light">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
-              Rule Above
+              Paragraph Rules
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-3">
-              <div className="space-y-3 pt-1">
+              <div className="space-y-4 pt-1">
 
-                {/* Enabled toggle */}
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="rule-above-enabled"
-                    checked={bodyDraft.ruleAboveEnabled}
-                    onCheckedChange={(checked) =>
-                      set('ruleAboveEnabled', checked === true)
+                {/* ── Rule Above sub-block ── */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="rule-above-enabled"
+                      checked={bodyDraft.ruleAboveEnabled}
+                      onCheckedChange={(checked) =>
+                        set('ruleAboveEnabled', checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor="rule-above-enabled"
+                      className="text-xs font-semibold text-mylo-text-secondary cursor-pointer"
+                    >
+                      Rule Above
+                    </Label>
+                  </div>
+                  <div
+                    className={
+                      bodyDraft.ruleAboveEnabled
+                        ? undefined
+                        : 'opacity-40 pointer-events-none'
                     }
-                  />
-                  <Label
-                    htmlFor="rule-above-enabled"
-                    className="text-xs text-mylo-text-secondary font-normal cursor-pointer"
                   >
-                    Enable Rule Above
-                  </Label>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <StackedField label="Weight">
+                          <DimensionInput
+                            value={bodyDraft.ruleAboveWeight}
+                            onChange={(v) => set('ruleAboveWeight', v)}
+                            disabled={!bodyDraft.ruleAboveEnabled}
+                          />
+                        </StackedField>
+                        <StackedField label="V. Offset">
+                          <DimensionInput
+                            value={bodyDraft.ruleAboveOffset}
+                            onChange={(v) => set('ruleAboveOffset', v)}
+                            disabled={!bodyDraft.ruleAboveEnabled}
+                          />
+                        </StackedField>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <StackedField label="Left Offset">
+                          <DimensionInput
+                            value={bodyDraft.ruleAboveLeft}
+                            onChange={(v) => set('ruleAboveLeft', v)}
+                            disabled={!bodyDraft.ruleAboveEnabled}
+                          />
+                        </StackedField>
+                        <StackedField label="Right Offset">
+                          <DimensionInput
+                            value={bodyDraft.ruleAboveRight}
+                            onChange={(v) => set('ruleAboveRight', v)}
+                            disabled={!bodyDraft.ruleAboveEnabled}
+                          />
+                        </StackedField>
+                      </div>
+                      <StackedField label="Color">
+                        <ColorField
+                          value={bodyDraft.ruleAboveColor}
+                          onChange={(v) => set('ruleAboveColor', v)}
+                          disabled={!bodyDraft.ruleAboveEnabled}
+                          inputRef={ruleAboveColorRef}
+                        />
+                      </StackedField>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Fields — dimmed when disabled */}
-                <div
-                  className={
-                    bodyDraft.ruleAboveEnabled
-                      ? undefined
-                      : 'opacity-40 pointer-events-none'
-                  }
-                >
-                  <div className="space-y-3">
-                    {/* Row 1: Weight + Vertical Offset */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <StackedField label="Weight">
-                        <DimensionInput
-                          value={bodyDraft.ruleAboveWeight}
-                          onChange={(v) => set('ruleAboveWeight', v)}
-                          disabled={!bodyDraft.ruleAboveEnabled}
-                        />
-                      </StackedField>
-                      <StackedField label="V. Offset">
-                        <DimensionInput
-                          value={bodyDraft.ruleAboveOffset}
-                          onChange={(v) => set('ruleAboveOffset', v)}
-                          disabled={!bodyDraft.ruleAboveEnabled}
+                {/* Divider between sub-blocks */}
+                <div className="border-t border-mylo-border-light" />
+
+                {/* ── Rule Below sub-block ── */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="rule-below-enabled"
+                      checked={bodyDraft.ruleBelowEnabled}
+                      onCheckedChange={(checked) =>
+                        set('ruleBelowEnabled', checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor="rule-below-enabled"
+                      className="text-xs font-semibold text-mylo-text-secondary cursor-pointer"
+                    >
+                      Rule Below
+                    </Label>
+                  </div>
+                  <div
+                    className={
+                      bodyDraft.ruleBelowEnabled
+                        ? undefined
+                        : 'opacity-40 pointer-events-none'
+                    }
+                  >
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <StackedField label="Weight">
+                          <DimensionInput
+                            value={bodyDraft.ruleBelowWeight}
+                            onChange={(v) => set('ruleBelowWeight', v)}
+                            disabled={!bodyDraft.ruleBelowEnabled}
+                          />
+                        </StackedField>
+                        <StackedField label="V. Offset">
+                          <DimensionInput
+                            value={bodyDraft.ruleBelowOffset}
+                            onChange={(v) => set('ruleBelowOffset', v)}
+                            disabled={!bodyDraft.ruleBelowEnabled}
+                          />
+                        </StackedField>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <StackedField label="Left Offset">
+                          <DimensionInput
+                            value={bodyDraft.ruleBelowLeft}
+                            onChange={(v) => set('ruleBelowLeft', v)}
+                            disabled={!bodyDraft.ruleBelowEnabled}
+                          />
+                        </StackedField>
+                        <StackedField label="Right Offset">
+                          <DimensionInput
+                            value={bodyDraft.ruleBelowRight}
+                            onChange={(v) => set('ruleBelowRight', v)}
+                            disabled={!bodyDraft.ruleBelowEnabled}
+                          />
+                        </StackedField>
+                      </div>
+                      <StackedField label="Color">
+                        <ColorField
+                          value={bodyDraft.ruleBelowColor}
+                          onChange={(v) => set('ruleBelowColor', v)}
+                          disabled={!bodyDraft.ruleBelowEnabled}
+                          inputRef={ruleBelowColorRef}
                         />
                       </StackedField>
                     </div>
-
-                    {/* Row 2: Left Offset + Right Offset */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <StackedField label="Left Offset">
-                        <DimensionInput
-                          value={bodyDraft.ruleAboveLeft}
-                          onChange={(v) => set('ruleAboveLeft', v)}
-                          disabled={!bodyDraft.ruleAboveEnabled}
-                        />
-                      </StackedField>
-                      <StackedField label="Right Offset">
-                        <DimensionInput
-                          value={bodyDraft.ruleAboveRight}
-                          onChange={(v) => set('ruleAboveRight', v)}
-                          disabled={!bodyDraft.ruleAboveEnabled}
-                        />
-                      </StackedField>
-                    </div>
-
-                    {/* Color */}
-                    <StackedField label="Color">
-                      <ColorField
-                        value={bodyDraft.ruleAboveColor}
-                        onChange={(v) => set('ruleAboveColor', v)}
-                        disabled={!bodyDraft.ruleAboveEnabled}
-                        inputRef={ruleAboveColorRef}
-                      />
-                    </StackedField>
                   </div>
                 </div>
 
@@ -595,89 +651,15 @@ export function BodyStylePanel({
             </AccordionContent>
           </AccordionItem>
 
-          {/* ══ 5. Rule Below ══ */}
-          <AccordionItem value="rule-below" className="border-b border-mylo-border-light">
+          {/* ══ 5. Keep Options ══ */}
+          <AccordionItem value="keep-options" className="border-b border-mylo-border-light">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
-              Rule Below
+              Keep Options
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-3">
-              <div className="space-y-3 pt-1">
-
-                {/* Enabled toggle */}
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="rule-below-enabled"
-                    checked={bodyDraft.ruleBelowEnabled}
-                    onCheckedChange={(checked) =>
-                      set('ruleBelowEnabled', checked === true)
-                    }
-                  />
-                  <Label
-                    htmlFor="rule-below-enabled"
-                    className="text-xs text-mylo-text-secondary font-normal cursor-pointer"
-                  >
-                    Enable Rule Below
-                  </Label>
-                </div>
-
-                {/* Fields — dimmed when disabled */}
-                <div
-                  className={
-                    bodyDraft.ruleBelowEnabled
-                      ? undefined
-                      : 'opacity-40 pointer-events-none'
-                  }
-                >
-                  <div className="space-y-3">
-                    {/* Row 1: Weight + Vertical Offset */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <StackedField label="Weight">
-                        <DimensionInput
-                          value={bodyDraft.ruleBelowWeight}
-                          onChange={(v) => set('ruleBelowWeight', v)}
-                          disabled={!bodyDraft.ruleBelowEnabled}
-                        />
-                      </StackedField>
-                      <StackedField label="V. Offset">
-                        <DimensionInput
-                          value={bodyDraft.ruleBelowOffset}
-                          onChange={(v) => set('ruleBelowOffset', v)}
-                          disabled={!bodyDraft.ruleBelowEnabled}
-                        />
-                      </StackedField>
-                    </div>
-
-                    {/* Row 2: Left Offset + Right Offset */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <StackedField label="Left Offset">
-                        <DimensionInput
-                          value={bodyDraft.ruleBelowLeft}
-                          onChange={(v) => set('ruleBelowLeft', v)}
-                          disabled={!bodyDraft.ruleBelowEnabled}
-                        />
-                      </StackedField>
-                      <StackedField label="Right Offset">
-                        <DimensionInput
-                          value={bodyDraft.ruleBelowRight}
-                          onChange={(v) => set('ruleBelowRight', v)}
-                          disabled={!bodyDraft.ruleBelowEnabled}
-                        />
-                      </StackedField>
-                    </div>
-
-                    {/* Color */}
-                    <StackedField label="Color">
-                      <ColorField
-                        value={bodyDraft.ruleBelowColor}
-                        onChange={(v) => set('ruleBelowColor', v)}
-                        disabled={!bodyDraft.ruleBelowEnabled}
-                        inputRef={ruleBelowColorRef}
-                      />
-                    </StackedField>
-                  </div>
-                </div>
-
-              </div>
+              <p className="pt-1 text-xs text-mylo-text-tertiary leading-relaxed">
+                Keep options coming in a future update.
+              </p>
             </AccordionContent>
           </AccordionItem>
 
