@@ -26,6 +26,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { EditorState } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
 import { Node as PMNode } from 'prosemirror-model';
 import { ChevronLeft, Check } from 'lucide-react';
 import { myloSchema } from '../mylo/schema';
@@ -131,6 +132,12 @@ export function EditorPage() {
   const [editorState, setEditorState] = useState<EditorState | null>(null);
 
   // ---------------------------------------------------------------------------
+  // Modification tracking — true only when the user has explicitly typed/edited
+  // ---------------------------------------------------------------------------
+
+  const [isModified, setIsModified] = useState(false);
+
+  // ---------------------------------------------------------------------------
   // Governance banner — shown in PreviewPanel when a governance rule triggers
   // ---------------------------------------------------------------------------
 
@@ -190,6 +197,19 @@ export function EditorPage() {
     },
     [id, updateDocument],
   );
+
+  // Called once when the ProseMirror view is ready — sets the initial editorState
+  // for PreviewPanel without touching saveStatus or isModified.
+  const handleViewReady = useCallback((view: EditorView) => {
+    setEditorState(view.state);
+  }, []);
+
+  // Called by EditorPanel only when the user has actually typed or edited content
+  // (transaction.steps.length > 0 && view.hasFocus()). Sets isModified so that
+  // LoadSampleMenu can gate its confirmation dialog on real edits only.
+  const handleUserEdit = useCallback(() => {
+    setIsModified(true);
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Template persistence — called by PreviewPanel when user switches template
@@ -277,6 +297,10 @@ export function EditorPage() {
         >
           <EditorPanel
             onDocumentChange={handleDocumentChange}
+            onViewReady={handleViewReady}
+            onUserEdit={handleUserEdit}
+            isModified={isModified}
+            onResetModified={() => setIsModified(false)}
             initialDoc={initialDocRef.current}
             template={activeTemplate}
             onGovernanceTrigger={handleGovernanceTrigger}

@@ -38,9 +38,13 @@ import { EditorView } from "prosemirror-view";
 
 interface LoadSampleMenuProps {
   view?: EditorView | null;
+  /** True only when the user has explicitly typed/edited content. */
+  isModified?: boolean;
+  /** Called after a sample is loaded to clear the isModified flag. */
+  onResetModified?: () => void;
 }
 
-export function LoadSampleMenu({ view }: LoadSampleMenuProps) {
+export function LoadSampleMenu({ view, isModified, onResetModified }: LoadSampleMenuProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingSampleId, setPendingSampleId] = useState<string | null>(null);
 
@@ -66,11 +70,21 @@ export function LoadSampleMenu({ view }: LoadSampleMenuProps) {
 
     // Dispatch the transaction (this triggers dispatchTransaction callback)
     view.dispatch(tr);
+
+    // Programmatic replacement — not a user edit; clear the modified flag so
+    // subsequent sample loads do not show the confirmation dialog unnecessarily.
+    onResetModified?.();
   };
 
   const handleSampleClick = (sampleId: string) => {
-    setPendingSampleId(sampleId);
-    setShowConfirmDialog(true);
+    if (isModified) {
+      // User has typed content — confirm before overwriting
+      setPendingSampleId(sampleId);
+      setShowConfirmDialog(true);
+    } else {
+      // Fresh or already-reset document — load directly, no dialog
+      loadSample(sampleId);
+    }
   };
 
   const handleConfirm = () => {

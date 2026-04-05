@@ -56,6 +56,22 @@ interface EditorPanelProps {
    * a doc change (e.g. cursor move while empty paragraphs exist).
    */
   onEmptyParagraphDetected?: () => void;
+  /**
+   * Called when the user makes an explicit edit (transaction has steps AND the
+   * editor is focused). NOT called for programmatic doc replacements.
+   * EditorPage uses this to set isModified so LoadSampleMenu can gate its dialog.
+   */
+  onUserEdit?: () => void;
+  /**
+   * Whether the document has unsaved user edits. Threaded down to LoadSampleMenu
+   * so it can decide whether to show the "overwrite?" confirmation dialog.
+   */
+  isModified?: boolean;
+  /**
+   * Called after a programmatic doc replacement (e.g. loading a sample) to
+   * clear the isModified flag in EditorPage.
+   */
+  onResetModified?: () => void;
 }
 
 /**
@@ -118,7 +134,7 @@ function checkEmptyParagraphNotification(
   }
 }
 
-export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, template, onGovernanceTrigger, onEmptyParagraphDetected }: EditorPanelProps) {
+export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, template, onGovernanceTrigger, onEmptyParagraphDetected, onUserEdit, isModified, onResetModified }: EditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const [, setUpdateCount] = useState(0);
@@ -134,6 +150,10 @@ export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, templat
   const onGovernanceTriggerRef = useRef(onGovernanceTrigger);
   // Keep latest empty-paragraph callback accessible inside closure
   const onEmptyParagraphDetectedRef = useRef(onEmptyParagraphDetected);
+  // Called only when the user makes an explicit edit (steps present + focused)
+  const onUserEditRef = useRef(onUserEdit);
+  // Reset isModified after a programmatic doc replacement
+  const onResetModifiedRef = useRef(onResetModified);
   // Prevent re-triggering the governance banner within the same page load
   const governanceTriggeredRef = useRef(false);
   // Track previous empty-paragraph presence to avoid firing on every keystroke
@@ -153,6 +173,8 @@ export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, templat
     templateRef.current = template;
     onGovernanceTriggerRef.current = onGovernanceTrigger;
     onEmptyParagraphDetectedRef.current = onEmptyParagraphDetected;
+    onUserEditRef.current = onUserEdit;
+    onResetModifiedRef.current = onResetModified;
   });
 
   useEffect(() => {
@@ -197,6 +219,14 @@ export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, templat
         if (transaction.docChanged) {
           onDocumentChangeRef.current(newState);
 
+          // Only mark as modified when the user actually typed or edited content.
+          // Programmatic replacements (loading a sample) have steps but the view
+          // is not focused — they must not set the dirty flag.
+          const isUserEdit = transaction.steps.length > 0 && view.hasFocus();
+          if (isUserEdit) {
+            onUserEditRef.current?.();
+          }
+
           // Governance notification: consecutive empty paragraphs
           checkEmptyParagraphNotification(newState, templateRef.current ?? null, governanceTriggeredRef, onGovernanceTriggerRef.current)
         }
@@ -205,13 +235,12 @@ export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, templat
 
     viewRef.current = view;
 
-    // Notify parent that view is ready
+    // Notify parent that view is ready.
+    // onViewReady receives the EditorView so EditorPage can read initial state
+    // (via view.state) without triggering the document-change / save-status path.
     if (onViewReadyRef.current) {
       onViewReadyRef.current(view);
     }
-
-    // Initial document state
-    onDocumentChangeRef.current(state);
 
     return () => {
       view.destroy();
@@ -220,7 +249,7 @@ export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, templat
 
   return (
     <div className="h-full flex flex-col bg-mylo-editor-bg">
-      <EditorToolbar view={viewRef.current} />
+      <EditorToolbar view={viewRef.current} isModified={isModified} onResetModified={onResetModified} />
       
       <div className="flex-1 overflow-auto p-6 hide-scrollbar">
         <div 
