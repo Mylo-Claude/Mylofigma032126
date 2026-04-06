@@ -19,10 +19,12 @@
  *                    when false: renderer uses savedTemplate (see saved state)
  *
  * Panel state:
- *   { view: 'styleList' }                                  — style list visible
- *   { view: 'paragraph'; styleKey; draft: BodyStyleDraft } — paragraph style panel
- *   { view: 'character'; styleKey; draft: CharStyleDraft } — character style panel
- *   { view: 'list';      styleKey; draft: ListStyleDraft } — list style panel
+ *   { view: 'styleList' }                                      — style list visible
+ *   { view: 'paragraph'; styleKey; draft: BodyStyleDraft }   — paragraph style panel
+ *   { view: 'character'; styleKey; draft: CharStyleDraft }   — character style panel
+ *   { view: 'list';      styleKey; draft: ListStyleDraft }   — list style panel
+ *   { view: 'page-setup'; draft: PageSetupDraft }            — page setup panel
+ *   { view: 'document-settings'; draft: DocumentSettingsDraft } — document settings panel
  *
  * Mutations:
  *   Style row click — initialises panel draft from draftTemplate; opens appropriate panel
@@ -43,6 +45,8 @@
  * @see templates/ParagraphStylePanel.tsx — paragraph style property editor
  * @see templates/CharacterStylePanel.tsx — character style property editor
  * @see templates/ListStylePanel.tsx — list style property editor
+ * @see templates/components/PageSetupPanel.tsx — page setup property editor
+ * @see templates/components/DocumentSettingsPanel.tsx — document settings editor
  * @see router.tsx — /templates/new and /templates/:id routes (role-gated)
  */
 
@@ -88,6 +92,7 @@ import {
 } from '../components/ui/alert-dialog';
 
 import type { BodyStyleDraft, CharacterStyleDraft, ListStyleDraft } from './types/styleEditor';
+import type { PageSetupDraft, DocumentSettingsDraft } from './types/pageSetup';
 import {
   PARAGRAPH_STYLE_KEYS,
   CHARACTER_STYLE_KEYS,
@@ -108,10 +113,18 @@ import {
   templateStyleToListDraft,
   listDraftToTemplateUpdate,
 } from './utils/styleConversions';
+import {
+  pageStylesToDraft,
+  draftToPageStyles,
+  documentSettingsToDraft,
+  draftToDocumentSettings,
+} from './utils/pageSetupConversions';
 import { StyleListPanel } from './StyleListPanel';
 import { ParagraphStylePanel } from './ParagraphStylePanel';
 import { CharacterStylePanel } from './CharacterStylePanel';
 import { ListStylePanel } from './ListStylePanel';
+import { PageSetupPanel } from './components/PageSetupPanel';
+import { DocumentSettingsPanel } from './components/DocumentSettingsPanel';
 
 // ---------------------------------------------------------------------------
 // Panel state discriminated union
@@ -121,7 +134,9 @@ type PanelState =
   | { view: 'styleList' }
   | { view: 'paragraph'; styleKey: ParagraphStyleKey; draft: BodyStyleDraft }
   | { view: 'character'; styleKey: CharacterStyleKey; draft: CharacterStyleDraft }
-  | { view: 'list'; styleKey: ListStyleKey; draft: ListStyleDraft };
+  | { view: 'list'; styleKey: ListStyleKey; draft: ListStyleDraft }
+  | { view: 'page-setup'; draft: PageSetupDraft }
+  | { view: 'document-settings'; draft: DocumentSettingsDraft };
 
 // ---------------------------------------------------------------------------
 // StatusBadge
@@ -327,6 +342,44 @@ export function TemplateEditorPage() {
     setIsDirty(true);
   }, [panel]);
 
+  /** Open the Page Setup panel, seeding the draft from draftTemplate.pageStyles. */
+  const handlePageSetupEdit = useCallback(() => {
+    if (!draftTemplate) return;
+    setPanel({
+      view: 'page-setup',
+      draft: pageStylesToDraft(draftTemplate.pageStyles),
+    });
+  }, [draftTemplate]);
+
+  /** Open the Document Settings panel, seeding the draft from draftTemplate.documentSettings. */
+  const handleDocumentSettingsEdit = useCallback(() => {
+    if (!draftTemplate) return;
+    setPanel({
+      view: 'document-settings',
+      draft: documentSettingsToDraft(draftTemplate.documentSettings),
+    });
+  }, [draftTemplate]);
+
+  /** Called by PageSetupPanel whenever any field changes. */
+  const handlePageSetupDraftChange = useCallback((draft: PageSetupDraft) => {
+    if (panel.view !== 'page-setup') return;
+    setPanel({ view: 'page-setup', draft });
+    setDraftTemplate((prev) =>
+      prev ? { ...prev, pageStyles: draftToPageStyles(draft) } : prev
+    );
+    setIsDirty(true);
+  }, [panel.view]);
+
+  /** Called by DocumentSettingsPanel whenever any field changes. */
+  const handleDocumentSettingsDraftChange = useCallback((draft: DocumentSettingsDraft) => {
+    if (panel.view !== 'document-settings') return;
+    setPanel({ view: 'document-settings', draft });
+    setDraftTemplate((prev) =>
+      prev ? { ...prev, documentSettings: draftToDocumentSettings(draft) } : prev
+    );
+    setIsDirty(true);
+  }, [panel.view]);
+
   /**
    * Persists draftTemplate to TemplateContext and updates savedTemplate.
    * Called by both the top-bar Save button and each panel's Save button.
@@ -370,6 +423,10 @@ export function TemplateEditorPage() {
         ...panel,
         draft: templateStyleToListDraft(savedTemplate, panel.styleKey),
       });
+    } else if (panel.view === 'page-setup') {
+      setPanel({ view: 'page-setup', draft: pageStylesToDraft(savedTemplate.pageStyles) });
+    } else if (panel.view === 'document-settings') {
+      setPanel({ view: 'document-settings', draft: documentSettingsToDraft(savedTemplate.documentSettings) });
     }
   }, [savedTemplate, panel]);
 
@@ -534,6 +591,8 @@ export function TemplateEditorPage() {
             <StyleListPanel
               template={draftTemplate}
               onStyleClick={handleStyleClick}
+              onPageSetupEdit={handlePageSetupEdit}
+              onDocumentSettingsEdit={handleDocumentSettingsEdit}
             />
           ) : panel.view === 'paragraph' ? (
             <ParagraphStylePanel
@@ -564,6 +623,20 @@ export function TemplateEditorPage() {
               onCancel={handleCancel}
               showPreview={showPreview}
               onShowPreviewChange={setShowPreview}
+            />
+          ) : panel.view === 'page-setup' ? (
+            <PageSetupPanel
+              draft={panel.draft}
+              onChange={handlePageSetupDraftChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
+          ) : panel.view === 'document-settings' ? (
+            <DocumentSettingsPanel
+              draft={panel.draft}
+              onChange={handleDocumentSettingsDraftChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
             />
           ) : null}
         </div>

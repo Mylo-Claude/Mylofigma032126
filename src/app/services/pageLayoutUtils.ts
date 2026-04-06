@@ -26,18 +26,23 @@ function camelToKebab(str: string): string {
  * @returns CSS string with @page rule
  */
 function generatePageCSS(pageStyles: PageStyles): string {
-  const { size } = pageStyles;
-  
+  // Resolve explicit dimensions from the pageSizes map.
+  // Paged.js does not reliably parse named size strings (e.g. "legal", "A4") in
+  // @page { size: ... }; it requires explicit inch values like "8.5in 14in" to
+  // generate its internal --pagedjs-width / --pagedjs-height :root variables correctly.
+  const sizeKey = (pageStyles.size ?? 'letter') as keyof typeof PAGE_PROPERTIES.pageSizes;
+  const sizeConfig = PAGE_PROPERTIES.pageSizes[sizeKey] ?? PAGE_PROPERTIES.pageSizes.letter;
+
   // STEP 6: Schema-driven margin generation
   const margins = PAGE_PROPERTIES.margins;
-  const marginTop = pageStyles.marginTop ?? parseFloat(margins.top.default);
-  const marginRight = pageStyles.marginRight ?? parseFloat(margins.right.default);
+  const marginTop    = pageStyles.marginTop    ?? parseFloat(margins.top.default);
+  const marginRight  = pageStyles.marginRight  ?? parseFloat(margins.right.default);
   const marginBottom = pageStyles.marginBottom ?? parseFloat(margins.bottom.default);
-  const marginLeft = pageStyles.marginLeft ?? parseFloat(margins.left.default);
-  
+  const marginLeft   = pageStyles.marginLeft   ?? parseFloat(margins.left.default);
+
   return `
 @page {
-  size: ${size};
+  size: ${sizeConfig.width} ${sizeConfig.height};
   margin: ${marginTop}in ${marginRight}in ${marginBottom}in ${marginLeft}in;
 }`.trim();
 }

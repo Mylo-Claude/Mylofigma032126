@@ -35,13 +35,17 @@ interface StyleListPanelProps {
   template: Template;
   /** Called when any style row is clicked; receives the style key. */
   onStyleClick: (key: AnyStyleKey) => void;
+  /** Called when the Page Setup Edit button is clicked. */
+  onPageSetupEdit: () => void;
+  /** Called when the Document Settings Edit button is clicked. */
+  onDocumentSettingsEdit: () => void;
 }
 
 // ---------------------------------------------------------------------------
 // StyleListPanel
 // ---------------------------------------------------------------------------
 
-export function StyleListPanel({ template, onStyleClick }: StyleListPanelProps) {
+export function StyleListPanel({ template, onStyleClick, onPageSetupEdit, onDocumentSettingsEdit }: StyleListPanelProps) {
   const margins = template.pageStyles;
   const stripEmpty = template.documentSettings?.stripEmptyParagraphs ?? true;
 
@@ -196,12 +200,13 @@ export function StyleListPanel({ template, onStyleClick }: StyleListPanelProps) 
         <AccordionItem value="page-setup" className="border-b border-mylo-border-light">
           <AccordionTrigger className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary hover:no-underline hover:bg-mylo-surface-subtle">
             <span className="flex-1 text-left">Page Setup</span>
-            <span
-              aria-disabled="true"
-              className="text-[10px] font-normal normal-case tracking-normal text-mylo-text-tertiary opacity-40 mr-2 cursor-not-allowed"
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onPageSetupEdit(); }}
+              className="text-[10px] font-normal normal-case tracking-normal text-mylo-text-secondary hover:text-mylo-text-primary transition-colors mr-2"
             >
               Edit
-            </span>
+            </button>
           </AccordionTrigger>
           <AccordionContent className="px-6 pb-3">
             <div className="space-y-0.5 text-xs text-mylo-text-secondary">
@@ -220,12 +225,13 @@ export function StyleListPanel({ template, onStyleClick }: StyleListPanelProps) 
         <AccordionItem value="document-settings">
           <AccordionTrigger className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-mylo-text-tertiary hover:no-underline hover:bg-mylo-surface-subtle">
             <span className="flex-1 text-left">Document Settings</span>
-            <span
-              aria-disabled="true"
-              className="text-[10px] font-normal normal-case tracking-normal text-mylo-text-tertiary opacity-40 mr-2 cursor-not-allowed"
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onDocumentSettingsEdit(); }}
+              className="text-[10px] font-normal normal-case tracking-normal text-mylo-text-secondary hover:text-mylo-text-primary transition-colors mr-2"
             >
               Edit
-            </span>
+            </button>
           </AccordionTrigger>
           <AccordionContent className="px-6 pb-3">
             <div className="text-xs text-mylo-text-secondary">
