@@ -7,24 +7,32 @@
  * @does-not-own Template persistence (TemplateContext), Paged.js rendering pipeline
  *               (PaginatedDocumentRenderer — reused as-is), serializer, pagination
  *               service, pageLayoutUtils. None of these may be modified here.
- *               Panel rendering: delegated to StyleListPanel and BodyStylePanel.
+ *               Panel rendering: delegated to StyleListPanel, ParagraphStylePanel,
+ *               CharacterStylePanel, and ListStylePanel.
  *
  * State model:
  *   savedTemplate  — snapshot of the last explicitly-saved version (frozen until Save)
  *   draftTemplate  — local working copy; updated live on every panel field change
- *   bodyDraft      — property panel form state for the Body style; kept in sync with
- *                    draftTemplate via handleBodyDraftChange
+ *   panel          — discriminated union describing which panel is open and its draft state
  *   isDirty        — true when draftTemplate differs from savedTemplate
  *   showPreview    — when true: renderer uses draftTemplate (live A/B toggle)
  *                    when false: renderer uses savedTemplate (see saved state)
  *
+ * Panel state:
+ *   { view: 'styleList' }                                      — style list visible
+ *   { view: 'paragraph'; styleKey; draft: BodyStyleDraft }   — paragraph style panel
+ *   { view: 'character'; styleKey; draft: CharStyleDraft }   — character style panel
+ *   { view: 'list';      styleKey; draft: ListStyleDraft }   — list style panel
+ *   { view: 'page-setup'; draft: PageSetupDraft }            — page setup panel
+ *   { view: 'document-settings'; draft: DocumentSettingsDraft } — document settings panel
+ *
  * Mutations:
- *   Field change  — calls updateDraftBodyStyle (styleConversions.ts), immediately
- *                   writes bodyDraft → draftTemplate.contentStyles.body (live preview)
- *   Save (panel)  — same as top-bar Save; persists draftTemplate to TemplateContext
- *   Save (topbar) — persists draftTemplate to TemplateContext; updates savedTemplate
- *   Revert        — restores draftTemplate from savedTemplate; clears isDirty
- *   Cancel        — closes property panel; draftTemplate retains live changes
+ *   Style row click — initialises panel draft from draftTemplate; opens appropriate panel
+ *   Field change    — calls the relevant updateDraft* helper → draftTemplate update (live)
+ *   Save (panel)    — same as top-bar Save; persists draftTemplate to TemplateContext
+ *   Save (topbar)   — persists draftTemplate; updates savedTemplate
+ *   Revert          — restores draftTemplate from savedTemplate; re-derives open panel draft
+ *   Cancel          — closes property panel; draftTemplate retains live changes
  *   Publish/Unpublish — calls TemplateContext directly; also updates local draft status
  *
  * @governance Template Editor + Admin
@@ -32,9 +40,13 @@
  * @see TemplateListPage.tsx — navigates here on create / edit
  * @see PaginatedDocumentRenderer.tsx — reused for the live specimen preview
  * @see mylo/samples/specimen-documents.ts — specimen content
- * @see templates/utils/styleConversions.ts — Template ↔ BodyStyleDraft conversion
+ * @see templates/utils/styleConversions.ts — Template ↔ draft conversion
  * @see templates/StyleListPanel.tsx — left panel style tree view
- * @see templates/BodyStylePanel.tsx — left panel Body style property editor
+ * @see templates/ParagraphStylePanel.tsx — paragraph style property editor
+ * @see templates/CharacterStylePanel.tsx — character style property editor
+ * @see templates/ListStylePanel.tsx — list style property editor
+ * @see templates/components/PageSetupPanel.tsx — page setup property editor
+ * @see templates/components/DocumentSettingsPanel.tsx — document settings editor
  * @see router.tsx — /templates/new and /templates/:id routes (role-gated)
  */
 
@@ -79,13 +91,52 @@ import {
   AlertDialogTitle,
 } from '../components/ui/alert-dialog';
 
-import type { BodyStyleDraft } from './types/styleEditor';
+import type { BodyStyleDraft, CharacterStyleDraft, ListStyleDraft } from './types/styleEditor';
+import type { PageSetupDraft, DocumentSettingsDraft } from './types/pageSetup';
 import {
-  templateBodyToStyleDraft,
-  styleDraftToTemplateBody,
+  PARAGRAPH_STYLE_KEYS,
+  CHARACTER_STYLE_KEYS,
+  LIST_STYLE_KEYS,
+  PARA_CONTENT_KEY_MAP,
+} from './constants/stylePropertyMap';
+import type {
+  AnyStyleKey,
+  ParagraphStyleKey,
+  CharacterStyleKey,
+  ListStyleKey,
+} from './constants/stylePropertyMap';
+import {
+  templateStyleToParaDraft,
+  paraDraftToTemplateStyle,
+  templateStyleToCharacterDraft,
+  characterDraftToTemplateUpdate,
+  templateStyleToListDraft,
+  listDraftToTemplateUpdate,
 } from './utils/styleConversions';
+import {
+  pageStylesToDraft,
+  draftToPageStyles,
+  documentSettingsToDraft,
+  draftToDocumentSettings,
+} from './utils/pageSetupConversions';
 import { StyleListPanel } from './StyleListPanel';
-import { BodyStylePanel } from './BodyStylePanel';
+import { ParagraphStylePanel } from './ParagraphStylePanel';
+import { CharacterStylePanel } from './CharacterStylePanel';
+import { ListStylePanel } from './ListStylePanel';
+import { PageSetupPanel } from './components/PageSetupPanel';
+import { DocumentSettingsPanel } from './components/DocumentSettingsPanel';
+
+// ---------------------------------------------------------------------------
+// Panel state discriminated union
+// ---------------------------------------------------------------------------
+
+type PanelState =
+  | { view: 'styleList' }
+  | { view: 'paragraph'; styleKey: ParagraphStyleKey; draft: BodyStyleDraft }
+  | { view: 'character'; styleKey: CharacterStyleKey; draft: CharacterStyleDraft }
+  | { view: 'list'; styleKey: ListStyleKey; draft: ListStyleDraft }
+  | { view: 'page-setup'; draft: PageSetupDraft }
+  | { view: 'document-settings'; draft: DocumentSettingsDraft };
 
 // ---------------------------------------------------------------------------
 // StatusBadge
@@ -130,12 +181,9 @@ export function TemplateEditorPage() {
   }, []);
 
   // Resolve the current template from context (re-derives on every context update).
-  // Used only for: initialising state on mount, not-found redirect.
   const contextTemplate = id ? templates.find((t) => t.id === id) ?? null : null;
 
   // savedTemplate — frozen snapshot of the last explicitly-saved version.
-  // Only updated by handleSave. Drives the "Preview off" state in the renderer
-  // and is the restore point for Revert.
   const [savedTemplate, setSavedTemplate] = useState<Template | null>(contextTemplate);
 
   // draftTemplate — local working copy. Updated live on every panel field change.
@@ -144,8 +192,10 @@ export function TemplateEditorPage() {
   const [isDirty, setIsDirty] = useState(false);
 
   // showPreview — when true: renderer shows draftTemplate (live changes).
-  // When false: renderer shows savedTemplate (A/B comparison).
   const [showPreview, setShowPreview] = useState(true);
+
+  // panel — which panel is open and what draft it's editing.
+  const [panel, setPanel] = useState<PanelState>({ view: 'styleList' });
 
   // Sync local state when navigating to a different template (id change only).
   const prevIdRef = useRef(id);
@@ -157,8 +207,7 @@ export function TemplateEditorPage() {
       setSavedTemplate(template);
       setIsDirty(false);
       setShowPreview(true);
-      setActiveView('styleList');
-      setBodyDraft(null);
+      setPanel({ view: 'styleList' });
     }
   }, [id, templates]);
 
@@ -169,12 +218,6 @@ export function TemplateEditorPage() {
   useEffect(() => {
     if (isEditingName) nameInputRef.current?.select();
   }, [isEditingName]);
-
-  // Left panel view state
-  const [activeView, setActiveView] = useState<'styleList' | 'bodyPanel'>('styleList');
-
-  // Body style property panel state (null = not yet initialised)
-  const [bodyDraft, setBodyDraft] = useState<BodyStyleDraft | null>(null);
 
   // Specimen selection
   const [selectedSpecimen, setSelectedSpecimen] = useState<SampleDocument>(defaultSpecimen);
@@ -189,7 +232,7 @@ export function TemplateEditorPage() {
   const [measuredPageHeight, setMeasuredPageHeight] = useState<number | null>(null);
 
   const { scale, shouldCenterContent } = usePreviewZoom({
-    containerRef: scrollContainerRef,
+    containerRef: scrollContainerRef as React.RefObject<HTMLDivElement>,
     measuredPageWidth,
     measuredPageHeight,
     zoomMode: 'fit-page',
@@ -200,7 +243,6 @@ export function TemplateEditorPage() {
     setMeasuredPageHeight(height);
   }, []);
 
-  // Page count is not displayed in the Template Editor; callback required by PaginatedDocumentRenderer
   const handlePagedJsComplete = useCallback((_pageCount: number) => { /* no-op */ }, []);
 
   // Stable specimen doc — recomputed only when selected specimen changes
@@ -223,34 +265,124 @@ export function TemplateEditorPage() {
   // ---------------------------------------------------------------------------
 
   /**
-   * Called by BodyStylePanel whenever any field changes.
-   * Immediately writes the new bodyDraft to draftTemplate for live preview.
+   * Called when any style row in StyleListPanel is clicked.
+   * Derives the initial draft from draftTemplate and opens the correct panel.
    */
-  const handleBodyDraftChange = useCallback((draft: BodyStyleDraft) => {
-    setBodyDraft(draft);
+  const handleStyleClick = useCallback((styleKey: AnyStyleKey) => {
+    if (!draftTemplate) return;
+
+    if ((PARAGRAPH_STYLE_KEYS as readonly string[]).includes(styleKey)) {
+      setPanel({
+        view: 'paragraph',
+        styleKey: styleKey as ParagraphStyleKey,
+        draft: templateStyleToParaDraft(draftTemplate, styleKey as ParagraphStyleKey),
+      });
+    } else if ((CHARACTER_STYLE_KEYS as readonly string[]).includes(styleKey)) {
+      setPanel({
+        view: 'character',
+        styleKey: styleKey as CharacterStyleKey,
+        draft: templateStyleToCharacterDraft(draftTemplate, styleKey as CharacterStyleKey),
+      });
+    } else if ((LIST_STYLE_KEYS as readonly string[]).includes(styleKey)) {
+      setPanel({
+        view: 'list',
+        styleKey: styleKey as ListStyleKey,
+        draft: templateStyleToListDraft(draftTemplate, styleKey as ListStyleKey),
+      });
+    }
+  }, [draftTemplate]);
+
+  /**
+   * Called by ParagraphStylePanel whenever any field changes.
+   * Immediately writes the new draft to draftTemplate for live preview.
+   */
+  const handleParaDraftChange = useCallback((draft: BodyStyleDraft) => {
+    if (panel.view !== 'paragraph') return;
+    // Cast is safe: view === 'paragraph' guard ensures styleKey is ParagraphStyleKey.
+    // Without @types/react, useState narrows to any — explicit cast restores type safety.
+    const contentKey = PARA_CONTENT_KEY_MAP[panel.styleKey as ParagraphStyleKey];
+    setPanel({ ...panel, draft });
     setDraftTemplate((prev) =>
       prev
         ? {
             ...prev,
             contentStyles: {
               ...prev.contentStyles,
-              body: styleDraftToTemplateBody(draft),
+              [contentKey]: paraDraftToTemplateStyle(draft),
             },
           }
         : prev
     );
     setIsDirty(true);
-  }, []);
+  }, [panel]);
 
-  const handleBodyClick = useCallback(() => {
+  /**
+   * Called by CharacterStylePanel whenever any field changes.
+   * Immediately applies the character draft to draftTemplate for live preview.
+   */
+  const handleCharDraftChange = useCallback((draft: CharacterStyleDraft) => {
+    if (panel.view !== 'character') return;
+    setPanel({ ...panel, draft });
+    setDraftTemplate((prev) =>
+      prev ? characterDraftToTemplateUpdate(prev, draft, panel.styleKey) : prev
+    );
+    setIsDirty(true);
+  }, [panel]);
+
+  /**
+   * Called by ListStylePanel whenever any field changes.
+   * Immediately applies the list draft to draftTemplate for live preview.
+   */
+  const handleListDraftChange = useCallback((draft: ListStyleDraft) => {
+    if (panel.view !== 'list') return;
+    setPanel({ ...panel, draft });
+    setDraftTemplate((prev) =>
+      prev ? listDraftToTemplateUpdate(prev, draft, panel.styleKey) : prev
+    );
+    setIsDirty(true);
+  }, [panel]);
+
+  /** Open the Page Setup panel, seeding the draft from draftTemplate.pageStyles. */
+  const handlePageSetupEdit = useCallback(() => {
     if (!draftTemplate) return;
-    setBodyDraft(templateBodyToStyleDraft(draftTemplate));
-    setActiveView('bodyPanel');
+    setPanel({
+      view: 'page-setup',
+      draft: pageStylesToDraft(draftTemplate.pageStyles),
+    });
   }, [draftTemplate]);
+
+  /** Open the Document Settings panel, seeding the draft from draftTemplate.documentSettings. */
+  const handleDocumentSettingsEdit = useCallback(() => {
+    if (!draftTemplate) return;
+    setPanel({
+      view: 'document-settings',
+      draft: documentSettingsToDraft(draftTemplate.documentSettings),
+    });
+  }, [draftTemplate]);
+
+  /** Called by PageSetupPanel whenever any field changes. */
+  const handlePageSetupDraftChange = useCallback((draft: PageSetupDraft) => {
+    if (panel.view !== 'page-setup') return;
+    setPanel({ view: 'page-setup', draft });
+    setDraftTemplate((prev) =>
+      prev ? { ...prev, pageStyles: draftToPageStyles(draft) } : prev
+    );
+    setIsDirty(true);
+  }, [panel.view]);
+
+  /** Called by DocumentSettingsPanel whenever any field changes. */
+  const handleDocumentSettingsDraftChange = useCallback((draft: DocumentSettingsDraft) => {
+    if (panel.view !== 'document-settings') return;
+    setPanel({ view: 'document-settings', draft });
+    setDraftTemplate((prev) =>
+      prev ? { ...prev, documentSettings: draftToDocumentSettings(draft) } : prev
+    );
+    setIsDirty(true);
+  }, [panel.view]);
 
   /**
    * Persists draftTemplate to TemplateContext and updates savedTemplate.
-   * Called by both the top-bar Save button and the panel Save button.
+   * Called by both the top-bar Save button and each panel's Save button.
    */
   const handleSave = useCallback(() => {
     if (!draftTemplate) return;
@@ -264,22 +396,39 @@ export function TemplateEditorPage() {
    * Does NOT revert draft changes — draftTemplate retains live edits.
    */
   const handleCancel = useCallback(() => {
-    setActiveView('styleList');
-    setBodyDraft(null);
+    setPanel({ view: 'styleList' });
   }, []);
 
   /**
    * Restore draftTemplate to the last saved state (savedTemplate).
-   * Also resets bodyDraft if the panel is open.
+   * Also re-derives the panel draft if a panel is currently open.
    */
   const handleRevert = useCallback(() => {
     if (!savedTemplate) return;
     setDraftTemplate(savedTemplate);
     setIsDirty(false);
-    if (activeView === 'bodyPanel') {
-      setBodyDraft(templateBodyToStyleDraft(savedTemplate));
+
+    if (panel.view === 'paragraph') {
+      setPanel({
+        ...panel,
+        draft: templateStyleToParaDraft(savedTemplate, panel.styleKey),
+      });
+    } else if (panel.view === 'character') {
+      setPanel({
+        ...panel,
+        draft: templateStyleToCharacterDraft(savedTemplate, panel.styleKey),
+      });
+    } else if (panel.view === 'list') {
+      setPanel({
+        ...panel,
+        draft: templateStyleToListDraft(savedTemplate, panel.styleKey),
+      });
+    } else if (panel.view === 'page-setup') {
+      setPanel({ view: 'page-setup', draft: pageStylesToDraft(savedTemplate.pageStyles) });
+    } else if (panel.view === 'document-settings') {
+      setPanel({ view: 'document-settings', draft: documentSettingsToDraft(savedTemplate.documentSettings) });
     }
-  }, [savedTemplate, activeView]);
+  }, [savedTemplate, panel]);
 
   const handlePublishToggle = useCallback(() => {
     if (!draftTemplate) return;
@@ -307,7 +456,6 @@ export function TemplateEditorPage() {
     setIsDirty(true);
   }, []);
 
-  /** Navigate back to /templates, showing the unsaved changes guard if needed. */
   const handleBack = useCallback(() => {
     if (isDirty) {
       pendingNavigationRef.current = () => navigate('/templates');
@@ -356,7 +504,6 @@ export function TemplateEditorPage() {
       {/* ────────────────────── Top bar ────────────────────── */}
       <div className="h-12 shrink-0 bg-mylo-surface border-b border-mylo-border-light flex items-center gap-3 px-4">
 
-        {/* Back button */}
         <button
           type="button"
           onClick={handleBack}
@@ -368,7 +515,6 @@ export function TemplateEditorPage() {
 
         <span className="text-mylo-border-light text-sm shrink-0">/</span>
 
-        {/* Template name — editable inline */}
         {isEditingName ? (
           <input
             ref={nameInputRef}
@@ -389,7 +535,6 @@ export function TemplateEditorPage() {
           </button>
         )}
 
-        {/* Specimen dropdown */}
         <Select
           value={selectedSpecimen.id}
           onValueChange={(sid) => {
@@ -409,13 +554,10 @@ export function TemplateEditorPage() {
           </SelectContent>
         </Select>
 
-        {/* Status badge */}
         <StatusBadge status={draftTemplate.status} />
 
-        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Revert */}
         <Button
           variant="ghost"
           size="sm"
@@ -426,16 +568,10 @@ export function TemplateEditorPage() {
           Revert
         </Button>
 
-        {/* Save */}
-        <Button
-          size="sm"
-          onClick={handleSave}
-          className="h-7 px-3 text-xs"
-        >
+        <Button size="sm" onClick={handleSave} className="h-7 px-3 text-xs">
           Save
         </Button>
 
-        {/* Publish / Unpublish */}
         <Button
           variant={isPublished ? 'outline' : 'default'}
           size="sm"
@@ -449,21 +585,58 @@ export function TemplateEditorPage() {
       {/* ────────────────────── Body (two columns) ────────────────────── */}
       <div className="flex-1 flex overflow-hidden">
 
-        {/* Left column (300px): style list or property panel */}
+        {/* Left column (360px): style list or property panel */}
         <div className="w-[360px] shrink-0 bg-mylo-surface border-r border-mylo-border-light flex flex-col overflow-hidden">
-          {activeView === 'styleList' ? (
+          {panel.view === 'styleList' ? (
             <StyleListPanel
               template={draftTemplate}
-              onBodyClick={handleBodyClick}
+              onStyleClick={handleStyleClick}
+              onPageSetupEdit={handlePageSetupEdit}
+              onDocumentSettingsEdit={handleDocumentSettingsEdit}
             />
-          ) : bodyDraft !== null ? (
-            <BodyStylePanel
-              bodyDraft={bodyDraft}
-              onChange={handleBodyDraftChange}
+          ) : panel.view === 'paragraph' ? (
+            <ParagraphStylePanel
+              styleKey={panel.styleKey}
+              draft={panel.draft}
+              onChange={handleParaDraftChange}
               onSave={handleSave}
               onCancel={handleCancel}
               showPreview={showPreview}
               onShowPreviewChange={setShowPreview}
+            />
+          ) : panel.view === 'character' ? (
+            <CharacterStylePanel
+              styleKey={panel.styleKey}
+              draft={panel.draft}
+              onChange={handleCharDraftChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              showPreview={showPreview}
+              onShowPreviewChange={setShowPreview}
+            />
+          ) : panel.view === 'list' ? (
+            <ListStylePanel
+              styleKey={panel.styleKey}
+              draft={panel.draft}
+              onChange={handleListDraftChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              showPreview={showPreview}
+              onShowPreviewChange={setShowPreview}
+            />
+          ) : panel.view === 'page-setup' ? (
+            <PageSetupPanel
+              draft={panel.draft}
+              onChange={handlePageSetupDraftChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
+          ) : panel.view === 'document-settings' ? (
+            <DocumentSettingsPanel
+              draft={panel.draft}
+              onChange={handleDocumentSettingsDraftChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
             />
           ) : null}
         </div>
