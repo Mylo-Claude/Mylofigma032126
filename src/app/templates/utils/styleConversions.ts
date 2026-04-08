@@ -62,6 +62,10 @@ function toFontStyle(value: string): 'normal' | 'italic' {
 /**
  * Parse a CSS border shorthand like '1px solid #91161a' into weight and color.
  * Weight is returned as a display string (no px suffix).
+ *
+ * Expected format: "<width> <style> <color>" (3 space-separated tokens).
+ * parts[0] = width (e.g. "1px"), parts[1] = style (e.g. "solid"), parts[2] = color.
+ * The style token is intentionally ignored — panel UI doesn't expose border-style.
  */
 function parseBorderShorthand(value: string): { weight: string; color: string } {
   if (!value) return { weight: '', color: '' };
@@ -91,7 +95,7 @@ function parsePaddingShorthand(value: string): { top: string; bottom: string } {
   // 4-value: top | right | bottom | left (length=4)
   return {
     top: pxToPtDisplay(parts[0]),
-    bottom: pxToPtDisplay(parts[parts.length === 3 ? 2 : 2]),
+    bottom: pxToPtDisplay(parts[2]),
   };
 }
 

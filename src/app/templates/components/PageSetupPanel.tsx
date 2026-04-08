@@ -21,7 +21,7 @@
  * @see templates/constants/pageSetupConstants.ts — PAGE_SIZE_OPTIONS, MARGIN_FIELDS
  */
 
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   Accordion,
@@ -41,19 +41,7 @@ import {
 
 import type { PageSetupDraft } from '../types/pageSetup';
 import { PAGE_SIZE_OPTIONS, MARGIN_FIELDS } from '../constants/pageSetupConstants';
-
-// ---------------------------------------------------------------------------
-// Internal layout helpers
-// ---------------------------------------------------------------------------
-
-function StackedField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs text-mylo-text-secondary">{label}</span>
-      {children}
-    </div>
-  );
-}
+import { StackedField } from './shared/panelComponents';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -108,8 +96,9 @@ export function PageSetupPanel({
       {/* ── Accordion body (scrollable) ── */}
       <div className="flex-1 overflow-y-auto scrollbar-none">
         <Accordion
-          type="multiple"
-          defaultValue={['page-size', 'margins']}
+          type="single"
+          collapsible
+          defaultValue="page-size"
           className="w-full"
         >
 
@@ -179,14 +168,14 @@ export function PageSetupPanel({
                     ['Left margin',   draft.marginLeft   ? `${draft.marginLeft} in`   : '—'],
                   ] as const
                 ).map(([lbl, val]) => (
-                  <>
-                    <span key={`lbl-${lbl}`} className="text-xs text-muted-foreground whitespace-nowrap">
+                  <React.Fragment key={lbl}>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {lbl}
                     </span>
-                    <span key={`val-${lbl}`} className="text-xs font-medium text-mylo-text-primary truncate">
+                    <span className="text-xs font-medium text-mylo-text-primary truncate">
                       {val}
                     </span>
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             </AccordionContent>

@@ -1,5 +1,5 @@
 /**
- * @file templates/StyleListPanel.tsx
+ * @file templates/components/StyleListPanel.tsx
  * @role Left panel — style tree view
  * @owns Renders the full style list as collapsible accordions:
  *       Paragraph Styles, Character Styles, Page Setup, Document Settings.
@@ -23,9 +23,9 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '../components/ui/accordion';
-import type { Template } from '../mylo/template';
-import type { AnyStyleKey } from './constants/stylePropertyMap';
+} from '../../components/ui/accordion';
+import type { Template } from '../../mylo/template';
+import type { AnyStyleKey } from '../constants/stylePropertyMap';
 
 // ---------------------------------------------------------------------------
 // Props

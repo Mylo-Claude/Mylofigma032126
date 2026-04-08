@@ -190,8 +190,14 @@ function createList(node: PMNode, tag: 'ul' | 'ol', template: Template | undefin
     markerType = listStyleTypes[listDepth % listStyleTypes.length];
   }
   
-  // Set list style type
-  element.style.listStyleType = markerType;
+  // Set list style type only in the inline-style path.
+  // In the CSS path (useInlineStyles=false) the generated stylesheet governs
+  // list-style-type via .mylo-preview ul / .mylo-preview ol selectors.
+  // Setting it inline here would produce style="list-style-type: disc" on the
+  // element regardless of the template value, defeating the CSS rule.
+  if (useInlineStyles) {
+    element.style.listStyleType = markerType;
+  }
   
   if (listStyle?.indentSize) {
     element.style.paddingLeft = listStyle.indentSize;

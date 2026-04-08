@@ -1,34 +1,39 @@
 /**
- * @file templates/ParagraphStylePanel.tsx
- * @role Left panel — generic paragraph style property editor
- * @owns Renders the paragraph style property panel for any paragraph style
- *       (Body, Heading 1, Heading 2, Heading 3) based on the `styleKey` prop.
- *       • Breadcrumb header  (← All Styles / <Style Name>)
- *       • Six collapsible accordions:
- *           1. Typography  — Font Family, Weight, Style, Size/LineHeight/Tracking,
- *                            Alignment, Case
- *           2. Character Color — Color swatch + hex input
- *           3. Spacing     — Space Before/After, Left/Right Indent, First Line
- *           4. Rule Above  — enable toggle, Weight/V.Offset, Left/Right Indent, Color
- *           5. Rule Below  — same structure as Rule Above
- *           6. Style Summary — read-only two-column property grid
+ * @file templates/components/ListStylePanel.tsx
+ * @role Left panel — list style property editor
+ * @owns Renders the list style property panel for Bulleted List and Numbered List.
+ *       List styles have all paragraph fields (same as ParagraphStylePanel) plus
+ *       list-specific fields in a dedicated "List Style" accordion.
+ *       • Simple title header (style name only, border-bottom)
+ *       • Seven collapsible accordions:
+ *           1. List Style   — Marker style, Marker color, Marker size, Indent
+ *           2. Typography   — Font Family, Weight, Style, Size/LineHeight/Tracking,
+ *                             Alignment, Case (overrides for list item text)
+ *           3. Character Color — Color swatch + hex input
+ *           4. Spacing      — Space Before/After, Left/Right Indent, First Line
+ *           5. Rule Above   — enable toggle, Weight/V.Offset, Left/Right Indent, Color
+ *           6. Rule Below   — same structure as Rule Above
+ *           7. Style Summary — read-only two-column property grid
  *       • Pinned preview toggle bar
  *       • Save / Cancel footer
+ *         Cancel: returns to the style list immediately (no confirmation).
+ *         Save: persists and returns to the style list.
  * @does-not-own Template persistence (TemplateContext), style conversion
  *               (styleConversions.ts), orchestrator state (TemplateEditorPage).
  *
- * All field changes call onChange with a full new BodyStyleDraft — no internal
+ * All field changes call onChange with a full new ListStyleDraft — no internal
  * draft state. The parent owns the draft.
  *
  * @governance Template Editor only
  * @see TemplateEditorPage.tsx — orchestrator; passes draft and handlers
- * @see templates/types/styleEditor.ts — BodyStyleDraft interface
- * @see templates/utils/styleConversions.ts — updateDraftBodyStyle helper
- * @see templates/constants/stylePropertyMap.ts — STYLE_LABELS, ParagraphStyleKey
+ * @see templates/types/styleEditor.ts — ListStyleDraft interface
+ * @see templates/utils/styleConversions.ts — updateDraftListStyle helper
+ * @see templates/constants/stylePropertyMap.ts — STYLE_LABELS, ListStyleKey,
+ *                                                 BULLETED_MARKER_OPTIONS,
+ *                                                 NUMBERED_MARKER_OPTIONS
  */
 
-import { useRef, useCallback } from 'react';
-import type { ChangeEvent } from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   AlignLeft,
   AlignCenter,
@@ -41,39 +46,38 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '../components/ui/accordion';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Checkbox } from '../components/ui/checkbox';
-import { Label } from '../components/ui/label';
+} from '../../components/ui/accordion';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Label } from '../../components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
+} from '../../components/ui/select';
 
-import type { BodyStyleDraft } from './types/styleEditor';
-import type { ParagraphStyleKey } from './constants/stylePropertyMap';
-import { STYLE_LABELS } from './constants/stylePropertyMap';
-import { updateDraftBodyStyle } from './utils/styleConversions';
+import type { ListStyleDraft, BodyStyleDraft } from '../types/styleEditor';
+import type { ListStyleKey } from '../constants/stylePropertyMap';
+import {
+  STYLE_LABELS,
+  BULLETED_MARKER_OPTIONS,
+  NUMBERED_MARKER_OPTIONS,
+} from '../constants/stylePropertyMap';
+import { updateDraftListStyle } from '../utils/styleConversions';
+import {
+  FONT_WEIGHT_OPTIONS,
+  FONT_FAMILY_HELPER_TEXT,
+  StackedField,
+  DimensionInput,
+  ColorField,
+} from './shared/panelComponents';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const FONT_WEIGHT_OPTIONS = [
-  { value: '100', label: 'Thin (100)' },
-  { value: '200', label: 'Extra Light (200)' },
-  { value: '300', label: 'Light (300)' },
-  { value: '400', label: 'Regular (400)' },
-  { value: '500', label: 'Medium (500)' },
-  { value: '600', label: 'Semi Bold (600)' },
-  { value: '700', label: 'Bold (700)' },
-  { value: '800', label: 'Extra Bold (800)' },
-  { value: '900', label: 'Black (900)' },
-] as const;
 
 const TEXT_TRANSFORM_OPTIONS = [
   { value: 'none', label: 'None' },
@@ -90,129 +94,19 @@ const ALIGN_OPTIONS = [
   { value: 'justify', Icon: AlignJustify, label: 'Justify' },
 ] as const;
 
-/**
- * Width of compact dimension inputs (Size, Line Height, Tracking).
- * 52px fits 3-4 digit values comfortably at text-xs.
- */
-const DIM_INPUT_WIDTH = 'w-[52px]' as const;
-
-/**
- * Temporary affordance shown below the Font Family input until the Google
- * Fonts picker is added in Step 5. Remove when the picker replaces the input.
- */
-const FONT_FAMILY_HELPER_TEXT =
-  'Type any system font or font name. Google Fonts picker coming soon.' as const;
-
-// ---------------------------------------------------------------------------
-// Internal layout helpers
-// ---------------------------------------------------------------------------
-
-/** Label above + content below. */
-function StackedField({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs text-mylo-text-secondary">{label}</span>
-      {children}
-    </div>
-  );
-}
-
-/** Number + "pt" unit pair. `small` renders a max-52px input for compact three-in-a-row layouts. */
-function DimensionInput({
-  value,
-  onChange,
-  placeholder,
-  disabled,
-  small,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  small?: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder ?? '—'}
-        className={`h-7 text-xs ${small ? DIM_INPUT_WIDTH : 'w-16'}`}
-        inputMode="decimal"
-        disabled={disabled}
-      />
-      <span
-        className={`text-xs text-mylo-text-tertiary${disabled ? ' opacity-40' : ''}`}
-      >
-        pt
-      </span>
-    </div>
-  );
-}
-
-/** Color swatch + hidden color input + hex text input. */
-function ColorField({
-  value,
-  onChange,
-  disabled,
-  inputRef,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  disabled?: boolean;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        className="size-6 rounded border border-mylo-border-light shrink-0 disabled:opacity-40"
-        style={{ backgroundColor: value }}
-        onClick={() => inputRef.current?.click()}
-        aria-label="Open color picker"
-        disabled={disabled}
-      />
-      <input
-        ref={inputRef}
-        type="color"
-        className="sr-only"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
-      <Input
-        value={value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const val = e.target.value;
-          if (/^#[0-9a-fA-F]{0,6}$/.test(val)) onChange(val);
-        }}
-        className="h-7 text-xs font-mono w-24"
-        maxLength={7}
-        disabled={disabled}
-      />
-    </div>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
-interface ParagraphStylePanelProps {
-  /** Which paragraph style this panel is editing — controls breadcrumb label. */
-  styleKey: ParagraphStyleKey;
+interface ListStylePanelProps {
+  /** Which list style this panel is editing — controls header label and marker options. */
+  styleKey: ListStyleKey;
   /** Current draft state. Parent owns this; all changes call onChange. */
-  draft: BodyStyleDraft;
-  onChange: (draft: BodyStyleDraft) => void;
+  draft: ListStyleDraft;
+  onChange: (draft: ListStyleDraft) => void;
   /** Persists current draftTemplate to TemplateContext. Same action as top-bar Save. */
   onSave: () => void;
-  /** Close the panel; draft changes are retained in draftTemplate. */
+  /** Navigate back to the style list immediately. */
   onCancel: () => void;
   /** When true, specimen renders from draftTemplate (live changes). */
   showPreview: boolean;
@@ -220,10 +114,10 @@ interface ParagraphStylePanelProps {
 }
 
 // ---------------------------------------------------------------------------
-// ParagraphStylePanel
+// ListStylePanel
 // ---------------------------------------------------------------------------
 
-export function ParagraphStylePanel({
+export function ListStylePanel({
   styleKey,
   draft,
   onChange,
@@ -231,54 +125,42 @@ export function ParagraphStylePanel({
   onCancel,
   showPreview,
   onShowPreviewChange,
-}: ParagraphStylePanelProps) {
+}: ListStylePanelProps) {
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const markerColorRef = useRef<HTMLInputElement>(null);
   const ruleAboveColorRef = useRef<HTMLInputElement>(null);
   const ruleBelowColorRef = useRef<HTMLInputElement>(null);
 
   /** Produce a new draft with a single field updated via the pure helper. */
   const set = useCallback(
-    <K extends keyof BodyStyleDraft>(key: K, value: BodyStyleDraft[K]) => {
-      onChange(updateDraftBodyStyle(draft, { [key]: value }));
+    <K extends keyof ListStyleDraft>(key: K, value: ListStyleDraft[K]) => {
+      onChange(updateDraftListStyle(draft, { [key]: value }));
     },
     [draft, onChange],
   );
 
-  // ---------------------------------------------------------------------------
-  // Style Summary computed values
-  // ---------------------------------------------------------------------------
+  const styleName = STYLE_LABELS[styleKey];
+  const markerOptions = styleKey === 'bulletedList' ? BULLETED_MARKER_OPTIONS : NUMBERED_MARKER_OPTIONS;
+  const previewId = `list-preview-toggle-${styleKey}`;
+  const ruleAboveId = `list-rule-above-${styleKey}`;
+  const ruleBelowId = `list-rule-below-${styleKey}`;
 
+  // Style Summary computed values
   const summaryWeight =
     FONT_WEIGHT_OPTIONS.find((o) => o.value === draft.fontWeight)?.label ??
-    draft.fontWeight ??
-    '—';
+    draft.fontWeight ?? '—';
   const summaryStyle = draft.fontStyle === 'italic' ? 'Italic' : 'Normal';
   const summaryCase =
-    TEXT_TRANSFORM_OPTIONS.find(
-      (o) => o.value === (draft.textTransform || 'none'),
-    )?.label ?? '—';
+    TEXT_TRANSFORM_OPTIONS.find((o) => o.value === (draft.textTransform || 'none'))?.label ?? '—';
   const summaryAlign =
     ALIGN_OPTIONS.find((o) => o.value === draft.textAlign)?.label ?? '—';
-
-  const styleName = STYLE_LABELS[styleKey];
-  const previewId = `para-preview-toggle-${styleKey}`;
-  const ruleAboveId = `para-rule-above-${styleKey}`;
-  const ruleBelowId = `para-rule-below-${styleKey}`;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
 
-      {/* ── Breadcrumb header ── */}
-      <div className="px-4 py-2.5 border-b border-mylo-border-light shrink-0 flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex items-center gap-0.5 text-xs text-mylo-text-secondary hover:text-mylo-text-primary transition-colors"
-        >
-          ← All Styles
-        </button>
-        <span className="text-xs text-mylo-text-tertiary">/</span>
-        <span className="text-xs font-semibold text-mylo-text-primary">{styleName}</span>
+      {/* ── Panel header ── */}
+      <div className="px-4 py-3 border-b border-mylo-border-light shrink-0">
+        <p className="text-sm font-medium text-foreground">{styleName}</p>
       </div>
 
       {/* ── Accordion body (scrollable) ── */}
@@ -286,11 +168,61 @@ export function ParagraphStylePanel({
         <Accordion
           type="single"
           collapsible
-          defaultValue="typography"
+          defaultValue="list-style"
           className="w-full"
         >
 
-          {/* ══ 1. Typography ══ */}
+          {/* ══ 1. List Style ══ */}
+          <AccordionItem value="list-style" className="border-b border-mylo-border-light">
+            <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
+              List Style
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-3">
+              <div className="space-y-3 pt-1">
+
+                {/* Marker style */}
+                <StackedField label="Marker Style">
+                  <Select
+                    value={draft.markerStyle}
+                    onValueChange={(v) => set('markerStyle', v)}
+                  >
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {markerOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </StackedField>
+
+                {/* Marker color */}
+                <StackedField label="Marker Color">
+                  <ColorField
+                    value={draft.markerColor}
+                    onChange={(v) => set('markerColor', v)}
+                    inputRef={markerColorRef}
+                  />
+                </StackedField>
+
+                {/* Marker size + Indent — two-column */}
+                <div className="grid grid-cols-2 gap-4">
+                  <StackedField label="Marker Size">
+                    <DimensionInput value={draft.markerSize} onChange={(v) => set('markerSize', v)} />
+                  </StackedField>
+                  <StackedField label="Indent">
+                    <DimensionInput value={draft.indent} onChange={(v) => set('indent', v)} />
+                  </StackedField>
+                </div>
+
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* ══ 2. Typography ══ */}
           <AccordionItem value="typography" className="border-b border-mylo-border-light">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
               Typography
@@ -298,7 +230,6 @@ export function ParagraphStylePanel({
             <AccordionContent className="px-4 pb-3">
               <div className="space-y-3 pt-1">
 
-                {/* Font Family — full-width stacked */}
                 <StackedField label="Font Family">
                   <Input
                     value={draft.fontFamily}
@@ -311,7 +242,6 @@ export function ParagraphStylePanel({
                   </p>
                 </StackedField>
 
-                {/* Weight + Style — side by side */}
                 <div className="grid grid-cols-2 gap-4">
                   <StackedField label="Weight">
                     <Select
@@ -349,7 +279,6 @@ export function ParagraphStylePanel({
                   </StackedField>
                 </div>
 
-                {/* Size + Line Height + Tracking — 3-column grid */}
                 <div className="grid grid-cols-3 gap-4">
                   <StackedField label="Size">
                     <DimensionInput value={draft.fontSize} onChange={(v) => set('fontSize', v)} small />
@@ -362,14 +291,11 @@ export function ParagraphStylePanel({
                   </StackedField>
                 </div>
 
-                {/* Case + Alignment — two-column grid */}
                 <div className="grid grid-cols-2 gap-4">
                   <StackedField label="Case">
                     <Select
                       value={draft.textTransform || 'none'}
-                      onValueChange={(v) =>
-                        set('textTransform', v === 'none' ? '' : v)
-                      }
+                      onValueChange={(v) => set('textTransform', v === 'none' ? '' : v)}
                     >
                       <SelectTrigger className="h-7 text-xs">
                         <SelectValue />
@@ -408,7 +334,7 @@ export function ParagraphStylePanel({
             </AccordionContent>
           </AccordionItem>
 
-          {/* ══ 2. Character Color ══ */}
+          {/* ══ 3. Character Color ══ */}
           <AccordionItem value="character-color" className="border-b border-mylo-border-light">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
               Character Color
@@ -422,7 +348,7 @@ export function ParagraphStylePanel({
             </AccordionContent>
           </AccordionItem>
 
-          {/* ══ 3. Spacing ══ */}
+          {/* ══ 4. Spacing ══ */}
           <AccordionItem value="spacing" className="border-b border-mylo-border-light">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
               Spacing
@@ -452,7 +378,7 @@ export function ParagraphStylePanel({
             </AccordionContent>
           </AccordionItem>
 
-          {/* ══ 4. Paragraph Rules ══ */}
+          {/* ══ 5. Paragraph Rules ══ */}
           <AccordionItem value="paragraph-rules" className="border-b border-mylo-border-light">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
               Paragraph Rules
@@ -540,7 +466,7 @@ export function ParagraphStylePanel({
             </AccordionContent>
           </AccordionItem>
 
-          {/* ══ 5. Keep Options ══ */}
+          {/* ══ 6. Keep Options ══ */}
           <AccordionItem value="keep-options" className="border-b border-mylo-border-light">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
               Keep Options
@@ -552,7 +478,7 @@ export function ParagraphStylePanel({
             </AccordionContent>
           </AccordionItem>
 
-          {/* ══ 6. Style Summary ══ */}
+          {/* ══ 7. Style Summary ══ */}
           <AccordionItem value="style-summary">
             <AccordionTrigger className="px-4 py-2 text-xs font-semibold text-mylo-text-secondary hover:no-underline hover:bg-mylo-surface-subtle">
               Style Summary
@@ -561,39 +487,29 @@ export function ParagraphStylePanel({
               <div className="grid grid-cols-[96px_1fr] gap-y-1.5 pt-1">
                 {(
                   [
+                    ['Marker Style', draft.markerStyle || '—'],
+                    ['Marker Color', draft.markerColor || '—'],
+                    ['Indent', draft.indent ? `${draft.indent} pt` : '—'],
                     ['Font Family', draft.fontFamily || '—'],
                     ['Weight', summaryWeight],
                     ['Style', summaryStyle],
                     ['Size', draft.fontSize ? `${draft.fontSize} pt` : '—'],
                     ['Line Height', draft.lineHeight ? `${draft.lineHeight} pt` : '—'],
-                    ['Tracking', draft.letterSpacing ? `${draft.letterSpacing} pt` : '—'],
                     ['Case', summaryCase],
                     ['Alignment', summaryAlign],
                     ['Color', draft.color || '—'],
                     ['Space Before', draft.marginTop ? `${draft.marginTop} pt` : '—'],
                     ['Space After', draft.marginBottom ? `${draft.marginBottom} pt` : '—'],
-                    [
-                      'Rule Above',
-                      draft.ruleAboveEnabled
-                        ? `On${draft.ruleAboveWeight ? ` · ${draft.ruleAboveWeight}pt` : ''}`
-                        : 'Off',
-                    ],
-                    [
-                      'Rule Below',
-                      draft.ruleBelowEnabled
-                        ? `On${draft.ruleBelowWeight ? ` · ${draft.ruleBelowWeight}pt` : ''}`
-                        : 'Off',
-                    ],
                   ] as const
                 ).map(([lbl, val]) => (
-                  <>
-                    <span key={`lbl-${lbl}`} className="text-xs text-muted-foreground whitespace-nowrap">
+                  <React.Fragment key={lbl}>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {lbl}
                     </span>
-                    <span key={`val-${lbl}`} className="text-xs font-medium text-mylo-text-primary truncate">
+                    <span className="text-xs font-medium text-mylo-text-primary truncate">
                       {val}
                     </span>
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             </AccordionContent>

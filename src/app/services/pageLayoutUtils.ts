@@ -106,67 +106,58 @@ function generateContentCSS(contentStyles: ContentStyles): string {
  */
 function generateListCSS(listStyles: { bulletedList: any; orderedList: any }, bodyStyle: any): string {
   let css = '';
-  
+
   // Generate bulletedList CSS (maps to <ul>)
   if (listStyles.bulletedList) {
-    const ulSelector = '.mylo-preview ul';
+    const bl = listStyles.bulletedList;
+
+    // ul: structure (marker type, indentation). Color is intentionally omitted here —
+    // setting `color` on `ul` is overridden by the more-specific `li` rule below.
+    // Marker color is applied via `::marker` so it is independent of text color.
     const ulProps: Record<string, string | number> = {};
-    
-    // Map list-specific properties
-    if (listStyles.bulletedList.markerType) {
-      ulProps.listStyleType = listStyles.bulletedList.markerType;
-    }
-    if (listStyles.bulletedList.markerColor) {
-      ulProps.color = listStyles.bulletedList.markerColor;
-    }
-    if (listStyles.bulletedList.indentSize) {
-      ulProps.paddingLeft = listStyles.bulletedList.indentSize;
-    }
-    
-    // Add advanced properties
-    if (listStyles.bulletedList.advanced) {
-      Object.assign(ulProps, listStyles.bulletedList.advanced);
-    }
-    
-    // Convert to CSS declarations
+    if (bl.markerType) ulProps.listStyleType = bl.markerType;
+    if (bl.indentSize) ulProps.paddingLeft = bl.indentSize;
+    if (bl.advanced) Object.assign(ulProps, bl.advanced);
+
     const ulDeclarations = Object.entries(ulProps)
       .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
       .join('\n');
-    
-    if (ulDeclarations) {
-      css += `${ulSelector} {\n${ulDeclarations}\n}\n\n`;
-    }
+    if (ulDeclarations) css += `.mylo-preview ul {\n${ulDeclarations}\n}\n\n`;
+
+    // ul li::marker: color (Bug 1) and font-size / marker size (Bug 3)
+    const ulMarkerProps: Record<string, string | number> = {};
+    if (bl.markerColor) ulMarkerProps.color = bl.markerColor;
+    if (bl.markerSize) ulMarkerProps.fontSize = bl.markerSize;
+
+    const ulMarkerDeclarations = Object.entries(ulMarkerProps)
+      .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
+      .join('\n');
+    if (ulMarkerDeclarations) css += `.mylo-preview ul li::marker {\n${ulMarkerDeclarations}\n}\n\n`;
   }
-  
+
   // Generate orderedList CSS (maps to <ol>)
   if (listStyles.orderedList) {
-    const olSelector = '.mylo-preview ol';
+    const ol = listStyles.orderedList;
+
     const olProps: Record<string, string | number> = {};
-    
-    // Map list-specific properties
-    if (listStyles.orderedList.markerType) {
-      olProps.listStyleType = listStyles.orderedList.markerType;
-    }
-    if (listStyles.orderedList.markerColor) {
-      olProps.color = listStyles.orderedList.markerColor;
-    }
-    if (listStyles.orderedList.indentSize) {
-      olProps.paddingLeft = listStyles.orderedList.indentSize;
-    }
-    
-    // Add advanced properties
-    if (listStyles.orderedList.advanced) {
-      Object.assign(olProps, listStyles.orderedList.advanced);
-    }
-    
-    // Convert to CSS declarations
+    if (ol.markerType) olProps.listStyleType = ol.markerType;
+    if (ol.indentSize) olProps.paddingLeft = ol.indentSize;
+    if (ol.advanced) Object.assign(olProps, ol.advanced);
+
     const olDeclarations = Object.entries(olProps)
       .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
       .join('\n');
-    
-    if (olDeclarations) {
-      css += `${olSelector} {\n${olDeclarations}\n}\n\n`;
-    }
+    if (olDeclarations) css += `.mylo-preview ol {\n${olDeclarations}\n}\n\n`;
+
+    // ol li::marker: color and font-size
+    const olMarkerProps: Record<string, string | number> = {};
+    if (ol.markerColor) olMarkerProps.color = ol.markerColor;
+    if (ol.markerSize) olMarkerProps.fontSize = ol.markerSize;
+
+    const olMarkerDeclarations = Object.entries(olMarkerProps)
+      .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
+      .join('\n');
+    if (olMarkerDeclarations) css += `.mylo-preview ol li::marker {\n${olMarkerDeclarations}\n}\n\n`;
   }
   
   // Generate list item typography (inherit from body) and spacing

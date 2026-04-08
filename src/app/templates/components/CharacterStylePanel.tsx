@@ -1,17 +1,19 @@
 /**
- * @file templates/CharacterStylePanel.tsx
+ * @file templates/components/CharacterStylePanel.tsx
  * @role Left panel — character style property editor
  * @owns Renders the character style property panel for Bold, Italic, Underline,
  *       and Link styles. Character styles have a subset of paragraph fields:
  *       Font Family, Weight, Style (Normal/Italic), Size, Color.
  *       No Spacing tab, no Paragraph Rules, no Keep Options.
- *       • Breadcrumb header  (← All Styles / <Style Name>)
+ *       • Simple title header (style name only, border-bottom)
  *       • Three collapsible accordions:
  *           1. Typography  — Font Family, Weight, Style, Size
  *           2. Character Color — Color swatch + hex input
  *           3. Style Summary — read-only two-column property grid
  *       • Pinned preview toggle bar
  *       • Save / Cancel footer
+ *         Cancel: returns to the style list immediately (no confirmation).
+ *         Save: persists and returns to the style list.
  * @does-not-own Template persistence (TemplateContext), style conversion
  *               (styleConversions.ts), orchestrator state (TemplateEditorPage).
  *
@@ -25,136 +27,51 @@
  * @see templates/constants/stylePropertyMap.ts — STYLE_LABELS, CharacterStyleKey
  */
 
-import { useRef, useCallback } from 'react';
-import type { ChangeEvent } from 'react';
+import React, { useRef, useCallback } from 'react';
 
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '../components/ui/accordion';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Checkbox } from '../components/ui/checkbox';
-import { Label } from '../components/ui/label';
+} from '../../components/ui/accordion';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Label } from '../../components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
+} from '../../components/ui/select';
 
-import type { CharacterStyleDraft } from './types/styleEditor';
-import type { CharacterStyleKey } from './constants/stylePropertyMap';
-import { STYLE_LABELS } from './constants/stylePropertyMap';
-import { updateDraftCharStyle } from './utils/styleConversions';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const FONT_WEIGHT_OPTIONS = [
-  { value: '100', label: 'Thin (100)' },
-  { value: '200', label: 'Extra Light (200)' },
-  { value: '300', label: 'Light (300)' },
-  { value: '400', label: 'Regular (400)' },
-  { value: '500', label: 'Medium (500)' },
-  { value: '600', label: 'Semi Bold (600)' },
-  { value: '700', label: 'Bold (700)' },
-  { value: '800', label: 'Extra Bold (800)' },
-  { value: '900', label: 'Black (900)' },
-] as const;
-
-const FONT_FAMILY_HELPER_TEXT =
-  'Type any system font or font name. Google Fonts picker coming soon.' as const;
-
-// ---------------------------------------------------------------------------
-// Internal layout helpers
-// ---------------------------------------------------------------------------
-
-function StackedField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs text-mylo-text-secondary">{label}</span>
-      {children}
-    </div>
-  );
-}
-
-function DimensionInput({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="—"
-        className="h-7 text-xs w-16"
-        inputMode="decimal"
-      />
-      <span className="text-xs text-mylo-text-tertiary">pt</span>
-    </div>
-  );
-}
-
-function ColorField({
-  value,
-  onChange,
-  inputRef,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        className="size-6 rounded border border-mylo-border-light shrink-0"
-        style={{ backgroundColor: value }}
-        onClick={() => inputRef.current?.click()}
-        aria-label="Open color picker"
-      />
-      <input
-        ref={inputRef}
-        type="color"
-        className="sr-only"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <Input
-        value={value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const val = e.target.value;
-          if (/^#[0-9a-fA-F]{0,6}$/.test(val)) onChange(val);
-        }}
-        className="h-7 text-xs font-mono w-24"
-        maxLength={7}
-      />
-    </div>
-  );
-}
+import type { CharacterStyleDraft } from '../types/styleEditor';
+import type { CharacterStyleKey } from '../constants/stylePropertyMap';
+import { STYLE_LABELS } from '../constants/stylePropertyMap';
+import { updateDraftCharStyle } from '../utils/styleConversions';
+import {
+  FONT_WEIGHT_OPTIONS,
+  FONT_FAMILY_HELPER_TEXT,
+  StackedField,
+  DimensionInput,
+  ColorField,
+} from './shared/panelComponents';
 
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
 interface CharacterStylePanelProps {
-  /** Which character style this panel is editing — controls breadcrumb label. */
+  /** Which character style this panel is editing — controls header label. */
   styleKey: CharacterStyleKey;
   /** Current draft state. Parent owns this; all changes call onChange. */
   draft: CharacterStyleDraft;
   onChange: (draft: CharacterStyleDraft) => void;
   /** Persists current draftTemplate to TemplateContext. Same action as top-bar Save. */
   onSave: () => void;
-  /** Close the panel; draft changes are retained in draftTemplate. */
+  /** Navigate back to the style list immediately. */
   onCancel: () => void;
   /** When true, specimen renders from draftTemplate (live changes). */
   showPreview: boolean;
@@ -197,17 +114,9 @@ export function CharacterStylePanel({
   return (
     <div className="flex flex-col h-full overflow-hidden">
 
-      {/* ── Breadcrumb header ── */}
-      <div className="px-4 py-2.5 border-b border-mylo-border-light shrink-0 flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex items-center gap-0.5 text-xs text-mylo-text-secondary hover:text-mylo-text-primary transition-colors"
-        >
-          ← All Styles
-        </button>
-        <span className="text-xs text-mylo-text-tertiary">/</span>
-        <span className="text-xs font-semibold text-mylo-text-primary">{styleName}</span>
+      {/* ── Panel header ── */}
+      <div className="px-4 py-3 border-b border-mylo-border-light shrink-0">
+        <p className="text-sm font-medium text-foreground">{styleName}</p>
       </div>
 
       {/* ── Accordion body (scrollable) ── */}
@@ -317,14 +226,14 @@ export function CharacterStylePanel({
                     ['Color', draft.color || '—'],
                   ] as const
                 ).map(([lbl, val]) => (
-                  <>
-                    <span key={`lbl-${lbl}`} className="text-xs text-muted-foreground whitespace-nowrap">
+                  <React.Fragment key={lbl}>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {lbl}
                     </span>
-                    <span key={`val-${lbl}`} className="text-xs font-medium text-mylo-text-primary truncate">
+                    <span className="text-xs font-medium text-mylo-text-primary truncate">
                       {val}
                     </span>
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             </AccordionContent>

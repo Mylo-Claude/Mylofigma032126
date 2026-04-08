@@ -91,6 +91,7 @@ import {
   AlertDialogTitle,
 } from '../components/ui/alert-dialog';
 
+import { toast } from 'sonner';
 import type { BodyStyleDraft, CharacterStyleDraft, ListStyleDraft } from './types/styleEditor';
 import type { PageSetupDraft, DocumentSettingsDraft } from './types/pageSetup';
 import {
@@ -119,10 +120,10 @@ import {
   documentSettingsToDraft,
   draftToDocumentSettings,
 } from './utils/pageSetupConversions';
-import { StyleListPanel } from './StyleListPanel';
-import { ParagraphStylePanel } from './ParagraphStylePanel';
-import { CharacterStylePanel } from './CharacterStylePanel';
-import { ListStylePanel } from './ListStylePanel';
+import { StyleListPanel } from './components/StyleListPanel';
+import { ParagraphStylePanel } from './components/ParagraphStylePanel';
+import { CharacterStylePanel } from './components/CharacterStylePanel';
+import { ListStylePanel } from './components/ListStylePanel';
 import { PageSetupPanel } from './components/PageSetupPanel';
 import { DocumentSettingsPanel } from './components/DocumentSettingsPanel';
 
@@ -184,10 +185,14 @@ export function TemplateEditorPage() {
   const contextTemplate = id ? templates.find((t) => t.id === id) ?? null : null;
 
   // savedTemplate — frozen snapshot of the last explicitly-saved version.
-  const [savedTemplate, setSavedTemplate] = useState<Template | null>(contextTemplate);
+  const [savedTemplate, setSavedTemplate] = useState<Template | null>(
+    contextTemplate ? structuredClone(contextTemplate) : null
+  );
 
   // draftTemplate — local working copy. Updated live on every panel field change.
-  const [draftTemplate, setDraftTemplate] = useState<Template | null>(contextTemplate);
+  const [draftTemplate, setDraftTemplate] = useState<Template | null>(
+    contextTemplate ? structuredClone(contextTemplate) : null
+  );
 
   const [isDirty, setIsDirty] = useState(false);
 
@@ -203,8 +208,8 @@ export function TemplateEditorPage() {
     if (id !== prevIdRef.current) {
       prevIdRef.current = id;
       const template = id ? templates.find((t) => t.id === id) ?? null : null;
-      setDraftTemplate(template);
-      setSavedTemplate(template);
+      setDraftTemplate(template ? structuredClone(template) : null);
+      setSavedTemplate(template ? structuredClone(template) : null);
       setIsDirty(false);
       setShowPreview(true);
       setPanel({ view: 'styleList' });
@@ -270,6 +275,8 @@ export function TemplateEditorPage() {
    */
   const handleStyleClick = useCallback((styleKey: AnyStyleKey) => {
     if (!draftTemplate) return;
+    // Reset preview toggle to live mode whenever a new style panel is opened.
+    setShowPreview(true);
 
     if ((PARAGRAPH_STYLE_KEYS as readonly string[]).includes(styleKey)) {
       setPanel({
@@ -368,6 +375,11 @@ export function TemplateEditorPage() {
       prev ? { ...prev, pageStyles: draftToPageStyles(draft) } : prev
     );
     setIsDirty(true);
+  // [panel.view] rather than [panel]: the guard only checks view, and including
+  // the full panel object would cause a new callback on every draft keystroke,
+  // creating an infinite loop (callback change → parent re-render → new panel
+  // object → callback change). Style handlers use [panel] because they also
+  // read panel.styleKey inside the callback body.
   }, [panel.view]);
 
   /** Called by DocumentSettingsPanel whenever any field changes. */
@@ -378,6 +390,7 @@ export function TemplateEditorPage() {
       prev ? { ...prev, documentSettings: draftToDocumentSettings(draft) } : prev
     );
     setIsDirty(true);
+  // [panel.view] — same reasoning as handlePageSetupDraftChange above.
   }, [panel.view]);
 
   /**
@@ -387,8 +400,10 @@ export function TemplateEditorPage() {
   const handleSave = useCallback(() => {
     if (!draftTemplate) return;
     updateTemplate(draftTemplate.id, draftTemplate);
-    setSavedTemplate(draftTemplate);
+    setSavedTemplate(structuredClone(draftTemplate));
     setIsDirty(false);
+    toast.success('Template saved');
+    setPanel({ view: 'styleList' });
   }, [draftTemplate, updateTemplate]);
 
   /**
@@ -405,7 +420,7 @@ export function TemplateEditorPage() {
    */
   const handleRevert = useCallback(() => {
     if (!savedTemplate) return;
-    setDraftTemplate(savedTemplate);
+    setDraftTemplate(structuredClone(savedTemplate));
     setIsDirty(false);
 
     if (panel.view === 'paragraph') {
