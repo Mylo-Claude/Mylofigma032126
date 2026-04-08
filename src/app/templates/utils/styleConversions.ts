@@ -635,6 +635,11 @@ export function updateDraftCharStyle(
  *
  * Paragraph fields are read from listStyle.itemStyle (TemplateStyle).
  * Marker/indent fields are read from the ListStyle top-level properties.
+ *
+ * fontSize, lineHeight, and letterSpacing fall back to the body style values
+ * when itemStyle doesn't define them. List items visually inherit these from
+ * the body style anyway, so the fallback avoids showing "—" in the panel for
+ * templates that have not yet set explicit overrides on their list styles.
  */
 export function templateStyleToListDraft(
   template: Template,
@@ -648,8 +653,14 @@ export function templateStyleToListDraft(
   const itemStyle: TemplateStyle = listStyle.itemStyle ?? {};
   const paraDraft = styleObjectToBodyDraft(itemStyle);
 
+  // Fall back to body style for typography fields not explicitly set on itemStyle.
+  const bodyDraft = styleObjectToBodyDraft(template.contentStyles.body);
+
   return {
     ...paraDraft,
+    fontSize: paraDraft.fontSize || bodyDraft.fontSize,
+    lineHeight: paraDraft.lineHeight || bodyDraft.lineHeight,
+    letterSpacing: paraDraft.letterSpacing || bodyDraft.letterSpacing,
     markerStyle: listStyle.markerType || defaultMarker,
     markerColor: listStyle.markerColor || '#000000',
     markerSize: pxToPtDisplay(listStyle.markerSize || ''),
