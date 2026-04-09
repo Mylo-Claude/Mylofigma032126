@@ -155,7 +155,7 @@ export function ParagraphStylePanel({
     <div className="flex flex-col h-full overflow-hidden">
 
       {/* ── Panel header ── */}
-      <div className="px-4 py-3 border-b border-mylo-border-light shrink-0">
+      <div className="px-4 py-3 border-b border-mylo-border-light shrink-0 bg-mylo-surface-subtle">
         <p className="text-sm font-medium text-foreground">{styleName}</p>
       </div>
 
@@ -481,7 +481,7 @@ export function ParagraphStylePanel({
       </div>
 
       {/* ── Pinned preview bar ── */}
-      <div className="px-4 py-2 border-t border-mylo-border-light shrink-0 flex items-center gap-2">
+      <div className="px-4 py-2 border-t border-mylo-border-light shrink-0 flex items-center gap-2 bg-mylo-surface-subtle">
         <Checkbox
           id={previewId}
           checked={showPreview}
