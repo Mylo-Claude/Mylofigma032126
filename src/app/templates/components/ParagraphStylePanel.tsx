@@ -496,7 +496,7 @@ export function ParagraphStylePanel({
       </div>
 
       {/* ── Footer ── */}
-      <div className="px-4 py-3 border-t border-mylo-border-light shrink-0 flex items-center gap-2">
+      <div className="px-4 py-3 border-t border-mylo-border-light shrink-0 flex items-center gap-2 bg-mylo-surface-subtle">
         <Button variant="ghost" size="sm" onClick={onCancel} className="flex-1 h-7 text-xs">
           Cancel
         </Button>
