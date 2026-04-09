@@ -211,12 +211,19 @@ export function ListStylePanel({
                 {/* Marker size + Indent — two-column */}
                 <div className="grid grid-cols-2 gap-4">
                   <StackedField label="Marker Size">
-                    <DimensionInput value={draft.markerSize} onChange={(v) => set('markerSize', v)} />
+                    <DimensionInput
+                      value={draft.markerSize}
+                      onChange={(v) => set('markerSize', v)}
+                      placeholder="Auto"
+                    />
                   </StackedField>
                   <StackedField label="Indent">
                     <DimensionInput value={draft.indent} onChange={(v) => set('indent', v)} />
                   </StackedField>
                 </div>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  Marker size inherits from list font size when left empty.
+                </p>
 
               </div>
             </AccordionContent>

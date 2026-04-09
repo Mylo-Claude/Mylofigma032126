@@ -688,7 +688,8 @@ export function listDraftToTemplateUpdate(
     ...existingListStyle,
     markerType: draft.markerStyle,
     markerColor: draft.markerColor,
-    markerSize: draft.markerSize ? ptDisplayToPx(draft.markerSize) : existingListStyle.markerSize,
+    // Empty markerSize means "inherit from list font size" — omit the field entirely.
+    markerSize: draft.markerSize ? ptDisplayToPx(draft.markerSize) : undefined,
     indentSize: draft.indent ? ptDisplayToPx(draft.indent) : existingListStyle.indentSize,
     itemStyle: Object.keys(itemStyle).length > 0 ? itemStyle : undefined,
   };
