@@ -58,7 +58,7 @@ import {
   useRef,
 } from 'react';
 import type { KeyboardEvent, ChangeEvent } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { ChevronLeft } from 'lucide-react';
 
 import { useTemplates } from '../contexts/TemplateContext';
@@ -163,6 +163,7 @@ function StatusBadge({ status }: { status: 'draft' | 'published' | undefined }) 
 export function TemplateEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     templates,
     createTemplate,
@@ -170,16 +171,24 @@ export function TemplateEditorPage() {
     publishTemplate,
     unpublishTemplate,
   } = useTemplates();
+  const newTemplateDraftKey = `mylo_new_template_draft:${location.key}`;
 
   // When route is /templates/new, create a template and redirect immediately
   useEffect(() => {
-    if (!id) {
-      const t = createTemplate();
-      navigate(`/templates/${t.id}`, { replace: true });
+    if (id) return;
+
+    // React StrictMode remounts this route in development. Reuse the draft
+    // already created for this history entry instead of writing a second one.
+    const existingDraftId = sessionStorage.getItem(newTemplateDraftKey);
+    if (existingDraftId) {
+      navigate(`/templates/${existingDraftId}`, { replace: true });
+      return;
     }
-    // createTemplate and navigate are stable; only run once when id is missing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    const t = createTemplate();
+    sessionStorage.setItem(newTemplateDraftKey, t.id);
+    navigate(`/templates/${t.id}`, { replace: true });
+  }, [id, createTemplate, navigate, newTemplateDraftKey]);
 
   // Resolve the current template from context (re-derives on every context update).
   const contextTemplate = id ? templates.find((t) => t.id === id) ?? null : null;
