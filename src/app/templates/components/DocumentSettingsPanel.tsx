@@ -87,7 +87,7 @@ export function DocumentSettingsPanel({
                 Strip empty paragraphs
               </Label>
               <p className="text-[10px] text-muted-foreground leading-snug">
-                When enabled, consecutive empty paragraphs are removed on export. Recommended for most templates.
+                When enabled, all empty paragraphs are removed in Preview. Spacing is controlled by the template.
               </p>
             </div>
           </div>
