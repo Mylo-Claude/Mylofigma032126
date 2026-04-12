@@ -408,11 +408,14 @@ export function TemplateEditorPage() {
 
   /**
    * Close the property panel and return to the style list.
-   * Does NOT revert draft changes — draftTemplate retains live edits.
+   * Resets draftTemplate to the last saved state so unsaved edits
+   * do not persist if the same panel is reopened.
    */
   const handleCancel = useCallback(() => {
+    setDraftTemplate(structuredClone(savedTemplate));
+    setIsDirty(false);
     setPanel({ view: 'styleList' });
-  }, []);
+  }, [savedTemplate]);
 
   /**
    * Restore draftTemplate to the last saved state (savedTemplate).
