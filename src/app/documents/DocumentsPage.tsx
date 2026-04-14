@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router';
 import { LayoutTemplate, ArrowRight } from 'lucide-react';
 import { useRole } from '../contexts/RoleContext';
 import { useDocuments } from '../contexts/DocumentContext';
-import { availableTemplates } from '../mylo/templates';
+import { useTemplates } from '../contexts/TemplateContext';
 import { AppHeader } from './components/AppHeader';
 import { FolderSidebar } from './components/FolderSidebar';
 import { DocumentGrid } from './components/DocumentGrid';
@@ -37,6 +37,7 @@ import { Button } from '../components/ui/button';
 
 function TemplatesSection() {
   const { role } = useRole();
+  const { publishedTemplates } = useTemplates();
   const navigate = useNavigate();
   const canManage = role === 'template-editor' || role === 'admin';
 
@@ -64,7 +65,7 @@ function TemplatesSection() {
 
         {/* Template pills */}
         <div className="flex flex-wrap gap-2">
-          {availableTemplates.map((t) => (
+          {publishedTemplates.map((t) => (
             <div
               key={t.id}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-mylo-border-light bg-mylo-surface-subtle text-sm"

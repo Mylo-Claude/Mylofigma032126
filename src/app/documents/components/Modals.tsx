@@ -7,8 +7,6 @@
  * @does-not-own Document/folder persistence (DocumentContext), navigation
  *               (callbacks), template rendering (not invoked here).
  *
- * Template names are a static lookup here (Phase 5 will replace with TemplateContext).
- *
  * @see DocumentContext.tsx — createDocument, createFolder, updateDocument,
  *                            updateFolder, restoreDocument, permanentDeleteDocument
  * @see SessionContext.tsx — session.name used as createdBy
@@ -19,7 +17,7 @@ import { format } from 'date-fns';
 import { FileText, RotateCcw, Trash2 } from 'lucide-react';
 import { useDocuments } from '../../contexts/DocumentContext';
 import { useSession } from '../../contexts/SessionContext';
-import { availableTemplates } from '../../mylo/templates';
+import { useTemplates } from '../../contexts/TemplateContext';
 import type { MyloDocument } from '../../types';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -60,12 +58,13 @@ export function CreateDocumentModal({
 }: CreateDocumentModalProps) {
   const { createDocument } = useDocuments();
   const { session } = useSession();
+  const { publishedTemplates } = useTemplates();
   const [title, setTitle] = useState('');
-  const [templateId, setTemplateId] = useState(availableTemplates[0]?.id ?? 'default-template-v1');
+  const [templateId, setTemplateId] = useState(publishedTemplates[0]?.id ?? 'default-template-v1');
 
   const handleClose = () => {
     setTitle('');
-    setTemplateId(availableTemplates[0]?.id ?? 'default-template-v1');
+    setTemplateId(publishedTemplates[0]?.id ?? 'default-template-v1');
     onClose();
   };
 
@@ -110,7 +109,7 @@ export function CreateDocumentModal({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {availableTemplates.map((t) => (
+                {publishedTemplates.map((t) => (
                   <SelectItem key={t.id} value={t.id}>
                     {t.name}
                   </SelectItem>

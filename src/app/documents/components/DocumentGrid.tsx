@@ -4,7 +4,7 @@
  * @owns Real-time search filtering, document grid layout, empty states,
  *       the "New Document" CTA, folder breadcrumb label.
  * @does-not-own Document persistence (DocumentContext), navigation (callbacks),
- *               template data (availableTemplates, replaced by TemplateContext in Phase 5),
+ *               template data (TemplateContext),
  *               rename/delete UI (Modals.tsx via callbacks from DocumentsPage).
  *
  * Search filters document title in real time. Matches are case-insensitive
@@ -22,7 +22,7 @@
 import { useState, useMemo } from 'react';
 import { Search, Plus, FileText, FolderOpen, SearchX } from 'lucide-react';
 import { useDocuments } from '../../contexts/DocumentContext';
-import { availableTemplates } from '../../mylo/templates';
+import { useTemplates } from '../../contexts/TemplateContext';
 import type { MyloDocument, Folder } from '../../types';
 import { DocumentCard } from './DocumentCard';
 import { Button } from '../../components/ui/button';
@@ -130,6 +130,7 @@ function GridHeading({
 
 export function DocumentGrid({ folderId, onDocumentOpen, onNewDocument, onRenameDocument, onDeleteDocument }: Props) {
   const { documents, folders } = useDocuments();
+  const { templates } = useTemplates();
   const [query, setQuery] = useState('');
 
   // Filter to current folder view
@@ -192,7 +193,7 @@ export function DocumentGrid({ folderId, onDocumentOpen, onNewDocument, onRename
               <DocumentCard
                 key={doc.id}
                 document={doc}
-                templateName={availableTemplates.find((t) => t.id === doc.templateId)?.name ?? doc.templateId}
+                templateName={templates.find((t) => t.id === doc.templateId)?.name ?? doc.templateId}
                 onOpen={() => onDocumentOpen(doc.id)}
                 onRename={() => onRenameDocument(doc.id, doc.title)}
                 onDelete={() => onDeleteDocument(doc.id)}
