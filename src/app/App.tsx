@@ -33,11 +33,6 @@ import { RoleProvider } from './contexts/RoleContext';
 import { SessionProvider } from './contexts/SessionContext';
 import { DocumentProvider } from './contexts/DocumentContext';
 import { TemplateProvider } from './contexts/TemplateContext';
-import { runPhase3ATests } from './services/__tests__/serializerPhase3A.test';
-import { runPhase4Tests } from './services/__tests__/phase4Validation.test';
-import { runPhase5Tests } from './services/__tests__/phase5Validation.test';
-import { runAllValidations } from './mylo/templates/__tests__/validateAdapter';
-import { runGovernanceEnforcementTests } from './services/__tests__/governanceEnforcement.test';
 
 /**
  * DevTestSuite — runs the original codebase validation tests on mount.
@@ -47,12 +42,28 @@ import { runGovernanceEnforcementTests } from './services/__tests__/governanceEn
  */
 function DevTestSuite() {
   useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    if (localStorage.getItem('mylo_dev_tests') !== 'true') return;
     const timer = setTimeout(() => {
-      runPhase3ATests();
-      runPhase4Tests();
-      runPhase5Tests();
-      runAllValidations();
-      runGovernanceEnforcementTests();
+      void Promise.all([
+        import('./services/__tests__/serializerPhase3A.test'),
+        import('./services/__tests__/phase4Validation.test'),
+        import('./services/__tests__/phase5Validation.test'),
+        import('./mylo/templates/__tests__/validateAdapter'),
+        import('./services/__tests__/governanceEnforcement.test'),
+      ]).then(([
+        { runPhase3ATests },
+        { runPhase4Tests },
+        { runPhase5Tests },
+        { runAllValidations },
+        { runGovernanceEnforcementTests },
+      ]) => {
+        runPhase3ATests();
+        runPhase4Tests();
+        runPhase5Tests();
+        runAllValidations();
+        runGovernanceEnforcementTests();
+      });
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
