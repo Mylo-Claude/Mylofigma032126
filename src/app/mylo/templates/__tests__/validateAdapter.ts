@@ -11,6 +11,11 @@
 
 import { applyPageConfigToPagedJs } from '../pageConfigAdapter';
 import { modernTemplate } from '../modern';
+import type { Template } from '../../template';
+
+type TemplateWithOptionalPageStyles = Omit<Template, 'pageStyles'> & {
+  pageStyles?: Template['pageStyles'];
+};
 
 /**
  * Validate that the adapter produces identical results to the manual implementation
@@ -89,7 +94,7 @@ export function validateAdapterHandlesMissingPageStyles(): boolean {
   
   try {
     const element = document.createElement('div');
-    const templateWithoutPageStyles = {
+    const templateWithoutPageStyles: TemplateWithOptionalPageStyles = {
       ...modernTemplate,
       pageStyles: undefined,
     };
@@ -98,7 +103,7 @@ export function validateAdapterHandlesMissingPageStyles(): boolean {
     console.log('✓ Should apply default margins from schema (1in each)');
     
     // Should not throw
-    applyPageConfigToPagedJs(element, templateWithoutPageStyles);
+    applyPageConfigToPagedJs(element, templateWithoutPageStyles as Template);
     
     // Should apply default margins (1in for all)
     const topMargin = element.style.getPropertyValue('--pagedjs-margin-top');
