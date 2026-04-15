@@ -35,9 +35,9 @@ import { DocumentProvider } from './contexts/DocumentContext';
 import { TemplateProvider } from './contexts/TemplateContext';
 
 /**
- * DevTestSuite — runs the original codebase validation tests on mount.
- * Preserves the test harness that existed before Phase 1 refactoring.
- * Tests run once after a 1000ms delay to allow the app to fully initialize.
+ * DevTestSuite — opt-in dev test harness. Does NOT run on normal startup.
+ * To enable: localStorage.setItem('mylo_dev_tests', 'true'), then refresh.
+ * Runs only in development builds (import.meta.env.DEV).
  * Output is console-only; no UI impact.
  */
 function DevTestSuite() {
