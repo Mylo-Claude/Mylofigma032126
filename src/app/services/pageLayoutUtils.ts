@@ -79,13 +79,17 @@ function generateContentCSS(contentStyles: ContentStyles): string {
     const selector = `.mylo-preview ${htmlElement}[data-type="${key}"]`;
 
     // Collect all CSS properties (top-level + advanced)
-    const allProps: Record<string, string | number> = {};
+    const allProps: Record<string, string | number | undefined> = {};
 
     for (const [prop, value] of Object.entries(styleObj)) {
       if (prop === 'advanced' && typeof value === 'object' && value !== null) {
         // Flatten advanced properties into main properties
         Object.assign(allProps, value);
-      } else if (typeof value !== 'object') {
+      } else if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'undefined'
+      ) {
         // Add top-level property
         allProps[prop] = value;
       }

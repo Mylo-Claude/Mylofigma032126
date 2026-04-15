@@ -105,7 +105,7 @@ function nodeToHTML(node: PMNode, template: Template | undefined, listDepth: num
       return createList(node, 'ul', template, listDepth, useInlineStyles);
       
     case 'ordered_list':
-      return createList(node, 'ol', template, listDepth, node.attrs.start, useInlineStyles);
+      return createList(node, 'ol', template, listDepth, useInlineStyles, node.attrs.start);
       
     case 'list_item':
       // Fallback for orphaned list items (shouldn't normally occur)
@@ -174,7 +174,14 @@ function createParagraph(node: PMNode, template: Template | undefined, useInline
 /**
  * Create list element (ul or ol) with template styles
  */
-function createList(node: PMNode, tag: 'ul' | 'ol', template: Template | undefined, listDepth: number, start?: number, useInlineStyles?: boolean): HTMLElement {
+function createList(
+  node: PMNode,
+  tag: 'ul' | 'ol',
+  template: Template | undefined,
+  listDepth: number,
+  useInlineStyles = false,
+  start?: number,
+): HTMLElement {
   const element = document.createElement(tag);
   
   // Apply template list styles
@@ -246,7 +253,13 @@ function createList(node: PMNode, tag: 'ul' | 'ol', template: Template | undefin
 /**
  * Create list item element with template styles
  */
-function createListItem(node: PMNode, template: Template | undefined, listDepth: number, parentListType: 'ul' | 'ol', useInlineStyles?: boolean): HTMLElement {
+function createListItem(
+  node: PMNode,
+  template: Template | undefined,
+  listDepth: number,
+  parentListType: 'ul' | 'ol',
+  useInlineStyles = false,
+): HTMLElement {
   const element = document.createElement('li');
   
   // Apply body font styles to list items
