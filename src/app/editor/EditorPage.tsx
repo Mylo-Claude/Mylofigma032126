@@ -30,7 +30,7 @@ import { EditorView } from 'prosemirror-view';
 import { Node as PMNode } from 'prosemirror-model';
 import { ChevronLeft, Check } from 'lucide-react';
 import { myloSchema } from '../mylo/schema';
-import { availableTemplates, defaultTemplate } from '../mylo/templates';
+import { defaultTemplate } from '../mylo/templates';
 import type { Template } from '../mylo/template';
 import { useDocuments } from '../contexts/DocumentContext';
 import { markAsNotified } from '../services/governanceNotifications';
@@ -91,7 +91,7 @@ export function EditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { documents, updateDocument } = useDocuments();
-  const { publishedTemplates } = useTemplates();
+  const { templates, publishedTemplates } = useTemplates();
 
   // Look up the active document by route param
   const doc = documents.find((d) => d.id === id) ?? null;
@@ -118,7 +118,7 @@ export function EditorPage() {
   // Initial template — resolved once from templateId; PreviewPanel owns local state after that
   const initialTemplateRef = useRef<Template>(
     publishedTemplates.find((t) => t.id === doc?.templateId) ??
-    availableTemplates.find((t) => t.id === doc?.templateId) ??
+    templates.find((t) => t.id === doc?.templateId) ??
     defaultTemplate
   );
 
