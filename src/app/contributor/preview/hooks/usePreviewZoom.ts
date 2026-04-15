@@ -2,7 +2,7 @@ import { RefObject, useEffect, useState } from "react";
 import type { ZoomMode } from "../types";
 
 export interface UsePreviewZoomProps {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   measuredPageWidth: number | null;
   measuredPageHeight: number | null;
   zoomMode: ZoomMode;

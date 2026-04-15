@@ -172,7 +172,7 @@ function ColorField({
   value: string;
   onChange: (v: string) => void;
   disabled?: boolean;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
     <div className="flex items-center gap-2">
