@@ -8,7 +8,7 @@ Mylo features:
 - **Split-pane interface**: Editor (ProseMirror) and Preview (Paged.js)
 - **Role-based governance**: Distinct capabilities for Contributors, Template Editors, and Admins
 - **Template-driven rendering**: Preview applies governed styling through templates
-- **Advanced CSS control**: Template Editors have unlimited CSS flexibility via `advanced` properties
+- **Template-based styling**: Template definitions govern preview presentation
 
 ## Architecture
 
@@ -24,8 +24,8 @@ The codebase is organized by user role to enforce governance boundaries:
 │   │   └── hooks/      # Editor-specific hooks
 │   └── preview/        # Preview panel and rendering
 │       └── hooks/      # Preview-specific hooks
-├── template-editor/    # Template Editor role (future)
-├── admin/              # Admin role (future)
+├── templates/          # Template Editor routes and panels
+├── admin/              # Admin documentation scaffolding
 ├── contexts/           # Shared contexts (RoleContext)
 ├── components/         # Shared UI components (ShadCN)
 ├── mylo/               # Core Mylo schema and keymap
@@ -54,13 +54,14 @@ The codebase is organized by user role to enforce governance boundaries:
 
 #### Template Editor Role
 
-**Templates** (`/template-editor/`)
-- Not yet implemented (future phase)
+**Templates** (`/templates/`)
+- `TemplateListPage.tsx`: Template browser for template-editor and admin roles
+- `TemplateEditorPage.tsx`: Template editing surface for `/templates/new` and `/templates/:id`
 
 #### Admin Role
 
 **Administration** (`/admin/`)
-- Not yet implemented (future phase)
+- Documentation scaffolding exists, but admin app routes/pages are not wired into the current router
 
 #### Shared Systems
 
@@ -92,11 +93,11 @@ The codebase is organized by user role to enforce governance boundaries:
 
 - **Contributors**: Apply structural markers (headings, lists, bold, italic), author content
 - **Template Editors**: Define template styles, mappings, and allowed options
-- **Admins**: Publish templates, enforce governance policies, access audit logging
+- **Admins**: Publish templates and enforce governance policies
 
 ## Development Setup
 
-This project runs in Figma Make environment. No npm commands are available.
+This project runs as a local React/Vite app with npm-based development commands.
 
 ### Key Dependencies
 
@@ -127,13 +128,15 @@ Testing instructions:
 
 ## Documentation
 
-- `Guidelines.md`: Full governance framework and collaboration prompt
-- `REFACTORING_PLAN.md`: 7-phase refactoring plan
+- `guidelines/Guidelines.md`: Full governance framework and collaboration prompt
+- `docs/DesignSystemRules.md`: Current design system guidance
+- `docs/EDITOR_REFACTORING_ANALYSIS.md`: Current editor architecture analysis
+- `docs/archive/`: Historical completed-work documents
 - Role-specific READMEs in each directory
 
 ## Governance Alignment
 
-This structure enforces the governance model defined in `Guidelines.md`:
+This structure enforces the governance model defined in `guidelines/Guidelines.md`:
 - **Contributor structure authority**: All Editor controls respect structural markers only
 - **Template enforcement**: Preview applies template rules to structure
 - **No hybrid formatting authority**: Contributors cannot override Preview typography
