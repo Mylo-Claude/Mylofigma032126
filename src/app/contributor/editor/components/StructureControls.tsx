@@ -89,6 +89,84 @@ export function StructureControls({ view }: StructureControlsProps) {
     return { inList: false };
   };
   const listCtx = getListContext();
+  const getAffectedListSegments = () => {
+    if (state.selection.empty) return [];
+
+    const segments: Array<
+      | {
+          kind: "list";
+          listNode: NonNullable<ReturnType<typeof state.doc.nodeAt>>;
+          listPos: number;
+          firstIndex: number;
+          lastIndex: number;
+        }
+      | {
+          kind: "paragraph";
+          paragraphNode: NonNullable<ReturnType<typeof state.doc.nodeAt>>;
+          paragraphPos: number;
+        }
+    > = [];
+    const { from, to } = state.selection;
+
+    state.doc.nodesBetween(from, to, (node, pos, parent) => {
+      const isListNode =
+        node.type === myloSchema.nodes.bullet_list ||
+        node.type === myloSchema.nodes.ordered_list;
+      const isNestedList = parent?.type === myloSchema.nodes.list_item;
+      const isDocParagraph =
+        node.type === myloSchema.nodes.paragraph && parent?.type === state.doc.type;
+
+      if (isDocParagraph) {
+        const paragraphStart = pos;
+        const paragraphEnd = paragraphStart + node.nodeSize;
+        const overlapsSelection = paragraphEnd > from && paragraphStart < to;
+
+        if (overlapsSelection) {
+          segments.push({
+            kind: "paragraph",
+            paragraphNode: node,
+            paragraphPos: pos,
+          });
+        }
+
+        return false;
+      }
+
+      if (!isListNode || isNestedList) return;
+
+      let firstIndex: number | null = null;
+      let lastIndex: number | null = null;
+      let childPos = pos + 1;
+
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        const childStart = childPos;
+        const childEnd = childStart + child.nodeSize;
+        const overlapsSelection = childEnd > from && childStart < to;
+
+        if (overlapsSelection) {
+          if (firstIndex === null) firstIndex = i;
+          lastIndex = i;
+        }
+
+        childPos = childEnd;
+      }
+
+      if (firstIndex !== null && lastIndex !== null) {
+        segments.push({
+          kind: "list",
+          listNode: node,
+          listPos: pos,
+          firstIndex,
+          lastIndex,
+        });
+      }
+
+      return false;
+    });
+
+    return segments;
+  };
 
   // Get current paragraph type
   const getCurrentParagraphType = (): string => {
@@ -122,99 +200,161 @@ export function StructureControls({ view }: StructureControlsProps) {
   };
 
   const toggleList = (listType: "bullet_list" | "ordered_list") => {
-    const convertItemToTargetList = (
+    const convertListSegmentsToTargetList = (
       targetType: "bullet_list" | "ordered_list",
-      firstIndex: number,
-      lastIndex: number
+      segments: Array<
+        | {
+            kind: "list";
+            listNode: NonNullable<ReturnType<typeof state.doc.nodeAt>>;
+            listPos: number;
+            firstIndex: number;
+            lastIndex: number;
+          }
+        | {
+            kind: "paragraph";
+            paragraphNode: NonNullable<ReturnType<typeof state.doc.nodeAt>>;
+            paragraphPos: number;
+          }
+      >
     ) => {
-      if (!listCtx.inList) return;
-
-      const sourceListType = myloSchema.nodes[listCtx.listType];
       const targetListType = myloSchema.nodes[targetType];
-      const listNode = state.doc.nodeAt(listCtx.listPos);
-      if (!listNode) return;
+      const listItemType = myloSchema.nodes.list_item;
+      const tr = state.tr;
+      const targetListPositions: number[] = [];
+      const descendingSegments = [...segments].sort((a, b) => {
+        const aPos = a.kind === "list" ? a.listPos : a.paragraphPos;
+        const bPos = b.kind === "list" ? b.listPos : b.paragraphPos;
+        return bPos - aPos;
+      });
 
-      const beforeItems = [];
-      const selectedItems = [];
-      const afterItems = [];
+      for (const segment of descendingSegments) {
+        const segmentPos = segment.kind === "list" ? segment.listPos : segment.paragraphPos;
+        const segmentNode = segment.kind === "list" ? segment.listNode : segment.paragraphNode;
+        const mappedStart = tr.mapping.map(segmentPos);
+        const mappedEnd = tr.mapping.map(segmentPos + segmentNode.nodeSize);
 
-      for (let i = 0; i < firstIndex; i++) {
-        beforeItems.push(listNode.child(i));
-      }
-      for (let i = firstIndex; i <= lastIndex; i++) {
-        selectedItems.push(listNode.child(i));
-      }
-      for (let i = lastIndex + 1; i < listNode.childCount; i++) {
-        afterItems.push(listNode.child(i));
-      }
+        let replacementNodes: Parameters<typeof Fragment.fromArray>[0] = [];
+        let targetListPos = mappedStart;
 
-      const replacementNodes: Parameters<typeof Fragment.fromArray>[0] = [];
-      if (beforeItems.length > 0) {
-        replacementNodes.push(
-          sourceListType.create(listNode.attrs, Fragment.fromArray(beforeItems))
-        );
-      }
+        if (segment.kind === "list") {
+          const sourceListType = segment.listNode.type;
+          const beforeItems = [];
+          const selectedItems = [];
+          const afterItems = [];
 
-      replacementNodes.push(
-        targetListType.create(null, Fragment.fromArray(selectedItems))
-      );
+          for (let i = 0; i < segment.firstIndex; i++) {
+            beforeItems.push(segment.listNode.child(i));
+          }
+          for (let i = segment.firstIndex; i <= segment.lastIndex; i++) {
+            selectedItems.push(segment.listNode.child(i));
+          }
+          for (let i = segment.lastIndex + 1; i < segment.listNode.childCount; i++) {
+            afterItems.push(segment.listNode.child(i));
+          }
 
-      if (afterItems.length > 0) {
-        replacementNodes.push(
-          sourceListType.create(listNode.attrs, Fragment.fromArray(afterItems))
-        );
-      }
+          if (beforeItems.length > 0) {
+            replacementNodes.push(
+              sourceListType.create(segment.listNode.attrs, Fragment.fromArray(beforeItems))
+            );
+          }
 
-      const tr = state.tr.replaceWith(
-        listCtx.listPos,
-        listCtx.listPos + listNode.nodeSize,
-        Fragment.fromArray(replacementNodes)
-      );
+          replacementNodes.push(
+            targetListType.create(null, Fragment.fromArray(selectedItems))
+          );
 
-      let targetListPos =
-        listCtx.listPos +
-        (beforeItems.length > 0 ? replacementNodes[0].nodeSize : 0);
+          if (afterItems.length > 0) {
+            replacementNodes.push(
+              sourceListType.create(segment.listNode.attrs, Fragment.fromArray(afterItems))
+            );
+          }
 
-      const joinAtBoundary = (direction: "before" | "after") => {
-        const currentList = tr.doc.nodeAt(targetListPos);
-        if (!currentList || currentList.type !== targetListType) return false;
-
-        const boundaryPos =
-          direction === "before"
-            ? targetListPos
-            : targetListPos + currentList.nodeSize;
-        const $boundaryPos = tr.doc.resolve(boundaryPos);
-        const adjacentNode =
-          direction === "before" ? $boundaryPos.nodeBefore : $boundaryPos.nodeAfter;
-
-        if (adjacentNode?.type !== targetListType) return false;
-        if (!canJoin(tr.doc, boundaryPos)) return false;
-
-        const adjacentNodeSize = adjacentNode.nodeSize;
-        tr.join(boundaryPos);
-        if (direction === "before") {
-          targetListPos -= adjacentNodeSize;
+          targetListPos =
+            mappedStart + (beforeItems.length > 0 ? replacementNodes[0].nodeSize : 0);
+        } else {
+          const listItemNode = listItemType.create(null, segment.paragraphNode.content);
+          replacementNodes = [
+            targetListType.create(null, Fragment.from(listItemNode)),
+          ];
         }
-        return true;
+
+        const replacementFragment = Fragment.fromArray(replacementNodes);
+        const delta = replacementFragment.size - (mappedEnd - mappedStart);
+
+        for (let i = 0; i < targetListPositions.length; i++) {
+          if (targetListPositions[i] > mappedStart) {
+            targetListPositions[i] += delta;
+          }
+        }
+
+        tr.replaceWith(mappedStart, mappedEnd, replacementFragment);
+        targetListPositions.push(targetListPos);
+      }
+
+      targetListPositions.sort((a, b) => a - b);
+
+      const mergeAdjacentTargetLists = () => {
+        if (targetListPositions.length === 0) return;
+
+        let scanStart = targetListPositions[0];
+        let lastTargetPos = targetListPositions[targetListPositions.length - 1];
+        let lastTargetNode = tr.doc.nodeAt(lastTargetPos);
+        let scanEnd = lastTargetNode ? lastTargetPos + lastTargetNode.nodeSize : lastTargetPos;
+
+        let changed = true;
+        while (changed) {
+          changed = false;
+          let pos = 0;
+
+          while (pos < tr.doc.content.size) {
+            const node = tr.doc.nodeAt(pos);
+            if (!node) break;
+
+            const nextPos = pos + node.nodeSize;
+            const nextNode = tr.doc.nodeAt(nextPos);
+            const touchesScanWindow = nextPos >= scanStart && pos <= scanEnd;
+
+            if (
+              touchesScanWindow &&
+              node.type === targetListType &&
+              nextNode?.type === targetListType &&
+              canJoin(tr.doc, nextPos)
+            ) {
+              tr.join(nextPos);
+              scanEnd -= 2;
+              changed = true;
+              continue;
+            }
+
+            pos = nextPos;
+          }
+        }
       };
 
-      while (joinAtBoundary("before")) {
-        // Continue until there is no same-type target list immediately above.
-      }
+      mergeAdjacentTargetLists();
 
-      while (joinAtBoundary("after")) {
-        // Continue until there is no same-type target list immediately below.
-      }
-
-      const selectionPos = Math.min(targetListPos + 2, tr.doc.content.size);
+      const selectionPos =
+        targetListPositions.length > 0
+          ? Math.min(targetListPositions[0] + 2, tr.doc.content.size)
+          : state.selection.from;
       tr.setSelection(TextSelection.near(tr.doc.resolve(selectionPos)));
       view.dispatch(tr);
     };
 
-    if (listCtx.inList && listCtx.listType === listType) {
+    if (state.selection.empty && listCtx.inList && listCtx.listType === listType) {
       const liftCommand = liftListItem(myloSchema.nodes.list_item);
       if (liftCommand(state)) {
         liftCommand(state, view.dispatch);
+      }
+    } else if (!state.selection.empty) {
+      const affectedSegments = getAffectedListSegments();
+      const hasListSegments = affectedSegments.some((segment) => segment.kind === "list");
+      if (hasListSegments) {
+        convertListSegmentsToTargetList(listType, affectedSegments);
+      } else {
+        const wrapCommand = wrapInList(myloSchema.nodes[listType]);
+        if (wrapCommand(state)) {
+          wrapCommand(state, view.dispatch);
+        }
       }
     } else if (!listCtx.inList) {
       const wrapCommand = wrapInList(myloSchema.nodes[listType]);
@@ -222,46 +362,14 @@ export function StructureControls({ view }: StructureControlsProps) {
         wrapCommand(state, view.dispatch);
       }
     } else {
-      const firstIndex = state.selection.$from.index(listCtx.listDepth);
-      let lastIndex = firstIndex;
-      const currentListNode = state.doc.nodeAt(listCtx.listPos);
-
-      if (!state.selection.empty) {
-        const { $to } = state.selection;
-        let sameListAtTo = false;
-
-        for (let d = $to.depth; d > 0; d--) {
-          const node = $to.node(d);
-          if (
-            (node.type === myloSchema.nodes.bullet_list ||
-              node.type === myloSchema.nodes.ordered_list) &&
-            $to.before(d) === listCtx.listPos
-          ) {
-            sameListAtTo = true;
-            break;
-          }
-        }
-
-        if (sameListAtTo) {
-          lastIndex = $to.index(listCtx.listDepth);
-
-          const isAtNextItemBoundary =
-            $to.depth >= listCtx.listItemDepth &&
-            $to.before(listCtx.listItemDepth) > listCtx.listItemPos &&
-            $to.pos === $to.before(listCtx.listItemDepth) + 1;
-
-          if (isAtNextItemBoundary) {
-            lastIndex = Math.max(firstIndex, lastIndex - 1);
-          }
-
-          lastIndex = Math.min(
-            lastIndex,
-            currentListNode ? currentListNode.childCount - 1 : lastIndex
-          );
-        }
-      }
-
-      convertItemToTargetList(listType, firstIndex, lastIndex);
+      convertListSegmentsToTargetList(listType, [
+        {
+          listNode: state.doc.nodeAt(listCtx.listPos)!,
+          listPos: listCtx.listPos,
+          firstIndex: state.selection.$from.index(listCtx.listDepth),
+          lastIndex: state.selection.$from.index(listCtx.listDepth),
+        },
+      ]);
     }
 
     view.focus();
