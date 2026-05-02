@@ -10,7 +10,7 @@ export const blankDocument: SampleDocument = {
   content: [
     {
       type: 'body',
-      content: [{ text: 'Start typing here...' }],
+      content: [],
     },
   ],
 };
