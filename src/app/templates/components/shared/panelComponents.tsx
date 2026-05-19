@@ -2,7 +2,7 @@
  * @file templates/components/shared/panelComponents.tsx
  * @role Shared UI primitives used by all Template Editor panels.
  * @owns StackedField, DimensionInput, ColorField layout helpers;
- *       FONT_WEIGHT_OPTIONS and FONT_FAMILY_HELPER_TEXT constants.
+ *       font-weight option helpers.
  *
  * Consolidated from ParagraphStylePanel, CharacterStylePanel, ListStylePanel
  * (identical copies in each), and PageSetupPanel (StackedField only) during
@@ -11,31 +11,69 @@
  * @governance Template Editor only
  */
 
+import { useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { Input } from '../../../components/ui/input';
+import {
+  ensureFontMetadataLoaded,
+  getAvailableFontWeights,
+  getClosestAvailableWeight,
+  getFontWeightLabel,
+  subscribeToFontMetadata,
+} from '../../utils/googleFonts';
+import type { FontStyle } from '../../utils/googleFonts';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-export const FONT_WEIGHT_OPTIONS = [
-  { value: '100', label: 'Thin (100)' },
-  { value: '200', label: 'Extra Light (200)' },
-  { value: '300', label: 'Light (300)' },
-  { value: '400', label: 'Regular (400)' },
-  { value: '500', label: 'Medium (500)' },
-  { value: '600', label: 'Semi Bold (600)' },
-  { value: '700', label: 'Bold (700)' },
-  { value: '800', label: 'Extra Bold (800)' },
-  { value: '900', label: 'Black (900)' },
-] as const;
+export function useFontWeightOptions(
+  fontFamily: string,
+  fontStyle: FontStyle,
+  currentWeight: string,
+  onWeightChange: (value: string) => void,
+) {
+  const [metadataVersion, setMetadataVersion] = useState(0);
 
-/**
- * Temporary affordance shown below the Font Family input until the Google
- * Fonts picker is added in Step 5. Remove when the picker replaces the input.
- */
-export const FONT_FAMILY_HELPER_TEXT =
-  'Type any system font or font name. Google Fonts picker coming soon.' as const;
+  useEffect(() => {
+    let isMounted = true;
+    const unsubscribe = subscribeToFontMetadata(() => {
+      if (isMounted) setMetadataVersion((version) => version + 1);
+    });
+
+    ensureFontMetadataLoaded().then(() => {
+      if (isMounted) setMetadataVersion((version) => version + 1);
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, []);
+
+  const options = useMemo(() => {
+    void metadataVersion;
+    return getAvailableFontWeights(fontFamily, fontStyle).map((weight) => ({
+      value: String(weight),
+      label: getFontWeightLabel(weight),
+    }));
+  }, [fontFamily, fontStyle, metadataVersion]);
+
+  useEffect(() => {
+    if (options.length === 0) return;
+
+    const hasCurrentWeight = options.some((option) => option.value === currentWeight);
+    if (hasCurrentWeight) return;
+
+    const closestWeight = String(getClosestAvailableWeight(fontFamily, currentWeight, fontStyle));
+    console.warn(
+      `[Template Editor] Font weight ${currentWeight || 'unset'} is not available for ${fontFamily || 'the selected font'} (${fontStyle}); using ${closestWeight}.`,
+    );
+    onWeightChange(closestWeight);
+  }, [currentWeight, fontFamily, fontStyle, onWeightChange, options]);
+
+  return options;
+}
 
 // ---------------------------------------------------------------------------
 // Layout helpers
