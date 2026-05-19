@@ -6,6 +6,11 @@ import type { Template } from '../../mylo/template';
 import { resolveDocumentSettings } from '../../mylo/template';
 import { generateTemplateStylesheet } from '../../services/pageLayoutUtils';
 import { applyGovernanceRules } from '../../services/governanceEnforcement';
+import {
+  ensureFontMetadataLoaded,
+  loadGoogleFont,
+  extractFontLoadRequests,
+} from '../../templates/utils/googleFonts';
 
 /**
  * PaginatedDocumentRenderer - Paged.js Integration Component
@@ -55,6 +60,21 @@ export function PaginatedDocumentRenderer({
 }: PaginatedDocumentRendererProps) {
   const [pagedResult, setPagedResult] = useState<{ pageCount: number; pagesContainer: HTMLElement } | null>(null);
   const pagesContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    ensureFontMetadataLoaded().then(() => {
+      if (!isActive) return;
+      extractFontLoadRequests(template).forEach((request) => {
+        loadGoogleFont(request.family, request.styles);
+      });
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [template]);
 
   /**
    * PAGINATION EFFECT
