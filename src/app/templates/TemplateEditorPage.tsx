@@ -120,6 +120,11 @@ import {
   documentSettingsToDraft,
   draftToDocumentSettings,
 } from './utils/pageSetupConversions';
+import {
+  ensureFontMetadataLoaded,
+  loadGoogleFont,
+  extractFontLoadRequests,
+} from './utils/googleFonts';
 import { StyleListPanel } from './components/StyleListPanel';
 import { ParagraphStylePanel } from './components/ParagraphStylePanel';
 import { CharacterStylePanel } from './components/CharacterStylePanel';
@@ -258,6 +263,22 @@ export function TemplateEditorPage() {
   }, []);
 
   const handlePagedJsComplete = useCallback((_pageCount: number) => { /* no-op */ }, []);
+
+  useEffect(() => {
+    if (!draftTemplate) return;
+
+    let isActive = true;
+    ensureFontMetadataLoaded().then(() => {
+      if (!isActive) return;
+      extractFontLoadRequests(draftTemplate).forEach((request) => {
+        loadGoogleFont(request.family, request.styles);
+      });
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [draftTemplate?.id]);
 
   // Stable specimen doc — recomputed only when selected specimen changes
   const specimenDoc = useMemo(() => {

@@ -44,7 +44,6 @@ import {
   AccordionContent,
 } from '../../components/ui/accordion';
 import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
 import { Checkbox } from '../../components/ui/checkbox';
 import { Label } from '../../components/ui/label';
 import {
@@ -60,12 +59,12 @@ import type { ParagraphStyleKey } from '../constants/stylePropertyMap';
 import { STYLE_LABELS } from '../constants/stylePropertyMap';
 import { updateDraftBodyStyle } from '../utils/styleConversions';
 import {
-  FONT_WEIGHT_OPTIONS,
-  FONT_FAMILY_HELPER_TEXT,
+  useFontWeightOptions,
   StackedField,
   DimensionInput,
   ColorField,
 } from './shared/panelComponents';
+import { FontPicker } from './shared/FontPicker';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -129,13 +128,19 @@ export function ParagraphStylePanel({
     },
     [draft, onChange],
   );
+  const fontWeightOptions = useFontWeightOptions(
+    draft.fontFamily,
+    draft.fontStyle,
+    draft.fontWeight,
+    (value) => set('fontWeight', value),
+  );
 
   // ---------------------------------------------------------------------------
   // Style Summary computed values
   // ---------------------------------------------------------------------------
 
   const summaryWeight =
-    FONT_WEIGHT_OPTIONS.find((o) => o.value === draft.fontWeight)?.label ??
+    fontWeightOptions.find((o) => o.value === draft.fontWeight)?.label ??
     draft.fontWeight ??
     '—';
   const summaryStyle = draft.fontStyle === 'italic' ? 'Italic' : 'Normal';
@@ -178,15 +183,10 @@ export function ParagraphStylePanel({
 
                 {/* Font Family — full-width stacked */}
                 <StackedField label="Font Family">
-                  <Input
+                  <FontPicker
                     value={draft.fontFamily}
-                    onChange={(e) => set('fontFamily', e.target.value)}
-                    placeholder="e.g. Gill Sans, sans-serif"
-                    className="h-7 text-xs"
+                    onChange={(value) => set('fontFamily', value)}
                   />
-                  <p className="text-[10px] text-muted-foreground leading-snug">
-                    {FONT_FAMILY_HELPER_TEXT}
-                  </p>
                 </StackedField>
 
                 {/* Weight + Style — side by side */}
@@ -200,7 +200,7 @@ export function ParagraphStylePanel({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {FONT_WEIGHT_OPTIONS.map((opt) => (
+                        {fontWeightOptions.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value} className="text-xs">
                             {opt.label}
                           </SelectItem>
