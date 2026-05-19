@@ -1,4 +1,4 @@
-import { Fragment } from "prosemirror-model";
+import { Fragment, type Node as PMNode } from "prosemirror-model";
 import { TextSelection } from "prosemirror-state";
 import { canJoin } from "prosemirror-transform";
 import { EditorView } from "prosemirror-view";
@@ -233,7 +233,7 @@ export function StructureControls({ view }: StructureControlsProps) {
         const mappedStart = tr.mapping.map(segmentPos);
         const mappedEnd = tr.mapping.map(segmentPos + segmentNode.nodeSize);
 
-        let replacementNodes: Parameters<typeof Fragment.fromArray>[0] = [];
+        let replacementNodes: PMNode[] = [];
         let targetListPos = mappedStart;
 
         if (segment.kind === "list") {
@@ -364,6 +364,7 @@ export function StructureControls({ view }: StructureControlsProps) {
     } else {
       convertListSegmentsToTargetList(listType, [
         {
+          kind: "list",
           listNode: state.doc.nodeAt(listCtx.listPos)!,
           listPos: listCtx.listPos,
           firstIndex: state.selection.$from.index(listCtx.listDepth),
