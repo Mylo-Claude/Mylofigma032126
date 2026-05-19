@@ -99,6 +99,21 @@ function checkForEmptyParagraph(state: EditorState): boolean {
   return found;
 }
 
+function hasAuthoredParagraphContent(state: EditorState): boolean {
+  const paragraphType = state.schema.nodes.paragraph;
+  let found = false;
+  state.doc.forEach((node) => {
+    if (found) return;
+    if (node.type !== paragraphType) return;
+
+    const normalizedText = node.textContent.replace(/\u200B/g, '').trim();
+    if (normalizedText.length > 0) {
+      found = true;
+    }
+  });
+  return found;
+}
+
 /**
  * Detects any empty paragraph and triggers a governance notification.
  *
@@ -122,6 +137,7 @@ function checkEmptyParagraphNotification(
   const settings = resolveDocumentSettings(template.documentSettings)
   if (!settings.stripEmptyParagraphs) return
   if (!shouldNotify('empty_paragraphs')) return
+  if (!hasAuthoredParagraphContent(state)) return
 
   const { $from } = state.selection
   const node = $from.node()
