@@ -1,28 +1,34 @@
 # Editor Code Refactoring Analysis
 **Mylo Document System - Component Extraction Strategy**  
 **Generated:** March 2, 2026  
-**Status:** Analysis Only - No Changes Made
+**Status:** Analysis Only - Historical baseline retained; current architecture references updated
 
 ---
 
 ## Executive Summary
 
-This analysis examines the current Mylo editor codebase to identify opportunities for extracting reusable components using best practices. The codebase consists of **1,202 lines** across 3 main components with additional supporting files for schema, keymap, and templates.
+This analysis captures refactoring recommendations that were originally written against an earlier editor-focused Mylo baseline. The current codebase has since been reorganized around routed pages and role-based feature areas, so the architecture snapshot below has been updated to reflect the current file layout while preserving the strategic analysis that follows.
 
-### Current Architecture
+### Current Architecture Snapshot
 
 ```
 /src/app/
-├── App.tsx (37 lines) - Main application shell
-├── components/
-│   ├── Editor.tsx (121 lines) - ProseMirror editor wrapper
-│   ├── EditorToolbar.tsx (526 lines) - Toolbar with all formatting controls
-│   └── Preview.tsx (555 lines) - Template-governed preview with pagination
-├── mylo/
-│   ├── schema.ts (122 lines) - ProseMirror schema definition
-│   ├── keymap.ts (29 lines) - Keyboard shortcuts
-│   └── template.ts (287 lines) - Template system and default templates
+├── App.tsx (62 lines) - Root provider tree and gated dev test harness
+├── router.tsx (139 lines) - Canonical route structure and protection
+├── documents/
+│   └── DocumentsPage.tsx (168 lines) - Document dashboard shell
+├── editor/
+│   └── EditorPage.tsx (327 lines) - Routed editor + preview orchestration
+├── templates/
+│   ├── TemplateListPage.tsx (233 lines) - Template browser
+│   └── TemplateEditorPage.tsx (707 lines) - Template editing orchestrator
+├── contributor/
+│   ├── editor/ - Contributor editing controls and hooks
+│   └── preview/ - Contributor preview rendering and hooks
+└── mylo/ - Core schema, template types, samples, and adapters
 ```
+
+The detailed component analysis below still refers to the earlier `Editor.tsx` / `EditorToolbar.tsx` / `Preview.tsx` split that originally motivated these recommendations. Those file names and line counts are preserved as historical context for the analysis, not as a description of the current repo layout.
 
 ### Key Findings
 
@@ -37,9 +43,9 @@ This analysis examines the current Mylo editor codebase to identify opportunitie
 
 ## Component Analysis
 
-### 1. Editor.tsx (121 lines)
+### 1. Historical Editor.tsx Baseline (121 lines at time of analysis)
 
-**Current Responsibilities:**
+**Responsibilities at Time of Analysis:**
 - ProseMirror EditorView initialization
 - Sample content loading
 - State management (EditorState)
@@ -61,9 +67,9 @@ This analysis examines the current Mylo editor codebase to identify opportunitie
 
 ---
 
-### 2. EditorToolbar.tsx (526 lines) ⚠️ NEEDS REFACTORING
+### 2. Historical EditorToolbar.tsx Baseline (526 lines at time of analysis) ⚠️ NEEDS REFACTORING
 
-**Current Responsibilities:**
+**Responsibilities at Time of Analysis:**
 - Paragraph type controls (Body, H1-H3)
 - Character formatting (bold, italic, underline)
 - List controls (bullet, numbered, indent, outdent)
@@ -93,9 +99,9 @@ This analysis examines the current Mylo editor codebase to identify opportunitie
 
 ---
 
-### 3. Preview.tsx (555 lines) ⚠️ NEEDS REFACTORING
+### 3. Historical Preview.tsx Baseline (555 lines at time of analysis) ⚠️ NEEDS REFACTORING
 
-**Current Responsibilities:**
+**Responsibilities at Time of Analysis:**
 - Template selection
 - Zoom management (fit-to-width, calculations)
 - Scroll position management
@@ -126,17 +132,17 @@ This analysis examines the current Mylo editor codebase to identify opportunitie
 
 ---
 
-### 4. Supporting Files
+### 4. Historical Supporting Files Referenced by This Analysis
 
-#### schema.ts (122 lines) ✅ Well-Structured
+#### schema.ts (122 lines at time of analysis) ✅ Well-Structured
 - Clean ProseMirror schema definition
 - No refactoring needed
 
-#### keymap.ts (29 lines) ✅ Well-Structured
+#### keymap.ts (29 lines at time of analysis) ✅ Well-Structured
 - Simple keyboard shortcut mapping
 - No refactoring needed
 
-#### template.ts (287 lines) ✅ Well-Structured
+#### template.ts (287 lines at time of analysis) ✅ Well-Structured
 - Clear type definitions
 - Well-organized template definitions
 - Could benefit from splitting templates into separate files
@@ -688,9 +694,9 @@ The proposed refactoring addresses these issues systematically:
 
 This approach follows industry best practices and aligns perfectly with Mylo's governance framework. The incremental migration path minimizes risk while delivering immediate value.
 
-**Recommendation: Proceed with Phase 1 (EditorToolbar) immediately.**
+**Historical Recommendation:** The original analysis recommended starting with Phase 1 (EditorToolbar), but that recommendation should be re-evaluated against the current codebase before implementation.
 
 ---
 
-**Report Status:** ✅ Analysis Complete - Awaiting Approval to Implement  
+**Report Status:** ✅ Historical analysis retained for reference; not an active implementation-ready plan  
 **Next Step:** Review recommendations and approve refactoring plan

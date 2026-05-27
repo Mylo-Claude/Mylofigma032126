@@ -1,5 +1,6 @@
 import { EditorView } from "prosemirror-view";
 import { toggleMark } from "prosemirror-commands";
+import type { Mark } from "prosemirror-model";
 import { 
   Bold, 
   Italic, 
@@ -140,7 +141,7 @@ export function FormattingControls({ view }: FormattingControlsProps) {
     let tr = state.tr;
     
     // Collect text fragments with their marks and positions
-    const fragments: Array<{ text: string; marks: any[]; startPos: number; endPos: number }> = [];
+    const fragments: Array<{ text: string; marks: readonly Mark[]; startPos: number; endPos: number }> = [];
     
     state.doc.nodesBetween(from, to, (node, pos) => {
       if (node.isText) {

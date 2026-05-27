@@ -1,9 +1,8 @@
 import { RefObject, useEffect, useState } from "react";
-
-type ZoomMode = 'fit-width' | 'fit-page' | '100%';
+import type { ZoomMode } from "../types";
 
 export interface UsePreviewZoomProps {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   measuredPageWidth: number | null;
   measuredPageHeight: number | null;
   zoomMode: ZoomMode;
@@ -106,37 +105,14 @@ export function usePreviewZoom({
       if (zoomMode === '100%') {
         // 100%: fixed scale at actual size
         newScale = 1.0;
-        console.log('[Preview Scale - 100%]', {
-          newScale,
-        });
       } else if (zoomMode === 'fit-width') {
         // Fit-width: scale by width only (may require vertical scroll)
         newScale = availableWidth / pageWidth;
-        console.log('[Preview Scale - fit-width]', {
-          containerWidth,
-          pageWidth,
-          visualMarginWidth,
-          availableWidth,
-          newScale,
-        });
       } else {
         // Fit-page: scale by both dimensions, use smaller to fit entire page
         const scaleByWidth = availableWidth / pageWidth;
         const scaleByHeight = availableHeight / pageHeight;
         newScale = Math.min(scaleByWidth, scaleByHeight);
-        console.log('[Preview Scale - fit-page]', {
-          containerWidth,
-          containerHeight,
-          pageWidth,
-          pageHeight,
-          visualMarginWidth,
-          visualMarginHeight,
-          availableWidth,
-          availableHeight,
-          scaleByWidth,
-          scaleByHeight,
-          newScale: `Math.min(${scaleByWidth}, ${scaleByHeight}) = ${newScale}`,
-        });
       }
       
       setScale(newScale);

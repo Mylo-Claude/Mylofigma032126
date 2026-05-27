@@ -1,61 +1,87 @@
-import { useState, useEffect } from "react";
-import { EditorState } from "prosemirror-state";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./components/ui/resizable";
-import { EditorPanel } from "./contributor/editor/EditorPanel";
-import { PreviewPanel } from "./contributor/preview/PreviewPanel";
-import { RoleProvider } from "./contexts/RoleContext";
-import { runPhase3ATests } from "./services/__tests__/serializerPhase3A.test";
-import { runPhase4Tests } from "./services/__tests__/phase4Validation.test";
-import { runPhase5Tests } from "./services/__tests__/phase5Validation.test";
-import { runAllValidations as runStep3AdapterValidation } from "./mylo/templates/__tests__/validateAdapter";
+/**
+ * @file App.tsx
+ * @role Application root and context provider hierarchy
+ * @owns The provider tree (RoleProvider → SessionProvider → DocumentProvider)
+ *       and the router <Outlet /> that all page routes render into.
+ * @does-not-own Route definitions (router.tsx), page implementations,
+ *               editor state (EditorPage), session logic (SessionContext),
+ *               document state (DocumentContext).
+ *
+ * Provider order is load-bearing:
+ *   RoleProvider      — outermost: must exist before SessionProvider so that
+ *                       SessionProvider can call setRole on mount/login/logout.
+ *   SessionProvider   — middle: must wrap DocumentProvider so that call sites
+ *                       (Modals.tsx, FolderSidebar.tsx) can read session.name
+ *                       for createdBy and pass it explicitly to createDocument
+ *                       and createFolder. DocumentContext itself is session-free.
+ *   DocumentProvider  — session-free; receives createdBy at call sites.
+ *   TemplateProvider  — innermost: seeds mylo_templates on first load; provides
+ *                       template CRUD and publishedTemplates to all pages.
+ *
+ * All page components rendered via <Outlet /> have access to the full
+ * context hierarchy above them.
+ *
+ * @see router.tsx — App is the root element of the browser router
+ * @see RoleContext.tsx, SessionContext.tsx, DocumentContext.tsx,
+ *      TemplateContext.tsx — provided here
+ */
 
-export default function App() {
-  const [editorState, setEditorState] = useState<EditorState | null>(null);
-  const [isModified, setIsModified] = useState(false);
+import { useEffect } from 'react';
+import { Outlet } from 'react-router';
+import { Toaster } from 'sonner';
+import { RoleProvider } from './contexts/RoleContext';
+import { SessionProvider } from './contexts/SessionContext';
+import { DocumentProvider } from './contexts/DocumentContext';
+import { TemplateProvider } from './contexts/TemplateContext';
 
-  const handleDocumentChange = (state: EditorState) => {
-    setEditorState(state);
-  };
-
-  // Phase 3A, 4 & 5 Validation - Run tests on mount
+/**
+ * DevTestSuite — opt-in dev test harness. Does NOT run on normal startup.
+ * To enable: localStorage.setItem('mylo_dev_tests', 'true'), then refresh.
+ * Runs only in development builds (import.meta.env.DEV).
+ * Output is console-only; no UI impact.
+ */
+function DevTestSuite() {
   useEffect(() => {
-    // Run tests after a brief delay to ensure everything is loaded
+    if (!import.meta.env.DEV) return;
+    if (localStorage.getItem('mylo_dev_tests') !== 'true') return;
     const timer = setTimeout(() => {
-      runPhase3ATests();
-      runPhase4Tests();
-      runPhase5Tests();
-      runStep3AdapterValidation();
+      void Promise.all([
+        import('./services/__tests__/serializerPhase3A.test'),
+        import('./services/__tests__/phase4Validation.test'),
+        import('./services/__tests__/phase5Validation.test'),
+        import('./mylo/templates/__tests__/validateAdapter'),
+        import('./services/__tests__/governanceEnforcement.test'),
+      ]).then(([
+        { runPhase3ATests },
+        { runPhase4Tests },
+        { runPhase5Tests },
+        { runAllValidations },
+        { runGovernanceEnforcementTests },
+      ]) => {
+        runPhase3ATests();
+        runPhase4Tests();
+        runPhase5Tests();
+        runAllValidations();
+        runGovernanceEnforcementTests();
+      });
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+  return null;
+}
 
+export default function App() {
   return (
     <RoleProvider>
-      <div className="h-screen w-screen flex flex-col">
-        {/* Header */}
-        <header className="border-b border-mylo-border-light bg-mylo-surface px-6 py-4 shadow-sm">
-          {/* Header content - reserved for future use */}
-        </header>
-
-        {/* Main content with split panes */}
-        <div className="flex-1 overflow-hidden">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <EditorPanel 
-                onDocumentChange={handleDocumentChange}
-                isModified={isModified}
-                onModifiedChange={setIsModified}
-              />
-            </ResizablePanel>
-            
-            <ResizableHandle withHandle />
-            
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <PreviewPanel editorState={editorState} />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </div>
+      <SessionProvider>
+        <DocumentProvider>
+          <TemplateProvider>
+            <DevTestSuite />
+            <Outlet />
+            <Toaster position="bottom-right" />
+          </TemplateProvider>
+        </DocumentProvider>
+      </SessionProvider>
     </RoleProvider>
   );
 }

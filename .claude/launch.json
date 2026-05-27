@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Mylo Dev (Vite)",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/Doug/Documents/Work/my-idea/GIT/Mylofigma032126 && exec /usr/local/bin/node node_modules/.bin/vite"],
+      "port": 5173
+    }
+  ]
+}

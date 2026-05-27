@@ -105,7 +105,7 @@ function nodeToHTML(node: PMNode, template: Template | undefined, listDepth: num
       return createList(node, 'ul', template, listDepth, useInlineStyles);
       
     case 'ordered_list':
-      return createList(node, 'ol', template, listDepth, node.attrs.start, useInlineStyles);
+      return createList(node, 'ol', template, listDepth, useInlineStyles, node.attrs.start);
       
     case 'list_item':
       // Fallback for orphaned list items (shouldn't normally occur)
@@ -174,7 +174,14 @@ function createParagraph(node: PMNode, template: Template | undefined, useInline
 /**
  * Create list element (ul or ol) with template styles
  */
-function createList(node: PMNode, tag: 'ul' | 'ol', template: Template | undefined, listDepth: number, start?: number, useInlineStyles?: boolean): HTMLElement {
+function createList(
+  node: PMNode,
+  tag: 'ul' | 'ol',
+  template: Template | undefined,
+  listDepth: number,
+  useInlineStyles = false,
+  start?: number,
+): HTMLElement {
   const element = document.createElement(tag);
   
   // Apply template list styles
@@ -190,8 +197,14 @@ function createList(node: PMNode, tag: 'ul' | 'ol', template: Template | undefin
     markerType = listStyleTypes[listDepth % listStyleTypes.length];
   }
   
-  // Set list style type
-  element.style.listStyleType = markerType;
+  // Set list style type only in the inline-style path.
+  // In the CSS path (useInlineStyles=false) the generated stylesheet governs
+  // list-style-type via .mylo-preview ul / .mylo-preview ol selectors.
+  // Setting it inline here would produce style="list-style-type: disc" on the
+  // element regardless of the template value, defeating the CSS rule.
+  if (useInlineStyles) {
+    element.style.listStyleType = markerType;
+  }
   
   if (listStyle?.indentSize) {
     element.style.paddingLeft = listStyle.indentSize;
@@ -240,7 +253,13 @@ function createList(node: PMNode, tag: 'ul' | 'ol', template: Template | undefin
 /**
  * Create list item element with template styles
  */
-function createListItem(node: PMNode, template: Template | undefined, listDepth: number, parentListType: 'ul' | 'ol', useInlineStyles?: boolean): HTMLElement {
+function createListItem(
+  node: PMNode,
+  template: Template | undefined,
+  listDepth: number,
+  parentListType: 'ul' | 'ol',
+  useInlineStyles = false,
+): HTMLElement {
   const element = document.createElement('li');
   
   // Apply body font styles to list items

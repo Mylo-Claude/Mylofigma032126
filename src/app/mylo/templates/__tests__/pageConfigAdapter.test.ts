@@ -12,6 +12,10 @@ import { applyPageConfigToPagedJs } from '../pageConfigAdapter';
 import { modernTemplate } from '../modern';
 import type { Template } from '../../template';
 
+type TemplateWithOptionalPageStyles = Omit<Template, 'pageStyles'> & {
+  pageStyles?: Template['pageStyles'];
+};
+
 describe('pageConfigAdapter', () => {
   let mockPageElement: HTMLElement;
 
@@ -64,14 +68,14 @@ describe('pageConfigAdapter', () => {
     });
 
     it('should handle templates without pageStyles gracefully', () => {
-      const templateWithoutPageStyles: Template = {
+      const templateWithoutPageStyles: TemplateWithOptionalPageStyles = {
         ...modernTemplate,
         pageStyles: undefined,
       };
 
       // Should not throw
       expect(() => {
-        applyPageConfigToPagedJs(mockPageElement, templateWithoutPageStyles);
+        applyPageConfigToPagedJs(mockPageElement, templateWithoutPageStyles as Template);
       }).not.toThrow();
 
       // Should apply default values from schema (1in for all margins)
@@ -95,7 +99,6 @@ describe('pageConfigAdapter', () => {
       };
 
       // Manually remove a margin property to test fallback
-      // @ts-expect-error - intentionally creating invalid state for testing
       delete partialTemplate.pageStyles.marginTop;
 
       applyPageConfigToPagedJs(mockPageElement, partialTemplate);

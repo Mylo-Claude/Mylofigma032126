@@ -26,18 +26,23 @@ function camelToKebab(str: string): string {
  * @returns CSS string with @page rule
  */
 function generatePageCSS(pageStyles: PageStyles): string {
-  const { size } = pageStyles;
-  
+  // Resolve explicit dimensions from the pageSizes map.
+  // Paged.js does not reliably parse named size strings (e.g. "legal", "A4") in
+  // @page { size: ... }; it requires explicit inch values like "8.5in 14in" to
+  // generate its internal --pagedjs-width / --pagedjs-height :root variables correctly.
+  const sizeKey = (pageStyles.size ?? 'letter') as keyof typeof PAGE_PROPERTIES.pageSizes;
+  const sizeConfig = PAGE_PROPERTIES.pageSizes[sizeKey] ?? PAGE_PROPERTIES.pageSizes.letter;
+
   // STEP 6: Schema-driven margin generation
   const margins = PAGE_PROPERTIES.margins;
-  const marginTop = pageStyles.marginTop ?? parseFloat(margins.top.default);
-  const marginRight = pageStyles.marginRight ?? parseFloat(margins.right.default);
+  const marginTop    = pageStyles.marginTop    ?? parseFloat(margins.top.default);
+  const marginRight  = pageStyles.marginRight  ?? parseFloat(margins.right.default);
   const marginBottom = pageStyles.marginBottom ?? parseFloat(margins.bottom.default);
-  const marginLeft = pageStyles.marginLeft ?? parseFloat(margins.left.default);
-  
+  const marginLeft   = pageStyles.marginLeft   ?? parseFloat(margins.left.default);
+
   return `
 @page {
-  size: ${size};
+  size: ${sizeConfig.width} ${sizeConfig.height};
   margin: ${marginTop}in ${marginRight}in ${marginBottom}in ${marginLeft}in;
 }`.trim();
 }
@@ -46,6 +51,14 @@ function generatePageCSS(pageStyles: PageStyles): string {
  * Generate content styling CSS from ContentStyles.
  *
  * Maps semantic keys to HTML selectors.
+ *
+ * Paragraph rule indents (ruleAboveLeft, ruleAboveRight, ruleBelowLeft,
+ * ruleBelowRight) are not valid CSS properties — they are editor-only
+ * keys stored in the advanced object. When present alongside borderTop/
+ * borderBottom they are handled via ::before / ::after pseudo-elements
+ * so that margin-left / margin-right can independently inset the rule
+ * line. Without pseudo-elements, a border-top on a block element cannot
+ * be inset from its sides.
  *
  * @param contentStyles - Content styling configuration
  * @returns CSS string with scoped selectors
@@ -58,35 +71,91 @@ function generateContentCSS(contentStyles: ContentStyles): string {
     heading2: 'h2',
     heading3: 'h3',
   };
-  
+
   let css = '';
-  
+
   for (const [key, styleObj] of Object.entries(contentStyles)) {
     const htmlElement = selectorMap[key as keyof ContentStyles];
     const selector = `.mylo-preview ${htmlElement}[data-type="${key}"]`;
-    
+
     // Collect all CSS properties (top-level + advanced)
-    const allProps: Record<string, string | number> = {};
-    
+    const allProps: Record<string, string | number | undefined> = {};
+
     for (const [prop, value] of Object.entries(styleObj)) {
       if (prop === 'advanced' && typeof value === 'object' && value !== null) {
         // Flatten advanced properties into main properties
         Object.assign(allProps, value);
-      } else if (typeof value !== 'object') {
+      } else if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'undefined'
+      ) {
         // Add top-level property
         allProps[prop] = value;
       }
       // Skip other object properties (shouldn't exist)
     }
-    
-    // Convert to CSS declarations
+
+    // Extract paragraph-rule indent keys — these are editor-only storage keys,
+    // not valid CSS properties, and must never appear in the output stylesheet.
+    const ruleAboveLeft  = allProps.ruleAboveLeft  as string | undefined;
+    const ruleAboveRight = allProps.ruleAboveRight as string | undefined;
+    const ruleBelowLeft  = allProps.ruleBelowLeft  as string | undefined;
+    const ruleBelowRight = allProps.ruleBelowRight as string | undefined;
+    delete allProps.ruleAboveLeft;
+    delete allProps.ruleAboveRight;
+    delete allProps.ruleBelowLeft;
+    delete allProps.ruleBelowRight;
+
+    // Rule Above with left/right indent — generate ::before pseudo-element.
+    // A border-top on a block element spans the full box width with no way to
+    // independently inset it. A ::before block can carry its own margin-left /
+    // margin-right to shorten the rule from either side.
+    if (allProps.borderTop && (ruleAboveLeft || ruleAboveRight)) {
+      const borderTopVal    = allProps.borderTop as string;
+      const verticalOffset  = (allProps.paddingTop as string | undefined) || '0';
+      delete allProps.borderTop;
+      delete allProps.paddingTop;
+
+      css += `${selector}::before {\n`;
+      css += `  content: '';\n`;
+      css += `  display: block;\n`;
+      css += `  height: 0;\n`;
+      css += `  border-top: ${borderTopVal};\n`;
+      css += `  margin-left: ${ruleAboveLeft  || '0'};\n`;
+      css += `  margin-right: ${ruleAboveRight || '0'};\n`;
+      css += `  margin-bottom: ${verticalOffset};\n`;
+      css += `}\n\n`;
+    }
+
+    // Rule Below with left/right indent — generate ::after pseudo-element.
+    // border-top on ::after draws a line at the top of the pseudo-element,
+    // which sits below the element's content, producing the rule-below effect.
+    if (allProps.borderBottom && (ruleBelowLeft || ruleBelowRight)) {
+      const borderBottomVal = allProps.borderBottom as string;
+      const verticalOffset  = (allProps.paddingBottom as string | undefined) || '0';
+      delete allProps.borderBottom;
+      delete allProps.paddingBottom;
+
+      css += `${selector}::after {\n`;
+      css += `  content: '';\n`;
+      css += `  display: block;\n`;
+      css += `  height: 0;\n`;
+      css += `  border-top: ${borderBottomVal};\n`;
+      css += `  margin-left: ${ruleBelowLeft  || '0'};\n`;
+      css += `  margin-right: ${ruleBelowRight || '0'};\n`;
+      css += `  margin-top: ${verticalOffset};\n`;
+      css += `}\n\n`;
+    }
+
+    // Convert remaining properties to CSS declarations
     const declarations = Object.entries(allProps)
       .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
       .join('\n');
-    
+
     css += `${selector} {\n${declarations}\n}\n\n`;
   }
-  
+
   return css.trim();
 }
 
@@ -101,67 +170,58 @@ function generateContentCSS(contentStyles: ContentStyles): string {
  */
 function generateListCSS(listStyles: { bulletedList: any; orderedList: any }, bodyStyle: any): string {
   let css = '';
-  
+
   // Generate bulletedList CSS (maps to <ul>)
   if (listStyles.bulletedList) {
-    const ulSelector = '.mylo-preview ul';
+    const bl = listStyles.bulletedList;
+
+    // ul: structure (marker type, indentation). Color is intentionally omitted here —
+    // setting `color` on `ul` is overridden by the more-specific `li` rule below.
+    // Marker color is applied via `::marker` so it is independent of text color.
     const ulProps: Record<string, string | number> = {};
-    
-    // Map list-specific properties
-    if (listStyles.bulletedList.markerType) {
-      ulProps.listStyleType = listStyles.bulletedList.markerType;
-    }
-    if (listStyles.bulletedList.markerColor) {
-      ulProps.color = listStyles.bulletedList.markerColor;
-    }
-    if (listStyles.bulletedList.indentSize) {
-      ulProps.paddingLeft = listStyles.bulletedList.indentSize;
-    }
-    
-    // Add advanced properties
-    if (listStyles.bulletedList.advanced) {
-      Object.assign(ulProps, listStyles.bulletedList.advanced);
-    }
-    
-    // Convert to CSS declarations
+    if (bl.markerType) ulProps.listStyleType = bl.markerType;
+    if (bl.indentSize) ulProps.paddingLeft = bl.indentSize;
+    if (bl.advanced) Object.assign(ulProps, bl.advanced);
+
     const ulDeclarations = Object.entries(ulProps)
       .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
       .join('\n');
-    
-    if (ulDeclarations) {
-      css += `${ulSelector} {\n${ulDeclarations}\n}\n\n`;
-    }
+    if (ulDeclarations) css += `.mylo-preview ul {\n${ulDeclarations}\n}\n\n`;
+
+    // ul li::marker: color (Bug 1) and font-size / marker size (Bug 3)
+    const ulMarkerProps: Record<string, string | number> = {};
+    if (bl.markerColor) ulMarkerProps.color = bl.markerColor;
+    if (bl.markerSize) ulMarkerProps.fontSize = bl.markerSize;
+
+    const ulMarkerDeclarations = Object.entries(ulMarkerProps)
+      .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
+      .join('\n');
+    if (ulMarkerDeclarations) css += `.mylo-preview ul li::marker {\n${ulMarkerDeclarations}\n}\n\n`;
   }
-  
+
   // Generate orderedList CSS (maps to <ol>)
   if (listStyles.orderedList) {
-    const olSelector = '.mylo-preview ol';
+    const ol = listStyles.orderedList;
+
     const olProps: Record<string, string | number> = {};
-    
-    // Map list-specific properties
-    if (listStyles.orderedList.markerType) {
-      olProps.listStyleType = listStyles.orderedList.markerType;
-    }
-    if (listStyles.orderedList.markerColor) {
-      olProps.color = listStyles.orderedList.markerColor;
-    }
-    if (listStyles.orderedList.indentSize) {
-      olProps.paddingLeft = listStyles.orderedList.indentSize;
-    }
-    
-    // Add advanced properties
-    if (listStyles.orderedList.advanced) {
-      Object.assign(olProps, listStyles.orderedList.advanced);
-    }
-    
-    // Convert to CSS declarations
+    if (ol.markerType) olProps.listStyleType = ol.markerType;
+    if (ol.indentSize) olProps.paddingLeft = ol.indentSize;
+    if (ol.advanced) Object.assign(olProps, ol.advanced);
+
     const olDeclarations = Object.entries(olProps)
       .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
       .join('\n');
-    
-    if (olDeclarations) {
-      css += `${olSelector} {\n${olDeclarations}\n}\n\n`;
-    }
+    if (olDeclarations) css += `.mylo-preview ol {\n${olDeclarations}\n}\n\n`;
+
+    // ol li::marker: color and font-size
+    const olMarkerProps: Record<string, string | number> = {};
+    if (ol.markerColor) olMarkerProps.color = ol.markerColor;
+    if (ol.markerSize) olMarkerProps.fontSize = ol.markerSize;
+
+    const olMarkerDeclarations = Object.entries(olMarkerProps)
+      .map(([prop, val]) => `  ${camelToKebab(prop)}: ${val};`)
+      .join('\n');
+    if (olMarkerDeclarations) css += `.mylo-preview ol li::marker {\n${olMarkerDeclarations}\n}\n\n`;
   }
   
   // Generate list item typography (inherit from body) and spacing

@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useState } from "react";
 
 export interface UsePageTrackingProps {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   scale: number;
   pagedJsPageCount: number;
 }
