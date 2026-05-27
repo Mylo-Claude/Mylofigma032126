@@ -34,7 +34,10 @@ import { TemplateListPage } from './templates/TemplateListPage';
 import { TemplateEditorPage } from './templates/TemplateEditorPage';
 import { useSession } from './contexts/SessionContext';
 import { useRole } from './contexts/RoleContext';
+import { useDocuments } from './contexts/DocumentContext';
 import type { Role } from './types';
+
+const LAST_DOCUMENT_ID_KEY = 'mylo_last_document_id';
 
 // ---------------------------------------------------------------------------
 // Route guard
@@ -55,14 +58,24 @@ import type { Role } from './types';
  *
  * Previous behaviour: / → /documents (unconditional) → /login (ProtectedRoute).
  * This component reads session directly and redirects in one hop:
- *   - Session exists → /documents
- *   - No session    → /login
+ *   - No session                       → /login
+ *   - Session + valid last document ID → /documents/:id
+ *   - Session + missing/invalid ID     → /documents
  *
  * Must render inside App (i.e. inside SessionProvider) to have context access.
  */
 function RootRedirect() {
   const { session } = useSession();
-  return <Navigate to={session ? '/documents' : '/login'} replace />;
+  const { documents } = useDocuments();
+
+  if (!session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const lastDocumentId = localStorage.getItem(LAST_DOCUMENT_ID_KEY);
+  const lastDocumentExists = documents.some((document) => document.id === lastDocumentId);
+
+  return <Navigate to={lastDocumentExists ? `/documents/${lastDocumentId}` : '/documents'} replace />;
 }
 
 function ProtectedRoute({ allowedRoles }: { allowedRoles?: Role[] }) {

@@ -39,6 +39,7 @@ import { EditorPanel } from '../contributor/editor/EditorPanel';
 import { PreviewPanel } from '../contributor/preview/PreviewPanel';
 
 const GOVERNANCE_BANNER_MESSAGE = 'Extra blank lines are ignored in Preview. Spacing comes from the template.';
+const LAST_DOCUMENT_ID_KEY = 'mylo_last_document_id';
 
 // ---------------------------------------------------------------------------
 // Save status indicator
@@ -102,6 +103,13 @@ export function EditorPage() {
       navigate('/documents', { replace: true });
     }
   }, [id, doc, navigate]);
+
+  // Remember the last active document for resume routing when reopening the app.
+  useEffect(() => {
+    if (doc) {
+      localStorage.setItem(LAST_DOCUMENT_ID_KEY, doc.id);
+    }
+  }, [doc]);
 
   // ---------------------------------------------------------------------------
   // Stable refs — computed once at mount, never reactive after that
