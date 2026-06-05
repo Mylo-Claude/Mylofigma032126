@@ -1,0 +1,71 @@
+/* Browser print / Save PDF output for the contributor preview. */
+
+@media print {
+  html,
+  body,
+  #root {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .pilcrow-editor-header,
+  .pilcrow-editor-pane,
+  .pilcrow-preview-toolbar-row,
+  .pilcrow-governance-banner {
+    display: none !important;
+  }
+
+  .pilcrow-editor-page,
+  .pilcrow-split-pane,
+  .pilcrow-preview-panel,
+  .pilcrow-preview-canvas,
+  .pilcrow-paged-document {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .pilcrow-preview-canvas {
+    padding: 0 !important;
+  }
+
+  .pilcrow-paged-document {
+    gap: 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .pilcrow-zoom-outer {
+    display: block !important;
+    width: auto !important;
+  }
+
+  .pilcrow-zoom-inner {
+    transform: none !important;
+    transform-origin: top left !important;
+  }
+
+  .pilcrow-preview-canvas .pagedjs_pages {
+    display: block !important;
+  }
+
+  .pilcrow-preview-canvas .pagedjs_page {
+    color: black !important;
+    background: transparent !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .pilcrow-preview-canvas .pagedjs_page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}

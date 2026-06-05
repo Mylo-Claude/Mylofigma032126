@@ -163,7 +163,7 @@ export function PaginatedDocumentRenderer({
   return (
     <>
       {pagedResult && (
-        <div className={`flex flex-col ${shouldCenter ? 'items-center' : 'items-start'} gap-8`}>
+        <div className={`pilcrow-paged-document flex flex-col ${shouldCenter ? 'items-center' : 'items-start'} gap-8`}>
           {/*
             ZOOM IMPLEMENTATION: Two-layer approach
 
@@ -176,6 +176,7 @@ export function PaginatedDocumentRenderer({
             - transformOrigin: top center keeps pages aligned at top
           */}
           <div
+            className="pilcrow-zoom-outer"
             style={{
               width: `${100 / scale}%`,
               display: 'flex',
@@ -184,6 +185,7 @@ export function PaginatedDocumentRenderer({
             }}
           >
             <div
+              className="pilcrow-zoom-inner"
               style={{
                 transform: `scale(${scale})`,
                 transformOrigin: shouldCenter ? 'top center' : 'top left',
