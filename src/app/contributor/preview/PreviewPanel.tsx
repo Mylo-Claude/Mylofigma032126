@@ -2,6 +2,8 @@ import { EditorState } from "prosemirror-state";
 import { defaultTemplate } from "../../mylo/templates";
 import type { Template } from "../../mylo/template";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Printer } from "lucide-react";
+import { Button } from "../../components/ui/button";
 import { PreviewToolbar } from "./PreviewToolbar";
 import { PaginatedDocumentRenderer } from "./PaginatedDocumentRenderer";
 import { GovernanceBanner } from "./GovernanceBanner";
@@ -108,11 +110,16 @@ export function PreviewPanel({
     scale,
     pagedJsPageCount,
   });
+  const hasRenderedPages = pagedJsPageCount > 0;
+
+  const handleSavePdf = () => {
+    window.print();
+  };
 
   if (!editorState) {
     return (
-      <div className="h-full flex flex-col">
-        <div className="border-b border-mylo-border-light p-4">
+      <div className="pilcrow-preview-panel h-full flex flex-col">
+        <div className="pilcrow-preview-toolbar-row border-b border-mylo-border-light p-4">
           <h2 className="text-lg font-semibold text-mylo-text-primary">Preview</h2>
           <p className="text-sm text-mylo-text-secondary">Template-governed rendering</p>
         </div>
@@ -124,30 +131,46 @@ export function PreviewPanel({
   }
 
   return (
-    <div className="h-full flex flex-col bg-mylo-canvas">
-      <div className="border-b border-mylo-border-light px-4 py-2 bg-mylo-surface flex items-center justify-between">
+    <div className="pilcrow-preview-panel h-full flex flex-col bg-mylo-canvas">
+      <div className="pilcrow-preview-toolbar-row border-b border-mylo-border-light px-4 py-2 bg-mylo-surface flex items-center justify-between">
         <PreviewToolbar
           selectedTemplate={selectedTemplate}
           onTemplateChange={handleTemplateChange}
           zoomMode={zoomMode}
           onZoomChange={setZoomMode}
         />
-        <p className="text-xs text-mylo-text-secondary">
-          Page {currentPage} of {pagedJsPageCount}
-        </p>
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSavePdf}
+            disabled={!hasRenderedPages}
+            aria-label="Save PDF"
+            title="Opens your browser’s print dialog."
+          >
+            <Printer className="size-4" />
+            Save PDF
+          </Button>
+          <p className="text-xs text-mylo-text-secondary">
+            Page {currentPage} of {pagedJsPageCount}
+          </p>
+        </div>
       </div>
 
       {showGovernanceBanner && (
-        <GovernanceBanner
-          message={governanceBannerMessage!}
-          onDismiss={onGovernanceBannerDismiss!}
-          onDismissPermanently={onGovernanceBannerDismissPermanently!}
-        />
+        <div className="pilcrow-governance-banner">
+          <GovernanceBanner
+            message={governanceBannerMessage!}
+            onDismiss={onGovernanceBannerDismiss!}
+            onDismissPermanently={onGovernanceBannerDismissPermanently!}
+          />
+        </div>
       )}
 
       <div
         ref={scrollContainerRef}
-        className={`flex-1 overflow-auto p-8 ${shouldShowHorizontalScrollbar ? 'preview-scroll pb-3' : 'hide-scrollbar'}`}
+        className={`pilcrow-preview-canvas flex-1 overflow-auto p-8 ${shouldShowHorizontalScrollbar ? 'preview-scroll pb-3' : 'hide-scrollbar'}`}
       >
         <PaginatedDocumentRenderer
           doc={editorState.doc}

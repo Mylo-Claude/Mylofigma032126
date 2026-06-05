@@ -251,10 +251,10 @@ export function EditorPage() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--mylo-canvas)' }}>
+    <div className="pilcrow-editor-page h-screen flex flex-col overflow-hidden" style={{ background: 'var(--mylo-canvas)' }}>
       {/* ── Header ────────────────────────────────────────────────────── */}
       <header
-        className="shrink-0 flex items-center gap-3 px-4 border-b"
+        className="pilcrow-editor-header shrink-0 flex items-center gap-3 px-4 border-b"
         style={{
           height: '48px',
           background: 'var(--mylo-surface)',
@@ -297,10 +297,10 @@ export function EditorPage() {
       </header>
 
       {/* ── Split pane ────────────────────────────────────────────────── */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="pilcrow-split-pane flex-1 flex overflow-hidden min-h-0">
         {/* Editor — left half */}
         <div
-          className="flex-1 overflow-hidden border-r"
+          className="pilcrow-editor-pane flex-1 overflow-hidden border-r"
           style={{ borderColor: 'var(--mylo-border-light)' }}
         >
           <EditorPanel
