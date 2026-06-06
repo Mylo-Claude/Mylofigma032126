@@ -8,6 +8,7 @@ import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import { EditorToolbar } from "./EditorToolbar";
 import { myloKeymap } from "../../mylo/keymap";
+import { myloInputRules } from "../../mylo/inputRules";
 import { welcome } from "../../mylo/samples/welcome";
 import { sampleToEditorState } from "../../mylo/samples/converter";
 import type { Template } from "../../mylo/template";
@@ -205,6 +206,7 @@ export function EditorPanel({ onDocumentChange, onViewReady, initialDoc, templat
       schema: myloSchema,
       plugins: [
         history(),
+        myloInputRules(),
         myloKeymap(),
         keymap(baseKeymap),
       ]
