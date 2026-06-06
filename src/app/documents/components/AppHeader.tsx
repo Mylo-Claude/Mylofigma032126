@@ -18,7 +18,7 @@
  */
 
 import { NavLink, useNavigate } from 'react-router';
-import { LogOut } from 'lucide-react';
+import { LogOut, RotateCcw } from 'lucide-react';
 import { useSession } from '../../contexts/SessionContext';
 import { useRole } from '../../contexts/RoleContext';
 import { Button } from '../../components/ui/button';
@@ -54,6 +54,14 @@ export function AppHeader() {
   const handleSignOut = () => {
     logout();
     navigate('/login', { replace: true });
+  };
+
+  const handleResetDemo = () => {
+    if (!window.confirm('Reset Demo?')) return;
+
+    const appKeys = Object.keys(localStorage).filter((key) => key.startsWith('mylo_'));
+    appKeys.forEach((key) => localStorage.removeItem(key));
+    window.location.reload();
   };
 
   const roleConfig = ROLE_CONFIG[role] ?? {
@@ -92,6 +100,18 @@ export function AppHeader() {
 
       {/* Right cluster */}
       <div className="flex items-center gap-3">
+        {import.meta.env.DEV && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleResetDemo}
+            className="h-8 px-2.5 gap-1.5 text-mylo-text-secondary hover:text-mylo-text-primary"
+          >
+            <RotateCcw className="size-3.5" />
+            <span className="text-sm">Reset Demo</span>
+          </Button>
+        )}
+
         {/* Role badge */}
         <span
           className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${roleConfig.className}`}

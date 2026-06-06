@@ -48,13 +48,6 @@ function getTemplateStyles(template: Template | undefined) {
 export function serializeToHTML(doc: PMNode, template?: Template): string {
   const useInlineStyles = !!template;
   
-  // Validation logging for Phase 3A
-  if (useInlineStyles) {
-    console.log('[Serializer] Using OLD path (inline styles) - template provided');
-  } else {
-    console.log('[Serializer] Using NEW path (semantic HTML only) - no template');
-  }
-  
   const container = document.createElement('div');
   
   doc.forEach((node) => {
@@ -74,7 +67,6 @@ export function serializeToHTML(doc: PMNode, template?: Template): string {
  * @returns CSS string with @page rules and content styles
  */
 export function generateStylesheetFromTemplate(template: Template): string {
-  console.log('[Serializer] Generating stylesheet CSS for template:', template.id);
   return generateTemplateStylesheet(template);
 }
 

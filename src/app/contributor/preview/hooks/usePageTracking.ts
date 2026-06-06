@@ -70,7 +70,6 @@ export function usePageTracking({
         }
         
         setCurrentPage(Math.min(Math.max(1, currentPageNumber), pagedJsPageCount));
-        console.log('[Scroll Tracking] Current page:', currentPageNumber, '(scale:', scale, ')');
       }
     };
 
