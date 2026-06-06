@@ -1,7 +1,7 @@
 /**
  * @file App.tsx
  * @role Application root and context provider hierarchy
- * @owns The provider tree (RoleProvider → SessionProvider → DocumentProvider)
+ * @owns The provider tree (RoleProvider → SessionProvider → TemplateProvider)
  *       and the router <Outlet /> that all page routes render into.
  * @does-not-own Route definitions (router.tsx), page implementations,
  *               editor state (EditorPage), session logic (SessionContext),
@@ -14,9 +14,10 @@
  *                       (Modals.tsx, FolderSidebar.tsx) can read session.name
  *                       for createdBy and pass it explicitly to createDocument
  *                       and createFolder. DocumentContext itself is session-free.
- *   DocumentProvider  — session-free; receives createdBy at call sites.
- *   TemplateProvider  — innermost: seeds mylo_templates on first load; provides
+ *   TemplateProvider  — seeds mylo_templates on first load; provides
  *                       template CRUD and publishedTemplates to all pages.
+ *   DocumentProvider  — reads templates for document timestamp normalization;
+ *                       receives createdBy at call sites.
  *
  * All page components rendered via <Outlet /> have access to the full
  * context hierarchy above them.
@@ -74,13 +75,13 @@ export default function App() {
   return (
     <RoleProvider>
       <SessionProvider>
-        <DocumentProvider>
-          <TemplateProvider>
+        <TemplateProvider>
+          <DocumentProvider>
             <DevTestSuite />
             <Outlet />
             <Toaster position="bottom-right" />
-          </TemplateProvider>
-        </DocumentProvider>
+          </DocumentProvider>
+        </TemplateProvider>
       </SessionProvider>
     </RoleProvider>
   );

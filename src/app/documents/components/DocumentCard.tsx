@@ -33,6 +33,7 @@ import { cn } from '../../components/ui/utils';
 interface Props {
   document: MyloDocument;
   templateName: string;
+  isTemplateUpdated: boolean;
   onOpen: () => void;
   onRename: () => void;
   onDelete: () => void;
@@ -69,7 +70,7 @@ function formatEdited(iso: string): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export function DocumentCard({ document, templateName, onOpen, onRename, onDelete }: Props) {
+export function DocumentCard({ document, templateName, isTemplateUpdated, onOpen, onRename, onDelete }: Props) {
   return (
     <div
       role="button"
@@ -97,6 +98,12 @@ export function DocumentCard({ document, templateName, onOpen, onRename, onDelet
       <p className="text-xs text-mylo-text-tertiary mb-4">
         {templateName}
       </p>
+
+      {isTemplateUpdated && (
+        <span className="self-start rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200 mb-4">
+          Template updated
+        </span>
+      )}
 
       {/* Footer: timestamps + kebab */}
       <div className="mt-auto flex items-end justify-between gap-2">

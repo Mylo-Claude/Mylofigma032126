@@ -37,6 +37,14 @@ import { markAsNotified } from '../services/governanceNotifications';
 import { useTemplates } from '../contexts/TemplateContext';
 import { EditorPanel } from '../contributor/editor/EditorPanel';
 import { PreviewPanel } from '../contributor/preview/PreviewPanel';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 
 const GOVERNANCE_BANNER_MESSAGE = 'Extra blank lines are ignored in Preview. Spacing comes from the template.';
 const LAST_DOCUMENT_ID_KEY = 'mylo_last_document_id';
@@ -96,6 +104,12 @@ export function EditorPage() {
 
   // Look up the active document by route param
   const doc = documents.find((d) => d.id === id) ?? null;
+  const assignedTemplate = templates.find((template) => template.id === doc?.templateId);
+  const isTemplateUpdated = Boolean(
+    assignedTemplate?.updatedAt &&
+    doc?.templateUpdatedAtSeen &&
+    assignedTemplate.updatedAt > doc.templateUpdatedAtSeen
+  );
 
   // Redirect to /documents if the ID is unknown or document is trashed
   useEffect(() => {
@@ -227,10 +241,18 @@ export function EditorPage() {
     (template: Template) => {
       setActiveTemplate(template);
       if (!id) return;
-      updateDocument(id, { templateId: template.id });
+      updateDocument(id, {
+        templateId: template.id,
+        templateUpdatedAtSeen: template.updatedAt,
+      });
     },
     [id, updateDocument],
   );
+
+  const handleTemplateUpdateAcknowledged = useCallback(() => {
+    if (!id || !assignedTemplate?.updatedAt) return;
+    updateDocument(id, { templateUpdatedAtSeen: assignedTemplate.updatedAt });
+  }, [id, assignedTemplate, updateDocument]);
 
   // ---------------------------------------------------------------------------
   // Cleanup
@@ -251,7 +273,21 @@ export function EditorPage() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="pilcrow-editor-page h-screen flex flex-col overflow-hidden" style={{ background: 'var(--mylo-canvas)' }}>
+    <>
+      <AlertDialog open={isTemplateUpdated}>
+        <AlertDialogContent className="sm:max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Template updated</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleTemplateUpdateAcknowledged}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="pilcrow-editor-page h-screen flex flex-col overflow-hidden" style={{ background: 'var(--mylo-canvas)' }}>
       {/* ── Header ────────────────────────────────────────────────────── */}
       <header
         className="pilcrow-editor-header shrink-0 flex items-center gap-3 px-4 border-b"
@@ -330,6 +366,7 @@ export function EditorPage() {
           />
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

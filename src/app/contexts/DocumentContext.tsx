@@ -30,6 +30,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { MyloDocument, Folder } from '../types';
+import { useTemplates } from './TemplateContext';
 
 const DOCUMENTS_KEY = 'mylo_documents';
 const FOLDERS_KEY = 'mylo_folders';
@@ -90,7 +91,7 @@ interface DocumentContextType {
    */
   updateDocument: (
     id: string,
-    updates: Partial<Pick<MyloDocument, 'title' | 'content' | 'templateId' | 'folderId'>>
+    updates: Partial<Pick<MyloDocument, 'title' | 'content' | 'templateId' | 'templateUpdatedAtSeen' | 'folderId'>>
   ) => void;
 
   /** Soft-delete: moves document to trash by setting deletedAt. */
@@ -131,9 +132,26 @@ const DocumentContext = createContext<DocumentContextType | null>(null);
 // ---------------------------------------------------------------------------
 
 export function DocumentProvider({ children }: { children: ReactNode }) {
-  const [allDocuments, setAllDocuments] = useState<MyloDocument[]>(() =>
-    loadFromStorage<MyloDocument>(DOCUMENTS_KEY)
-  );
+  const { templates } = useTemplates();
+  const [allDocuments, setAllDocuments] = useState<MyloDocument[]>(() => {
+    const storedDocuments = loadFromStorage<MyloDocument>(DOCUMENTS_KEY);
+    let didNormalize = false;
+    const normalizedDocuments = storedDocuments.map((document) => {
+      if (document.templateUpdatedAtSeen !== undefined) return document;
+
+      const template = templates.find((candidate) => candidate.id === document.templateId);
+      if (!template?.updatedAt) return document;
+
+      didNormalize = true;
+      return { ...document, templateUpdatedAtSeen: template.updatedAt };
+    });
+
+    if (didNormalize) {
+      saveToStorage(DOCUMENTS_KEY, normalizedDocuments);
+    }
+
+    return normalizedDocuments;
+  });
 
   const [folders, setFolders] = useState<Folder[]>(() =>
     loadFromStorage<Folder>(FOLDERS_KEY)
@@ -160,6 +178,7 @@ export function DocumentProvider({ children }: { children: ReactNode }) {
       folderId,
       content: {},       // empty object signals EditorPanel to load the welcome sample
       templateId,
+      templateUpdatedAtSeen: templates.find((template) => template.id === templateId)?.updatedAt,
       createdAt: timestamp,
       updatedAt: timestamp,
       createdBy,
@@ -169,11 +188,11 @@ export function DocumentProvider({ children }: { children: ReactNode }) {
     setAllDocuments(updated);
     saveToStorage(DOCUMENTS_KEY, updated);
     return doc;
-  }, [allDocuments]);
+  }, [allDocuments, templates]);
 
   const updateDocument = useCallback((
     id: string,
-    updates: Partial<Pick<MyloDocument, 'title' | 'content' | 'templateId' | 'folderId'>>
+    updates: Partial<Pick<MyloDocument, 'title' | 'content' | 'templateId' | 'templateUpdatedAtSeen' | 'folderId'>>
   ): void => {
     const updated = allDocuments.map(d =>
       d.id === id ? { ...d, ...updates, updatedAt: nowISO() } : d
