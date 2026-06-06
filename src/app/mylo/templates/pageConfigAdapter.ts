@@ -45,11 +45,9 @@ export function applyPageConfigToPagedJs(
 
   sizeVars.width.forEach((varName) => {
     pageElement.style.setProperty(varName, sizeConfig.width);
-    console.log(`[PageConfigAdapter] Set ${varName} = ${sizeConfig.width}`);
   });
   sizeVars.height.forEach((varName) => {
     pageElement.style.setProperty(varName, sizeConfig.height);
-    console.log(`[PageConfigAdapter] Set ${varName} = ${sizeConfig.height}`);
   });
 
   // ── 2. Margins ──────────────────────────────────────────────────────────────
@@ -68,7 +66,5 @@ export function applyPageConfigToPagedJs(
 
     // Set the Paged.js CSS variable
     pageElement.style.setProperty(config.pagedJsVar, value);
-
-    console.log(`[PageConfigAdapter] Set ${config.pagedJsVar} = ${value}`);
   });
 }

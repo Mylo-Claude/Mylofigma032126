@@ -65,15 +65,19 @@ function TemplatesSection() {
 
         {/* Template pills */}
         <div className="flex flex-wrap gap-2">
-          {publishedTemplates.map((t) => (
-            <div
-              key={t.id}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-mylo-border-light bg-mylo-surface-subtle text-sm"
-            >
-              <div className="size-2 rounded-full bg-mylo-border" />
-              <span className="text-mylo-text-secondary font-medium">{t.name}</span>
-            </div>
-          ))}
+          {publishedTemplates.length === 0 ? (
+            <p className="text-sm text-mylo-text-tertiary">No published templates</p>
+          ) : (
+            publishedTemplates.map((t) => (
+              <div
+                key={t.id}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-mylo-border-light bg-mylo-surface-subtle text-sm"
+              >
+                <div className="size-2 rounded-full bg-mylo-border" />
+                <span className="text-mylo-text-secondary font-medium">{t.name}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

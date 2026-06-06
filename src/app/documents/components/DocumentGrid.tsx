@@ -201,7 +201,7 @@ export function DocumentGrid({ folderId, onDocumentOpen, onNewDocument, onRename
                 <DocumentCard
                   key={doc.id}
                   document={doc}
-                  templateName={template?.name ?? doc.templateId}
+                  templateName={template?.name ?? '(Template removed)'}
                   isTemplateUpdated={isTemplateUpdated}
                   onOpen={() => onDocumentOpen(doc.id)}
                   onRename={() => onRenameDocument(doc.id, doc.title)}
