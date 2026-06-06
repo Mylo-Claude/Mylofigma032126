@@ -189,16 +189,26 @@ export function DocumentGrid({ folderId, onDocumentOpen, onNewDocument, onRename
         {/* Card grid */}
         {filtered.length > 0 && (
           <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
-            {filtered.map((doc) => (
-              <DocumentCard
-                key={doc.id}
-                document={doc}
-                templateName={templates.find((t) => t.id === doc.templateId)?.name ?? doc.templateId}
-                onOpen={() => onDocumentOpen(doc.id)}
-                onRename={() => onRenameDocument(doc.id, doc.title)}
-                onDelete={() => onDeleteDocument(doc.id)}
-              />
-            ))}
+            {filtered.map((doc) => {
+              const template = templates.find((candidate) => candidate.id === doc.templateId);
+              const isTemplateUpdated = Boolean(
+                template?.updatedAt &&
+                doc.templateUpdatedAtSeen &&
+                template.updatedAt > doc.templateUpdatedAtSeen
+              );
+
+              return (
+                <DocumentCard
+                  key={doc.id}
+                  document={doc}
+                  templateName={template?.name ?? doc.templateId}
+                  isTemplateUpdated={isTemplateUpdated}
+                  onOpen={() => onDocumentOpen(doc.id)}
+                  onRename={() => onRenameDocument(doc.id, doc.title)}
+                  onDelete={() => onDeleteDocument(doc.id)}
+                />
+              );
+            })}
           </div>
         )}
       </div>

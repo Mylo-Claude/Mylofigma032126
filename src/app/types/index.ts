@@ -68,6 +68,7 @@ export interface MyloDocument {
   folderId: string | null;  // null = root level; folder may be independently deleted
   content: object;          // ProseMirror doc.toJSON() — opaque to the context layer
   templateId: string;       // e.g. 'default-template-v1'
+  templateUpdatedAtSeen?: string; // assigned template.updatedAt last acknowledged
   createdAt: string;        // ISO 8601
   updatedAt: string;        // ISO 8601
   createdBy: string;        // session.name at creation time
